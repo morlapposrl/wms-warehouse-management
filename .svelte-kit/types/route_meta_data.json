@@ -132,6 +132,21 @@
 	"/api/prodotti/global": [
 		"src/routes/api/prodotti/global/+server.ts"
 	],
+	"/api/ubicazioni": [
+		"src/routes/api/ubicazioni/+server.ts"
+	],
+	"/api/ubicazioni/bulk": [
+		"src/routes/api/ubicazioni/bulk/+server.ts"
+	],
+	"/api/ubicazioni/optimization": [
+		"src/routes/api/ubicazioni/optimization/+server.ts"
+	],
+	"/api/ubicazioni/picker": [
+		"src/routes/api/ubicazioni/picker/+server.ts"
+	],
+	"/api/ubicazioni/[id]/content": [
+		"src/routes/api/ubicazioni/[id]/content/+server.ts"
+	],
 	"/auth": [],
 	"/auth/admin/committenti": [],
 	"/auth/committenti": [],
@@ -160,8 +175,14 @@
 	"/auth/giacenze": [
 		"src/routes/auth/giacenze/+page.server.ts"
 	],
+	"/auth/magazzino": [
+		"src/routes/auth/magazzino/+page.server.ts"
+	],
 	"/auth/movimenti": [
 		"src/routes/auth/movimenti/+page.server.ts"
+	],
+	"/auth/movimenti/nuovo": [
+		"src/routes/auth/movimenti/nuovo/+page.server.ts"
 	],
 	"/auth/ordini": [
 		"src/routes/auth/ordini/+page.server.ts"

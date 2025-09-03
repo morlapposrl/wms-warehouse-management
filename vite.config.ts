@@ -6,6 +6,7 @@ export default defineConfig({
 	server: {
 		port: 3002,
 		host: true,
+		strictPort: true, // Forza la porta 3002, non cerca alternative
 		allowedHosts: ['connect.microlops.it', 'localhost', '127.0.0.1'],
 		hmr: {
 			// Riduce refresh automatico

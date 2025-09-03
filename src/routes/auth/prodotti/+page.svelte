@@ -25,7 +25,7 @@
     loading = true;
     try {
       const url = selectedCommittente 
-        ? `/api/committenti/${selectedCommittente}/prodotti`
+        ? `/api/prodotti/global?committente=${selectedCommittente}`
         : '/api/prodotti/global';
         
       const response = await fetch(url);
@@ -39,7 +39,7 @@
     }
   }
   
-  $: if (selectedCommittente !== '') {
+  $: if (selectedCommittente !== undefined) {
     loadProdotti();
   }
 </script>
@@ -170,7 +170,7 @@
                     <div class="flex items-center">
                       <span class="w-2 h-2 bg-primary-500 rounded-full mr-2"></span>
                       <span class="text-sm font-medium">
-                        {committenti.find(c => c.id == prodotto.committente_id)?.ragione_sociale || 'N/A'}
+                        {prodotto.committente_nome || 'N/A'}
                       </span>
                     </div>
                   </td>

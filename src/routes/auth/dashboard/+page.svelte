@@ -8,15 +8,56 @@
   let autoRefresh = true;
   let refreshInterval: NodeJS.Timeout;
   let lastUpdate = new Date();
+  let isRefreshing = false;
 
   // Auto-refresh ogni 30 secondi
   onMount(() => {
+    startAutoRefresh();
+  });
+  
+  function startAutoRefresh() {
+    if (refreshInterval) clearInterval(refreshInterval);
     if (autoRefresh) {
       refreshInterval = setInterval(() => {
-        location.reload();
+        refreshData();
       }, 30000);
     }
-  });
+  }
+  
+  // Watch autoRefresh changes
+  $: {
+    if (autoRefresh !== undefined) {
+      startAutoRefresh();
+    }
+  }
+  
+  async function refreshData() {
+    if (isRefreshing) return;
+    
+    isRefreshing = true;
+    try {
+      const response = await fetch(window.location.pathname, {
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        // For now, we'll still need to reload as SvelteKit SSR
+        // In a real implementation, we'd update the data reactively
+        setTimeout(() => {
+          window.location.reload();
+        }, 500); // Small delay for visual feedback
+      }
+    } catch (error) {
+      console.error('Refresh failed:', error);
+    } finally {
+      setTimeout(() => {
+        isRefreshing = false;
+        lastUpdate = new Date();
+      }, 1000);
+    }
+  }
 
   onDestroy(() => {
     if (refreshInterval) {
@@ -90,7 +131,6 @@
 
 <svelte:head>
   <title>Dashboard Real-Time Operatori | Gestionale Magazzino</title>
-  <meta http-equiv="refresh" content="30" />
 </svelte:head>
 
 <div class="container mx-auto max-w-7xl">
@@ -118,14 +158,17 @@
             bind:checked={autoRefresh}
             class="checkbox"
           />
-          <span class="text-sm">Auto-refresh</span>
+          <span class="text-sm {isRefreshing ? 'text-blue-600' : ''}">
+            {isRefreshing ? '🔄 Aggiornando...' : 'Auto-refresh'}
+          </span>
         </div>
         <button 
-          on:click={() => location.reload()}
-          class="btn btn-sm btn-secondary"
+          on:click={refreshData}
+          disabled={isRefreshing}
+          class="btn btn-sm btn-secondary {isRefreshing ? 'loading' : ''}"
         >
-          <Icon name="arrow-clockwise" class="w-4 h-4 mr-2" />
-          Aggiorna
+          <Icon name="arrow-clockwise" class="w-4 h-4 mr-2 {isRefreshing ? 'animate-spin' : ''}" />
+          {isRefreshing ? 'Aggiornando...' : 'Aggiorna'}
         </button>
       </div>
     </div>
@@ -499,5 +542,18 @@
   
   .animate-pulse {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .loading {
+    @apply opacity-75 cursor-not-allowed;
   }
 </style>

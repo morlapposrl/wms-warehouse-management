@@ -33,7 +33,9 @@ export const nodes = [
 	() => import('./nodes/29'),
 	() => import('./nodes/30'),
 	() => import('./nodes/31'),
-	() => import('./nodes/32')
+	() => import('./nodes/32'),
+	() => import('./nodes/33'),
+	() => import('./nodes/34')
 ];
 
 export const server_loads = [];
@@ -60,14 +62,16 @@ export const dictionary = {
 		"/auth/committenti/[committente_id]/unita-misura": [22,[2,3]],
 		"/auth/dashboard": [~23,[2]],
 		"/auth/giacenze": [~24,[2]],
-		"/auth/movimenti": [~25,[2]],
-		"/auth/ordini": [~26,[2]],
-		"/auth/ordini/nuovo": [~28,[2]],
-		"/auth/ordini/[id]": [~27,[2]],
-		"/auth/ottimizzazione": [~29,[2]],
-		"/auth/prodotti": [30,[2]],
-		"/auth/wave-planning": [~31,[2]],
-		"/test-css": [32]
+		"/auth/magazzino": [~25,[2]],
+		"/auth/movimenti": [~26,[2]],
+		"/auth/movimenti/nuovo": [~27,[2]],
+		"/auth/ordini": [~28,[2]],
+		"/auth/ordini/nuovo": [~30,[2]],
+		"/auth/ordini/[id]": [~29,[2]],
+		"/auth/ottimizzazione": [~31,[2]],
+		"/auth/prodotti": [32,[2]],
+		"/auth/wave-planning": [~33,[2]],
+		"/test-css": [34]
 	};
 
 export const hooks = {

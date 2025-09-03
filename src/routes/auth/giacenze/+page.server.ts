@@ -4,17 +4,24 @@ import { error } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ url }) => {
   try {
-    const committente_id = parseInt(url.searchParams.get('committente') || '1');
+    // GIACENZE GLOBALI: non filtriamo per committente specifico
     const search = url.searchParams.get('search') || '';
     const categoria_id = url.searchParams.get('categoria') || '';
+    const committente_filter = url.searchParams.get('committente') || ''; // Filtro opzionale
     const solo_scorte_basse = url.searchParams.get('solo_scorte_basse') === 'true';
     const page = parseInt(url.searchParams.get('page') || '1');
     const limit = 50;
     const offset = (page - 1) * limit;
 
-    // Query base per giacenze
-    let whereConditions = ['g.committente_id = ?'];
-    let queryParams: any[] = [committente_id];
+    // Query base per giacenze GLOBALI
+    let whereConditions: string[] = [];
+    let queryParams: any[] = [];
+
+    // Filtro committente opzionale (per giacenze globali)
+    if (committente_filter && committente_filter !== '') {
+      whereConditions.push('g.committente_id = ?');
+      queryParams.push(parseInt(committente_filter));
+    }
 
     if (search) {
       whereConditions.push('(p.codice LIKE ? OR p.descrizione LIKE ?)');
@@ -32,7 +39,7 @@ export const load: PageServerLoad = async ({ url }) => {
 
     const whereClause = whereConditions.length > 0 ? 'WHERE ' + whereConditions.join(' AND ') : '';
 
-    // Carica giacenze con dettagli prodotto
+    // Carica giacenze GLOBALI con dettagli prodotto e committente
     const giacenze = db.prepare(`
       SELECT 
         g.id,
@@ -51,6 +58,9 @@ export const load: PageServerLoad = async ({ url }) => {
         p.lotto_partita as lotto,
         c.descrizione as categoria_nome,
         um.descrizione as unita_misura,
+        -- Info committente per vista globale
+        comm.ragione_sociale as committente_nome,
+        comm.codice as committente_codice,
         -- Calcoli
         ROUND(g.quantita * COALESCE(g.valore_medio, p.prezzo_acquisto, 0), 2) as valore_totale,
         CASE 
@@ -58,74 +68,101 @@ export const load: PageServerLoad = async ({ url }) => {
           WHEN p.scorta_massima IS NOT NULL AND g.quantita >= p.scorta_massima THEN 'ALTA'
           ELSE 'NORMALE'
         END as stato_scorta,
-        -- Movimenti recenti (ultimi 7 giorni)
+        -- Movimenti recenti globali (ultimi 7 giorni)
         COALESCE(m_recent.movimenti_recenti, 0) as movimenti_recenti
       FROM giacenze g
       JOIN prodotti p ON g.prodotto_id = p.id
+      JOIN committenti comm ON g.committente_id = comm.id
       LEFT JOIN categorie c ON p.categoria_id = c.id
       LEFT JOIN unita_misura um ON p.unita_misura_id = um.id
       LEFT JOIN (
         SELECT 
           prodotto_id,
+          committente_id_origine,
           COUNT(*) as movimenti_recenti
         FROM movimenti 
-        WHERE committente_id_origine = ? 
-          AND data_movimento >= date('now', '-7 days')
-        GROUP BY prodotto_id
-      ) m_recent ON p.id = m_recent.prodotto_id
+        WHERE data_movimento >= date('now', '-7 days')
+        GROUP BY prodotto_id, committente_id_origine
+      ) m_recent ON p.id = m_recent.prodotto_id AND g.committente_id = m_recent.committente_id_origine
       ${whereClause}
       ORDER BY 
         CASE 
           WHEN g.quantita <= COALESCE(p.scorta_minima, 0) THEN 0
           ELSE 1
         END,
+        comm.ragione_sociale,
         g.ultima_modifica DESC
       LIMIT ? OFFSET ?
-    `).all(...[committente_id, ...queryParams, limit, offset]);
+    `).all(...queryParams, limit, offset);
 
-    // Conteggio totale per paginazione
+    // Conteggio totale per paginazione (GLOBALE)
     const totalCount = db.prepare(`
       SELECT COUNT(*) as count
       FROM giacenze g
       JOIN prodotti p ON g.prodotto_id = p.id
+      JOIN committenti comm ON g.committente_id = comm.id
       ${whereClause}
-    `).get(...[committente_id, ...queryParams.slice(1)]) as { count: number };
+    `).get(...queryParams) as { count: number };
 
-    // Statistiche generali
-    const stats = db.prepare(`
-      SELECT 
-        COUNT(*) as totale_prodotti,
-        SUM(g.quantita) as totale_quantita,
-        SUM(ROUND(g.quantita * COALESCE(g.valore_medio, p.prezzo_acquisto, 0), 2)) as valore_totale,
-        COUNT(CASE WHEN g.quantita <= COALESCE(p.scorta_minima, 0) THEN 1 END) as scorte_basse,
-        COUNT(CASE WHEN g.quantita = 0 THEN 1 END) as prodotti_esauriti,
-        COUNT(CASE WHEN g.quantita >= COALESCE(p.scorta_massima, 999999) THEN 1 END) as scorte_eccessive
-      FROM giacenze g
-      JOIN prodotti p ON g.prodotto_id = p.id
-      WHERE g.committente_id = ?
-    `).get(committente_id);
+    // Statistiche GLOBALI (tutti i committenti)
+    const stats = committente_filter ? 
+      db.prepare(`
+        SELECT 
+          COUNT(*) as totale_prodotti,
+          SUM(g.quantita) as totale_quantita,
+          SUM(ROUND(g.quantita * COALESCE(g.valore_medio, p.prezzo_acquisto, 0), 2)) as valore_totale,
+          COUNT(CASE WHEN g.quantita <= COALESCE(p.scorta_minima, 0) THEN 1 END) as scorte_basse,
+          COUNT(CASE WHEN g.quantita = 0 THEN 1 END) as prodotti_esauriti,
+          COUNT(CASE WHEN g.quantita >= COALESCE(p.scorta_massima, 999999) THEN 1 END) as scorte_eccessive,
+          COUNT(DISTINCT g.committente_id) as totale_committenti
+        FROM giacenze g
+        JOIN prodotti p ON g.prodotto_id = p.id
+        WHERE g.committente_id = ?
+      `).get(parseInt(committente_filter)) :
+      db.prepare(`
+        SELECT 
+          COUNT(*) as totale_prodotti,
+          SUM(g.quantita) as totale_quantita,
+          SUM(ROUND(g.quantita * COALESCE(g.valore_medio, p.prezzo_acquisto, 0), 2)) as valore_totale,
+          COUNT(CASE WHEN g.quantita <= COALESCE(p.scorta_minima, 0) THEN 1 END) as scorte_basse,
+          COUNT(CASE WHEN g.quantita = 0 THEN 1 END) as prodotti_esauriti,
+          COUNT(CASE WHEN g.quantita >= COALESCE(p.scorta_massima, 999999) THEN 1 END) as scorte_eccessive,
+          COUNT(DISTINCT g.committente_id) as totale_committenti
+        FROM giacenze g
+        JOIN prodotti p ON g.prodotto_id = p.id
+      `).get();
 
-    // Carica committente
-    const committente = db.prepare('SELECT * FROM committenti WHERE id = ?').get(committente_id);
+    // Carica TUTTI i committenti per vista globale
+    const committenti = db.prepare(`
+      SELECT c.*, 
+             COUNT(g.id) as prodotti_count,
+             SUM(g.quantita) as totale_quantita,
+             SUM(ROUND(g.quantita * COALESCE(g.valore_medio, p.prezzo_acquisto, 0), 2)) as valore_totale
+      FROM committenti c
+      LEFT JOIN giacenze g ON c.id = g.committente_id
+      LEFT JOIN prodotti p ON g.prodotto_id = p.id
+      WHERE c.stato = 'attivo'
+      GROUP BY c.id
+      ORDER BY c.ragione_sociale
+    `).all();
 
-    // Carica categorie per filtro
+    // Carica categorie GLOBALI per filtro
     const categorie = db.prepare(`
       SELECT DISTINCT c.id, c.descrizione, COUNT(p.id) as prodotti_count
       FROM categorie c
       JOIN prodotti p ON c.id = p.categoria_id
       JOIN giacenze g ON p.id = g.prodotto_id
-      WHERE c.committente_id = ? AND g.committente_id = ?
       GROUP BY c.id, c.descrizione
       ORDER BY c.descrizione
-    `).all(committente_id, committente_id);
+    `).all();
 
     return {
       giacenze,
       stats,
-      committente,
+      committenti,
       categorie,
       filters: {
-        committente_id,
+        committente_filter,
         search,
         categoria_id: categoria_id ? parseInt(categoria_id) : null,
         solo_scorte_basse

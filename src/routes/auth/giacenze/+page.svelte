@@ -35,7 +35,7 @@
   // Naviga ai movimenti del prodotto
   function goToMovimenti(prodotto_id: number, prodotto_codice: string) {
     const params = new URLSearchParams({
-      committente: data.filters.committente_id.toString(),
+      committente: data.filters.committente_filter || '1',
       prodotto: prodotto_id.toString(),
       search: prodotto_codice
     });
@@ -49,7 +49,7 @@
     const params = new URLSearchParams();
     
     // Mantieni il committente corrente
-    params.set('committente', data.filters.committente_id.toString());
+    params.set('committente', data.filters.committente_filter || '');
     
     for (const [key, value] of formData.entries()) {
       if (value && value !== '') {
@@ -61,7 +61,7 @@
   }
 
   function resetFilters() {
-    goto(`?committente=${data.filters.committente_id}`);
+    goto(`?committente=${data.filters.committente_filter || ''}`);
   }
 
   function changePage(newPage: number) {
@@ -76,13 +76,21 @@
 
 <div class="flex justify-between items-center mb-6">
   <div>
-    <h1 class="h1">Giacenze Real-time</h1>
+    <h1 class="h1">Giacenze Real-time - Vista Globale</h1>
     <p class="text-neutral-600 mt-1">
-      Committente: <strong>{data.committente.ragione_sociale}</strong>
+      {#if data.filters.committente_filter}
+        {#each data.committenti as committente}
+          {#if committente.id.toString() === data.filters.committente_filter}
+            Committente: <strong>{committente.ragione_sociale}</strong>
+          {/if}
+        {/each}
+      {:else}
+        Visualizzazione di tutti i committenti attivi
+      {/if}
     </p>
   </div>
   <div class="flex gap-2">
-    <a href="/auth/movimenti/nuovo?committente={data.filters.committente_id}" class="btn btn-success">
+    <a href="/auth/movimenti/nuovo?committente={data.filters.committente_filter || '1'}" class="btn btn-success">
       📦 Nuovo Movimento
     </a>
     <button class="btn btn-secondary" on:click={() => window.location.reload()}>
@@ -171,9 +179,9 @@
   </div>
   <div class="card-body">
     <form id="filtersForm" on:submit|preventDefault={applyFilters}>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <!-- Ricerca -->
-        <div class="lg:col-span-2">
+        <div class="lg:col-span-2 xl:col-span-2">
           <label class="form-label">Ricerca Prodotto</label>
           <input 
             type="text" 
@@ -182,6 +190,19 @@
             placeholder="Codice o descrizione prodotto..."
             value={data.filters.search}
           />
+        </div>
+
+        <!-- Committente -->
+        <div>
+          <label class="form-label">Committente</label>
+          <select name="committente" class="form-input">
+            <option value="">Tutti i committenti</option>
+            {#each data.committenti as committente}
+              <option value={committente.id} selected={data.filters.committente_filter === committente.id.toString()}>
+                {committente.ragione_sociale} ({committente.prodotti_count || 0})
+              </option>
+            {/each}
+          </select>
         </div>
 
         <!-- Categoria -->

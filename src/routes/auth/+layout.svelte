@@ -37,6 +37,12 @@
       description: 'Tutte le movimentazioni magazzino'
     },
     {
+      href: '/auth/magazzino',
+      label: 'Layout Magazzino',
+      icon: 'building-office-2',
+      description: 'Mappa interattiva ubicazioni e zone'
+    },
+    {
       href: '/auth/ordini',
       label: 'Gestione Ordini',
       icon: 'shopping-bag',
