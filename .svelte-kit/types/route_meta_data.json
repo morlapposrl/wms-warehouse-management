@@ -1,0 +1,183 @@
+{
+	"/": [],
+	"/api/admin/categorie/copy": [
+		"src/routes/api/admin/categorie/copy/+server.ts"
+	],
+	"/api/admin/committenti": [
+		"src/routes/api/admin/committenti/+server.ts"
+	],
+	"/api/admin/committenti/check": [
+		"src/routes/api/admin/committenti/check/+server.ts"
+	],
+	"/api/admin/committenti/stats": [
+		"src/routes/api/admin/committenti/stats/+server.ts"
+	],
+	"/api/admin/committenti/with-stats": [
+		"src/routes/api/admin/committenti/with-stats/+server.ts"
+	],
+	"/api/admin/committenti/[id]": [
+		"src/routes/api/admin/committenti/[id]/+server.ts"
+	],
+	"/api/admin/fornitori": [
+		"src/routes/api/admin/fornitori/+server.ts"
+	],
+	"/api/admin/fornitori/check": [
+		"src/routes/api/admin/fornitori/check/+server.ts"
+	],
+	"/api/admin/fornitori/suggestions": [
+		"src/routes/api/admin/fornitori/suggestions/+server.ts"
+	],
+	"/api/admin/fornitori/[id]": [
+		"src/routes/api/admin/fornitori/[id]/+server.ts"
+	],
+	"/api/admin/prodotti/copy": [
+		"src/routes/api/admin/prodotti/copy/+server.ts"
+	],
+	"/api/admin/unita-misura": [
+		"src/routes/api/admin/unita-misura/+server.ts"
+	],
+	"/api/admin/unita-misura/init": [
+		"src/routes/api/admin/unita-misura/init/+server.ts"
+	],
+	"/api/committenti": [
+		"src/routes/api/committenti/+server.ts"
+	],
+	"/api/committenti/[committente_id]/categorie": [
+		"src/routes/api/committenti/[committente_id]/categorie/+server.ts"
+	],
+	"/api/committenti/[committente_id]/categorie/check": [
+		"src/routes/api/committenti/[committente_id]/categorie/check/+server.ts"
+	],
+	"/api/committenti/[committente_id]/categorie/[id]": [
+		"src/routes/api/committenti/[committente_id]/categorie/[id]/+server.ts"
+	],
+	"/api/committenti/[committente_id]/fornitori": [
+		"src/routes/api/committenti/[committente_id]/fornitori/+server.ts"
+	],
+	"/api/committenti/[committente_id]/fornitori/associate": [
+		"src/routes/api/committenti/[committente_id]/fornitori/associate/+server.ts"
+	],
+	"/api/committenti/[committente_id]/fornitori/[fornitore_id]": [
+		"src/routes/api/committenti/[committente_id]/fornitori/[fornitore_id]/+server.ts"
+	],
+	"/api/committenti/[committente_id]/giacenze": [
+		"src/routes/api/committenti/[committente_id]/giacenze/+server.ts"
+	],
+	"/api/committenti/[committente_id]/giacenze/scorta-bassa": [
+		"src/routes/api/committenti/[committente_id]/giacenze/scorta-bassa/+server.ts"
+	],
+	"/api/committenti/[committente_id]/giacenze/[prodotto_id]": [
+		"src/routes/api/committenti/[committente_id]/giacenze/[prodotto_id]/+server.ts"
+	],
+	"/api/committenti/[committente_id]/inventari": [
+		"src/routes/api/committenti/[committente_id]/inventari/+server.ts"
+	],
+	"/api/committenti/[committente_id]/inventari/[inventario_id]": [
+		"src/routes/api/committenti/[committente_id]/inventari/[inventario_id]/+server.ts"
+	],
+	"/api/committenti/[committente_id]/inventari/[inventario_id]/actions": [
+		"src/routes/api/committenti/[committente_id]/inventari/[inventario_id]/actions/+server.ts"
+	],
+	"/api/committenti/[committente_id]/inventari/[inventario_id]/conteggi": [
+		"src/routes/api/committenti/[committente_id]/inventari/[inventario_id]/conteggi/+server.ts"
+	],
+	"/api/committenti/[committente_id]/inventari/[inventario_id]/conteggi/[prodotto_id]": [
+		"src/routes/api/committenti/[committente_id]/inventari/[inventario_id]/conteggi/[prodotto_id]/+server.ts"
+	],
+	"/api/committenti/[committente_id]/movimenti": [
+		"src/routes/api/committenti/[committente_id]/movimenti/+server.ts"
+	],
+	"/api/committenti/[committente_id]/movimenti/dropdown-data": [
+		"src/routes/api/committenti/[committente_id]/movimenti/dropdown-data/+server.ts"
+	],
+	"/api/committenti/[committente_id]/movimenti/[movimento_id]": [
+		"src/routes/api/committenti/[committente_id]/movimenti/[movimento_id]/+server.ts"
+	],
+	"/api/committenti/[committente_id]/prodotti": [
+		"src/routes/api/committenti/[committente_id]/prodotti/+server.ts"
+	],
+	"/api/committenti/[committente_id]/prodotti/check": [
+		"src/routes/api/committenti/[committente_id]/prodotti/check/+server.ts"
+	],
+	"/api/committenti/[committente_id]/prodotti/scorte-basse": [
+		"src/routes/api/committenti/[committente_id]/prodotti/scorte-basse/+server.ts"
+	],
+	"/api/committenti/[committente_id]/prodotti/suggestions": [
+		"src/routes/api/committenti/[committente_id]/prodotti/suggestions/+server.ts"
+	],
+	"/api/committenti/[committente_id]/prodotti/[id]": [
+		"src/routes/api/committenti/[committente_id]/prodotti/[id]/+server.ts"
+	],
+	"/api/committenti/[committente_id]/unita-misura": [
+		"src/routes/api/committenti/[committente_id]/unita-misura/+server.ts"
+	],
+	"/api/committenti/[committente_id]/unita-misura/check": [
+		"src/routes/api/committenti/[committente_id]/unita-misura/check/+server.ts"
+	],
+	"/api/committenti/[committente_id]/unita-misura/suggestions": [
+		"src/routes/api/committenti/[committente_id]/unita-misura/suggestions/+server.ts"
+	],
+	"/api/committenti/[committente_id]/unita-misura/[id]": [
+		"src/routes/api/committenti/[committente_id]/unita-misura/[id]/+server.ts"
+	],
+	"/api/fornitori/[fornitore_id]/prodotti": [
+		"src/routes/api/fornitori/[fornitore_id]/prodotti/+server.ts"
+	],
+	"/api/giacenze/global": [
+		"src/routes/api/giacenze/global/+server.ts"
+	],
+	"/api/movimenti/global": [
+		"src/routes/api/movimenti/global/+server.ts"
+	],
+	"/api/prodotti/global": [
+		"src/routes/api/prodotti/global/+server.ts"
+	],
+	"/auth": [],
+	"/auth/admin/committenti": [],
+	"/auth/committenti": [],
+	"/auth/committenti/[committente_id]": [
+		"src/routes/auth/committenti/[committente_id]/+page.server.ts"
+	],
+	"/auth/committenti/[committente_id]/categorie": [],
+	"/auth/committenti/[committente_id]/fornitori": [],
+	"/auth/committenti/[committente_id]/giacenze": [],
+	"/auth/committenti/[committente_id]/giacenze/scorta-bassa": [],
+	"/auth/committenti/[committente_id]/inventari": [],
+	"/auth/committenti/[committente_id]/inventari/[inventario_id]": [],
+	"/auth/committenti/[committente_id]/magazzino": [
+		"src/routes/auth/committenti/[committente_id]/magazzino/+page.server.ts"
+	],
+	"/auth/committenti/[committente_id]/movimenti-simple": [],
+	"/auth/committenti/[committente_id]/movimenti": [],
+	"/auth/committenti/[committente_id]/movimenti/debug": [],
+	"/auth/committenti/[committente_id]/prodotti": [],
+	"/auth/committenti/[committente_id]/super-simple": [],
+	"/auth/committenti/[committente_id]/test-js": [],
+	"/auth/committenti/[committente_id]/unita-misura": [],
+	"/auth/dashboard": [
+		"src/routes/auth/dashboard/+page.server.ts"
+	],
+	"/auth/giacenze": [
+		"src/routes/auth/giacenze/+page.server.ts"
+	],
+	"/auth/movimenti": [
+		"src/routes/auth/movimenti/+page.server.ts"
+	],
+	"/auth/ordini": [
+		"src/routes/auth/ordini/+page.server.ts"
+	],
+	"/auth/ordini/nuovo": [
+		"src/routes/auth/ordini/nuovo/+page.server.ts"
+	],
+	"/auth/ordini/[id]": [
+		"src/routes/auth/ordini/[id]/+page.server.ts"
+	],
+	"/auth/ottimizzazione": [
+		"src/routes/auth/ottimizzazione/+page.server.ts"
+	],
+	"/auth/prodotti": [],
+	"/auth/wave-planning": [
+		"src/routes/auth/wave-planning/+page.server.ts"
+	],
+	"/test-css": []
+}

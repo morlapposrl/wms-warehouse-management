@@ -1,0 +1,1 @@
+export { default as component } from "../../../../src/routes/auth/committenti/[committente_id]/test-js/+page.svelte";
