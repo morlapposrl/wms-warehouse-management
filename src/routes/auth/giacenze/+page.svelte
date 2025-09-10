@@ -1,460 +1,676 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import type { PageData } from './$types';
-  import { goto } from '$app/navigation';
   import { page } from '$app/stores';
-
+  import { goto } from '$app/navigation';
+  import TransferModal from '$lib/components/TransferModal.svelte';
+  
   export let data: PageData;
 
-  // Funzioni utility
+  // Stato per controllare l'espansione delle righe UDC
+  let expanded: { [key: string]: boolean } = {};
+  
+  // Transfer modal state
+  let showTransferModal = false;
+  let selectedTransferProduct = null;
+  let selectedTransferCommittente = null;
+  let selectedUdc = null;
+
+  // Toggle espansione singola riga
+  function toggleExpansion(key: string) {
+    expanded[key] = !expanded[key];
+  }
+
+  // Espandi/Comprimi tutto
+  function expandAll() {
+    data.giacenze.forEach(g => {
+      if (g.dettagli_udc.length > 0) {
+        const key = `${g.committente.id}_${g.prodotto.id}`;
+        expanded[key] = true;
+      }
+    });
+  }
+
+  function collapseAll() {
+    expanded = {};
+  }
+
+  // Formattazione valori
+  function formatCurrency(value: number): string {
+    return new Intl.NumberFormat('it-IT', {
+      style: 'currency',
+      currency: 'EUR'
+    }).format(value);
+  }
+
   function formatDate(dateStr: string): string {
+    if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('it-IT');
   }
 
-  function formatDateTime(dateStr: string): string {
-    return new Date(dateStr).toLocaleString('it-IT');
+  // Calcola colore badge per UDC count
+  function getUdcBadgeColor(count: number): string {
+    if (count === 0) return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300';
+    if (count === 1) return 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200';
+    if (count <= 3) return 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200';
+    return 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200';
+  }
+  
+  // Transfer functions
+  function openTransferModal(giacenza: any) {
+    selectedTransferProduct = {
+      id: giacenza.prodotto.id,
+      codice: giacenza.prodotto.codice,
+      descrizione: giacenza.prodotto.descrizione,
+      unita_misura: giacenza.prodotto.unita_misura
+    };
+    selectedTransferCommittente = {
+      id: giacenza.committente.id,
+      nome: giacenza.committente.nome
+    };
+    selectedUdc = null; // Reset UDC selection
+    showTransferModal = true;
+  }
+  
+  function openTransferModalUdc(giacenza: any, udc: any) {
+    selectedTransferProduct = {
+      id: giacenza.prodotto.id,
+      codice: giacenza.prodotto.codice,
+      descrizione: giacenza.prodotto.descrizione,
+      unita_misura: giacenza.prodotto.unita_misura
+    };
+    selectedTransferCommittente = {
+      id: giacenza.committente.id,
+      nome: giacenza.committente.nome
+    };
+    selectedUdc = udc; // Pre-select UDC for transfer
+    showTransferModal = true;
+  }
+  
+  function handleTransferSuccess(event: any) {
+    // Ricarica la pagina per aggiornare le giacenze
+    window.location.reload();
+  }
+  
+  function handleTransferClose() {
+    showTransferModal = false;
+    selectedTransferProduct = null;
+    selectedTransferCommittente = null;
+    selectedUdc = null;
   }
 
-  function getStockStatusClass(stato: string): string {
+  // Colore badge per stato scorta
+  function getStatoScortaColor(stato: string): string {
     switch (stato) {
-      case 'BASSA': return 'bg-red-100 text-red-800';
-      case 'ALTA': return 'bg-blue-100 text-blue-800';
-      case 'NORMALE': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'BASSA': return 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200';
+      case 'ALTA': return 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200';
+      default: return 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200';
     }
   }
 
-  function getStockStatusText(stato: string): string {
-    switch (stato) {
-      case 'BASSA': return 'Scorta Bassa';
-      case 'ALTA': return 'Scorta Alta';
-      case 'NORMALE': return 'Normale';
-      default: return 'N/D';
+  // Gestione filtri lato client
+  let giacenzeOriginali = [];
+  let giacenzeFiltrate = [];
+  let searchTerm = '';
+  let selectedCommittente = '';
+  let selectedCategoria = '';
+  let soloScorteBasse = false;
+  
+  // Categorie dinamiche
+  let categorieComplete = []; // Lista completa delle categorie
+  let categorieFiltrate = []; // Categorie filtrate per committente
+  
+  // Gestione provenienza da Prodotti Globali
+  let isFromProdotti = false;
+  let prodottoProvenienza = null;
+  let committenteProvenienza = null;
+  
+  // Filtri lato client - definita prima per evitare errori
+  function applyClientFilters() {
+    if (!giacenzeOriginali || giacenzeOriginali.length === 0) {
+      giacenzeFiltrate = [];
+      return;
     }
-  }
-
-  // Naviga ai movimenti del prodotto
-  function goToMovimenti(prodotto_id: number, prodotto_codice: string) {
-    const params = new URLSearchParams({
-      committente: data.filters.committente_filter || '1',
-      prodotto: prodotto_id.toString(),
-      search: prodotto_codice
-    });
-    goto(`/auth/movimenti?${params.toString()}`);
-  }
-
-  // Gestione filtri
-  function applyFilters() {
-    const form = document.getElementById('filtersForm') as HTMLFormElement;
-    const formData = new FormData(form);
-    const params = new URLSearchParams();
     
-    // Mantieni il committente corrente
-    params.set('committente', data.filters.committente_filter || '');
-    
-    for (const [key, value] of formData.entries()) {
-      if (value && value !== '') {
-        params.set(key, value.toString());
+    giacenzeFiltrate = giacenzeOriginali.filter(giacenza => {
+      // Filtro ricerca
+      if (searchTerm && !giacenza.prodotto.codice.toLowerCase().includes(searchTerm.toLowerCase()) &&
+          !giacenza.prodotto.descrizione.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return false;
       }
+      
+      // Filtro committente
+      if (selectedCommittente && giacenza.committente.id != selectedCommittente) {
+        return false;
+      }
+      
+      // Filtro categoria  
+      if (selectedCategoria && giacenza.prodotto.categoria_id != selectedCategoria) {
+        return false;
+      }
+      
+      // Filtro scorte basse
+      if (soloScorteBasse && giacenza.totale.quantita > (giacenza.prodotto.scorta_minima || 0)) {
+        return false;
+      }
+      
+      return true;
+    });
+  }
+  
+  // Carica categorie globali al mount e gestisce provenienza
+  onMount(async () => {
+    try {
+      // Controlla se si arriva da Prodotti Globali
+      const urlParams = new URLSearchParams(window.location.search);
+      const searchParam = urlParams.get('search');
+      const committenteParam = urlParams.get('committente');
+      
+      if (searchParam && committenteParam) {
+        // Provenienza da Prodotti Globali
+        isFromProdotti = true;
+        prodottoProvenienza = searchParam;
+        committenteProvenienza = committenteParam;
+        
+        // Pre-imposta i filtri dal prodotto di origine
+        searchTerm = searchParam;
+        selectedCommittente = committenteParam;
+        
+        console.log('Navigazione da Prodotti Globali per:', searchParam);
+      }
+      
+      const catResponse = await fetch('/api/categorie/global');
+      if (catResponse.ok) {
+        const catData = await catResponse.json();
+        if (catData.success && catData.data) {
+          categorieComplete = catData.data;
+          updateCategorieFiltrate();
+          console.log('Categorie caricate:', categorieComplete.length);
+        } else {
+          console.error('Errore formato risposta categorie:', catData);
+        }
+      } else {
+        console.error('Errore fetch categorie:', catResponse.status);
+      }
+    } catch (err) {
+      console.error('Errore caricamento categorie:', err);
+    }
+  });
+
+  // Aggiorna le categorie filtrate in base al committente selezionato
+  function updateCategorieFiltrate() {
+    if (selectedCommittente === '' || !selectedCommittente) {
+      // Tutti i committenti: mostra tutte le categorie
+      categorieFiltrate = categorieComplete;
+    } else {
+      // Committente specifico: filtra per committente_id
+      categorieFiltrate = categorieComplete.filter(cat => 
+        cat.committente_id == selectedCommittente
+      );
     }
     
-    goto(`?${params.toString()}`);
+    // Reset categoria selezionata se non più valida
+    if (selectedCategoria && !categorieFiltrate.find(cat => cat.id == selectedCategoria)) {
+      selectedCategoria = '';
+    }
+  }
+
+  // Gestione cambio committente
+  function onCommittenteChange() {
+    updateCategorieFiltrate();
+    applyClientFilters();
+  }
+
+  // Inizializza con i dati del server
+  $: if (data.giacenze) {
+    giacenzeOriginali = data.giacenze;
+    applyClientFilters();
   }
 
   function resetFilters() {
-    goto(`?committente=${data.filters.committente_filter || ''}`);
+    searchTerm = '';
+    selectedCommittente = '';
+    selectedCategoria = '';
+    soloScorteBasse = false;
+    isFromProdotti = false;
+    prodottoProvenienza = null;
+    committenteProvenienza = null;
+    updateCategorieFiltrate();
+    applyClientFilters();
+    
+    // Pulisci URL dai parametri di provenienza
+    const url = new URL(window.location);
+    url.searchParams.delete('search');
+    url.searchParams.delete('committente');
+    window.history.replaceState({}, '', url);
   }
 
-  function changePage(newPage: number) {
-    const params = new URLSearchParams($page.url.searchParams);
-    params.set('page', newPage.toString());
-    goto(`?${params.toString()}`);
+  // Funzione per tornare alla pagina Prodotti Globali e riposizionarsi sul prodotto
+  function tornaAiProdotti() {
+    if (prodottoProvenienza) {
+      // Passa il codice prodotto come hash per il riposizionamento
+      window.location.href = `/auth/prodotti#${prodottoProvenienza}`;
+    } else {
+      window.location.href = '/auth/prodotti';
+    }
   }
-
-  // Controlla se ci sono filtri attivi
-  $: hasActiveFilters = data.filters.search || data.filters.categoria_id || data.filters.solo_scorte_basse;
+  
+  // Funzione per abilitare i filtri (uscire dalla modalità "da prodotti")
+  function abilitaFiltri() {
+    isFromProdotti = false;
+    
+    // Pulisci URL dai parametri di provenienza
+    const url = new URL(window.location);
+    url.searchParams.delete('search');
+    url.searchParams.delete('committente');
+    window.history.replaceState({}, '', url);
+  }
 </script>
 
-<div class="flex justify-between items-center mb-6">
-  <div>
-    <h1 class="h1">Giacenze Real-time - Vista Globale</h1>
-    <p class="text-neutral-600 mt-1">
-      {#if data.filters.committente_filter}
-        {#each data.committenti as committente}
-          {#if committente.id.toString() === data.filters.committente_filter}
-            Committente: <strong>{committente.ragione_sociale}</strong>
+<svelte:head>
+  <title>Giacenze Globali - Gestionale Magazzino</title>
+</svelte:head>
+
+<div class="w-full px-4 py-6">
+  <!-- Header e controlli -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      {#if isFromProdotti}
+        <div class="flex items-center gap-3 mb-2">
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Giacenze Globali</h1>
+          <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-sm font-medium">
+            📦 Vista da Prodotto: {prodottoProvenienza}
+          </span>
+        </div>
+        <div class="flex items-center gap-2 mb-3">
+          <button 
+            on:click={tornaAiProdotti}
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            ← Torna ai Prodotti Globali
+          </button>
+        </div>
+        <p class="text-gray-600 dark:text-gray-400">
+          Visualizzazione giacenze per il prodotto <strong>{prodottoProvenienza}</strong>
+          {#if committenteProvenienza}
+            del committente selezionato
           {/if}
-        {/each}
+        </p>
       {:else}
-        Visualizzazione di tutti i committenti attivi
-      {/if}
-    </p>
-  </div>
-  <div class="flex gap-2">
-    <a href="/auth/movimenti/nuovo?committente={data.filters.committente_filter || '1'}" class="btn btn-success">
-      📦 Nuovo Movimento
-    </a>
-    <button class="btn btn-secondary" on:click={() => window.location.reload()}>
-      🔄 Aggiorna
-    </button>
-  </div>
-</div>
-
-<!-- Statistiche Giacenze -->
-<div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
-  <div class="stat-card text-center">
-    <div class="stat-icon bg-blue-100 mb-2 mx-auto">
-      <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-      </svg>
-    </div>
-    <div class="text-2xl font-bold text-blue-900">{data.stats.totale_prodotti}</div>
-    <div class="text-sm text-blue-700">Prodotti</div>
-  </div>
-
-  <div class="stat-card text-center">
-    <div class="stat-icon bg-green-100 mb-2 mx-auto">
-      <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
-      </svg>
-    </div>
-    <div class="text-2xl font-bold text-green-900">{data.stats.totale_quantita}</div>
-    <div class="text-sm text-green-700">Pezzi Totali</div>
-  </div>
-
-  <div class="stat-card text-center">
-    <div class="stat-icon bg-purple-100 mb-2 mx-auto">
-      <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
-      </svg>
-    </div>
-    <div class="text-2xl font-bold text-purple-900">€ {data.stats.valore_totale?.toFixed(2) || '0.00'}</div>
-    <div class="text-sm text-purple-700">Valore Totale</div>
-  </div>
-
-  <div class="stat-card text-center">
-    <div class="stat-icon bg-red-100 mb-2 mx-auto">
-      <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z"/>
-      </svg>
-    </div>
-    <div class="text-2xl font-bold text-red-900">{data.stats.scorte_basse}</div>
-    <div class="text-sm text-red-700">Scorte Basse</div>
-  </div>
-
-  <div class="stat-card text-center">
-    <div class="stat-icon bg-gray-100 mb-2 mx-auto">
-      <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18 12M6 6l12 12"/>
-      </svg>
-    </div>
-    <div class="text-2xl font-bold text-gray-900">{data.stats.prodotti_esauriti}</div>
-    <div class="text-sm text-gray-700">Esauriti</div>
-  </div>
-
-  <div class="stat-card text-center">
-    <div class="stat-icon bg-yellow-100 mb-2 mx-auto">
-      <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-      </svg>
-    </div>
-    <div class="text-2xl font-bold text-yellow-900">{data.stats.scorte_eccessive}</div>
-    <div class="text-sm text-yellow-700">Eccessive</div>
-  </div>
-</div>
-
-<!-- Filtri Avanzati -->
-<div class="card mb-6">
-  <div class="card-header">
-    <div class="flex justify-between items-center">
-      <h2 class="text-lg font-semibold">Filtri Giacenze</h2>
-      {#if hasActiveFilters}
-        <button type="button" on:click={resetFilters} class="btn btn-sm btn-secondary">
-          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-          Reset
-        </button>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Giacenze Globali</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-1">Vista completa di tutti i committenti con sistema UDC</p>
       {/if}
     </div>
+    
+    <div class="flex space-x-2">
+      <button 
+        on:click={expandAll}
+        class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+      >
+        📋 Espandi Tutto
+      </button>
+      <button 
+        on:click={collapseAll}
+        class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+      >
+        📋 Comprimi Tutto
+      </button>
+    </div>
   </div>
-  <div class="card-body">
-    <form id="filtersForm" on:submit|preventDefault={applyFilters}>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        <!-- Ricerca -->
-        <div class="lg:col-span-2 xl:col-span-2">
-          <label class="form-label">Ricerca Prodotto</label>
-          <input 
-            type="text" 
-            name="search" 
-            class="form-input" 
-            placeholder="Codice o descrizione prodotto..."
-            value={data.filters.search}
-          />
-        </div>
 
-        <!-- Committente -->
-        <div>
-          <label class="form-label">Committente</label>
-          <select name="committente" class="form-input">
-            <option value="">Tutti i committenti</option>
-            {#each data.committenti as committente}
-              <option value={committente.id} selected={data.filters.committente_filter === committente.id.toString()}>
-                {committente.ragione_sociale} ({committente.prodotti_count || 0})
-              </option>
-            {/each}
-          </select>
-        </div>
-
-        <!-- Categoria -->
-        <div>
-          <label class="form-label">Categoria</label>
-          <select name="categoria" class="form-input">
-            <option value="">Tutte le categorie</option>
-            {#each data.categorie as categoria}
-              <option value={categoria.id} selected={data.filters.categoria_id === categoria.id}>
-                {categoria.descrizione} ({categoria.prodotti_count})
-              </option>
-            {/each}
-          </select>
-        </div>
-
-        <!-- Solo scorte basse -->
-        <div>
-          <label class="form-label">Filtro Speciale</label>
-          <label class="inline-flex items-center">
-            <input 
-              type="checkbox" 
-              name="solo_scorte_basse" 
-              value="true"
-              class="rounded border-gray-300 text-red-600 shadow-sm focus:border-red-300 focus:ring focus:ring-red-200 focus:ring-opacity-50"
-              checked={data.filters.solo_scorte_basse}
-            />
-            <span class="ml-2 text-sm text-gray-600">Solo scorte basse</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="flex justify-end mt-4">
-        <button type="submit" class="btn btn-primary">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          Filtra
-        </button>
-      </div>
-    </form>
+  <!-- Statistiche Globali -->
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border">
+      <div class="text-2xl font-bold text-blue-600">{data.statistiche.totale_giacenze || 0}</div>
+      <div class="text-sm text-gray-600 dark:text-gray-400">Giacenze Totali</div>
+    </div>
+    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border">
+      <div class="text-2xl font-bold text-purple-600">{data.statistiche.totale_committenti || 0}</div>
+      <div class="text-sm text-gray-600 dark:text-gray-400">Committenti</div>
+    </div>
+    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border">
+      <div class="text-2xl font-bold text-green-600">{data.statistiche.totale_prodotti || 0}</div>
+      <div class="text-sm text-gray-600 dark:text-gray-400">Prodotti</div>
+    </div>
+    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border">
+      <div class="text-2xl font-bold text-yellow-600">{data.statistiche.totale_udc || 0}</div>
+      <div class="text-sm text-gray-600 dark:text-gray-400">UDC Totali</div>
+    </div>
+    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border">
+      <div class="text-2xl font-bold text-orange-600">{data.statistiche.prodotti_distribuiti || 0}</div>
+      <div class="text-sm text-gray-600 dark:text-gray-400">Multi-UDC</div>
+    </div>
+    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border">
+      <div class="text-2xl font-bold text-indigo-600">{formatCurrency(data.statistiche.valore_totale_magazzino || 0)}</div>
+      <div class="text-sm text-gray-600 dark:text-gray-400">Valore Totale</div>
+    </div>
   </div>
-</div>
 
-<!-- Informazione Click -->
-<div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
-  <div class="flex items-center">
-    <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-    </svg>
-    <span class="text-sm text-blue-800">
-      <strong>Suggerimento:</strong> Clicca su una riga per vedere tutti i movimenti di quel prodotto
-    </span>
-  </div>
-</div>
-
-<!-- Tabella Giacenze -->
-<div class="card">
-  <div class="card-header">
-    <div class="flex justify-between items-center">
-      <h2 class="text-lg font-semibold">Giacenze Attuali</h2>
-      <div class="text-sm text-neutral-600">
-        {#if data.pagination.total_count > 0}
-          Mostrando {((data.pagination.current_page - 1) * data.pagination.limit) + 1}-{Math.min(data.pagination.current_page * data.pagination.limit, data.pagination.total_count)} di {data.pagination.total_count} prodotti
-        {:else}
-          Nessun prodotto trovato
+  <!-- Filtri -->
+  <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border mb-6">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-md font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+        <span class="text-lg">🔍</span>
+        <span>Filtri</span>
+        {#if isFromProdotti}
+          <span class="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs font-normal">
+            🔒 Filtri limitati - Vista prodotto specifico
+          </span>
         {/if}
+      </h3>
+      
+    </div>
+    
+    <div class="flex items-end gap-2 flex-nowrap">
+      <!-- Ricerca -->
+      <div class="min-w-24">
+        <input 
+          type="text" 
+          bind:value={searchTerm}
+          on:input={applyClientFilters}
+          placeholder="Codice..."
+          class="form-input text-sm"
+          disabled={isFromProdotti}
+        >
+      </div>
+      
+      <!-- Committente -->
+      <div class="min-w-36">
+        <select name="committente" class="form-input text-sm" bind:value={selectedCommittente} on:change={onCommittenteChange} disabled={isFromProdotti}>
+          <option value="">Tutti committenti</option>
+          {#each data.committenti as committente}
+            <option value={committente.id.toString()}>
+              {committente.ragione_sociale}
+            </option>
+          {/each}
+        </select>
+      </div>
+      
+      <!-- Categoria -->
+      <div class="min-w-32">
+        <select name="categoria" class="form-input text-sm" bind:value={selectedCategoria} on:change={applyClientFilters} disabled={isFromProdotti}>
+          <option value="">Tutte categorie</option>
+          {#each categorieFiltrate as categoria}
+            <option value={categoria.id.toString()}>
+              {categoria.descrizione}
+              {#if selectedCommittente === ''}
+                - {categoria.committente_ragione_sociale}
+              {/if}
+            </option>
+          {/each}
+        </select>
+      </div>
+      
+      <!-- Checkbox scorte basse -->
+      <div class="flex items-center">
+        <input 
+          type="checkbox" 
+          bind:checked={soloScorteBasse}
+          on:change={applyClientFilters}
+          class="mr-1"
+          disabled={isFromProdotti}
+        >
+        <label class="text-xs text-neutral-600 dark:text-gray-400 whitespace-nowrap">Scorte basse</label>
+      </div>
+
+      <!-- Azioni -->
+      <div class="flex gap-1">
+        <button
+          on:click={resetFilters}
+          class="btn btn-secondary btn-sm px-2"
+          title="Reset filtri"
+          disabled={isFromProdotti}
+        >
+          ↻
+        </button>
       </div>
     </div>
+    
+    {#if isFromProdotti}
+      <div class="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+        <div class="flex items-center gap-2 text-blue-800 dark:text-blue-200 text-sm">
+          <span class="text-lg">ℹ️</span>
+          <div>
+            <strong>Filtri automatici attivi:</strong> 
+            Ricerca per "<strong>{prodottoProvenienza}</strong>"
+            {#if committenteProvenienza}
+              presso il committente selezionato
+            {/if}
+          </div>
+        </div>
+      </div>
+    {/if}
   </div>
-  <div class="overflow-x-auto">
-    <table class="table">
-      <thead>
+
+  <!-- Tabella Giacenze Globali con UDC -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow border overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+      <thead class="bg-gray-50 dark:bg-gray-800">
         <tr>
-          <th>Prodotto</th>
-          <th>Quantità</th>
-          <th>Stato Scorta</th>
-          <th>Min/Max</th>
-          <th>Valore Unit.</th>
-          <th>Valore Totale</th>
-          <th>Ubicazione</th>
-          <th>Lotto/Scadenza</th>
-          <th>Ultima Modifica</th>
-          <th>Mov. Recenti</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            Committente & Prodotto
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            Quantità & Stato
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            Valore
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            UDC/Ubicazioni
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            Azioni
+          </th>
         </tr>
       </thead>
-      <tbody>
-        {#each data.giacenze as giacenza}
-          <tr class="hover:bg-neutral-50 cursor-pointer transition-colors duration-200" 
-              class:bg-red-25={giacenza.stato_scorta === 'BASSA'}
-              on:click={() => goToMovimenti(giacenza.prodotto_id, giacenza.prodotto_codice)}
-              title="Clicca per vedere i movimenti di questo prodotto">
-            <!-- Prodotto -->
-            <td>
-              <div>
-                <div class="font-medium">{giacenza.prodotto_codice}</div>
-                <div class="text-sm text-neutral-600 max-w-xs truncate">{giacenza.prodotto_descrizione}</div>
-                {#if giacenza.categoria_nome}
-                  <div class="text-xs text-neutral-500">({giacenza.categoria_nome})</div>
+      <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+        {#each giacenzeFiltrate as giacenza}
+          {@const key = `${giacenza.committente.id}_${giacenza.prodotto.id}`}
+          
+          <!-- Riga principale -->
+          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 {giacenza.is_distributed ? 'bg-blue-50 dark:bg-blue-900/20' : ''}">
+            <td class="px-6 py-4">
+              <div class="flex items-center">
+                {#if giacenza.dettagli_udc.length > 0}
+                  <button 
+                    on:click={() => toggleExpansion(key)}
+                    class="mr-3 w-5 h-5 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:text-gray-400"
+                  >
+                    {expanded[key] ? '📖' : '📕'}
+                  </button>
                 {/if}
+                <div>
+                  <!-- Info committente -->
+                  <div class="text-xs font-medium text-indigo-600 mb-1">
+                    🏢 {giacenza.committente.nome} ({giacenza.committente.codice})
+                  </div>
+                  <!-- Info prodotto -->
+                  <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{giacenza.prodotto.codice}</div>
+                  <div class="text-sm text-gray-500 dark:text-gray-400">{giacenza.prodotto.descrizione}</div>
+                  <div class="text-xs text-gray-400 dark:text-gray-500">{giacenza.prodotto.categoria}</div>
+                </div>
               </div>
             </td>
             
-            <!-- Quantità -->
-            <td class="text-center">
-              <div class="font-mono font-bold text-lg" 
-                   class:text-red-600={giacenza.quantita === 0}
-                   class:text-yellow-600={giacenza.stato_scorta === 'BASSA'}
-                   class:text-green-600={giacenza.stato_scorta === 'NORMALE'}>
-                {giacenza.quantita}
+            <td class="px-6 py-4">
+              <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                {giacenza.totale.quantita} {giacenza.prodotto.unita_misura}
               </div>
-              {#if giacenza.unita_misura}
-                <div class="text-xs text-neutral-500">{giacenza.unita_misura}</div>
-              {/if}
-            </td>
-            
-            <!-- Stato Scorta -->
-            <td class="text-center">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {getStockStatusClass(giacenza.stato_scorta)}">
-                {getStockStatusText(giacenza.stato_scorta)}
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {getStatoScortaColor(giacenza.totale.stato_scorta)}">
+                {giacenza.totale.stato_scorta}
               </span>
             </td>
             
-            <!-- Min/Max -->
-            <td class="text-center text-sm">
-              <div>Min: {giacenza.scorta_minima || 'N/D'}</div>
-              <div>Max: {giacenza.scorta_massima || 'N/D'}</div>
+            <td class="px-6 py-4">
+              <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                {formatCurrency(giacenza.totale.valore_totale)}
+              </div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Medio: {formatCurrency(giacenza.totale.valore_medio)}
+              </div>
             </td>
             
-            <!-- Valore Unitario -->
-            <td class="text-right font-mono">
-              {#if giacenza.valore_medio > 0}
-                € {giacenza.valore_medio.toFixed(2)}
-              {:else if giacenza.prezzo_acquisto}
-                € {giacenza.prezzo_acquisto.toFixed(2)}
-              {:else}
-                -
-              {/if}
-            </td>
-            
-            <!-- Valore Totale -->
-            <td class="text-right font-mono font-medium">
-              € {giacenza.valore_totale.toFixed(2)}
-            </td>
-            
-            <!-- Ubicazione -->
-            <td class="text-sm">
-              {giacenza.ubicazione || 'N/D'}
-            </td>
-            
-            <!-- Lotto/Scadenza -->
-            <td class="text-sm">
-              {#if giacenza.lotto}
-                <div>Lotto: {giacenza.lotto}</div>
-              {/if}
-              {#if giacenza.scadenza}
-                <div class="text-xs" class:text-red-600={new Date(giacenza.scadenza) <= new Date()}>
-                  Scad: {formatDate(giacenza.scadenza)}
-                </div>
-              {/if}
-              {#if !giacenza.lotto && !giacenza.scadenza}-{/if}
-            </td>
-            
-            <!-- Ultima Modifica -->
-            <td class="text-sm">
-              {formatDateTime(giacenza.ultima_modifica)}
-            </td>
-            
-            <!-- Movimenti Recenti -->
-            <td class="text-center">
-              <div class="flex items-center justify-center gap-2">
-                {#if giacenza.movimenti_recenti > 0}
-                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {giacenza.movimenti_recenti} mov.
+            <td class="px-6 py-4">
+              <div class="flex flex-wrap gap-1">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {getUdcBadgeColor(giacenza.udc_count)}">
+                  🏗️ {giacenza.udc_count} UDC
+                </span>
+                {#if giacenza.ubicazioni_count > 0}
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200">
+                    📍 {giacenza.ubicazioni_count} Ubic.
                   </span>
-                {:else}
-                  <span class="text-neutral-400">0 mov.</span>
                 {/if}
-                <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
+                {#if giacenza.is_distributed}
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
+                    🔀 Distribuito
+                  </span>
+                {/if}
+              </div>
+            </td>
+            
+            <td class="px-6 py-4">
+              <div class="flex flex-col gap-2">
+                {#if giacenza.dettagli_udc.length > 0}
+                  <button 
+                    on:click={() => toggleExpansion(key)}
+                    class="text-blue-600 hover:text-blue-900 text-sm font-medium text-left"
+                  >
+                    {expanded[key] ? 'Nascondi' : 'Dettagli'} UDC
+                  </button>
+                {:else}
+                  <span class="text-gray-400 dark:text-gray-500 text-sm">Nessun UDC</span>
+                {/if}
+                
+                <button 
+                  class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors"
+                  on:click={() => openTransferModal(giacenza)}
+                  title="Trasferisci prodotto (per quantità)"
+                >
+                  🔄 Trasferimento
+                </button>
               </div>
             </td>
           </tr>
-        {:else}
-          <tr>
-            <td colspan="10" class="text-center py-8 text-neutral-500">
-              <div class="flex flex-col items-center">
-                <svg class="w-12 h-12 mb-4 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                </svg>
-                <p class="font-medium">Nessuna giacenza trovata</p>
-                <p class="text-sm">
-                  {#if hasActiveFilters}
-                    Prova a modificare i filtri o <button type="button" on:click={resetFilters} class="text-primary-600 hover:underline">resettali</button>
-                  {:else}
-                    Aggiungi prodotti e movimenti per vedere le giacenze
-                  {/if}
-                </p>
-              </div>
-            </td>
-          </tr>
+
+          <!-- Righe espanse con dettagli UDC -->
+          {#if expanded[key] && giacenza.dettagli_udc.length > 0}
+            {#each giacenza.dettagli_udc as dettaglio}
+              <tr class="bg-gray-50 dark:bg-gray-700 border-l-4 border-blue-400">
+                <td class="px-6 py-3 pl-20">
+                  <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0 w-2 h-2 bg-blue-400 rounded-full"></div>
+                    <div>
+                      <div class="text-sm font-mono font-medium text-gray-700 dark:text-gray-300">
+                        🏗️ {dettaglio.udc_barcode}
+                      </div>
+                      <div class="text-xs text-gray-500">
+                        {dettaglio.tipo_udc} • Stato: {dettaglio.stato} • Pos: {dettaglio.posizione}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-3">
+                  <div class="text-sm text-gray-700 dark:text-gray-300">
+                    {dettaglio.quantita} {giacenza.prodotto.unita_misura}
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                    <div>🏷️ Lotto: {dettaglio.lotto || '-'}</div>
+                    <div>📅 Scadenza: {dettaglio.scadenza ? new Date(dettaglio.scadenza).toLocaleDateString('it-IT') : '-'}</div>
+                    <div>⚖️ Peso: 
+                      {#if dettaglio.peso_lordo > 0 || dettaglio.peso_kg > 0}
+                        <span class="text-blue-600">L:{dettaglio.peso_lordo || 0}kg</span>
+                        <span class="text-green-600 ml-1">N:{dettaglio.peso_kg || 0}kg</span>
+                      {:else}
+                        -
+                      {/if}
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-3">
+                  <div class="text-sm text-gray-700 dark:text-gray-300">
+                    {formatCurrency(dettaglio.valore || 0)}
+                  </div>
+                </td>
+                <td class="px-6 py-3">
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {#if dettaglio.ubicazione}
+                      📍 {dettaglio.ubicazione} ({dettaglio.zona})
+                    {:else}
+                      📍 Non assegnato
+                    {/if}
+                  </div>
+                  <div class="text-xs text-gray-400 dark:text-gray-500">
+                    {formatDate(dettaglio.data_inserimento)}
+                  </div>
+                </td>
+                <td class="px-6 py-3">
+                  <button 
+                    class="bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded text-xs font-medium transition-colors"
+                    on:click={() => openTransferModalUdc(giacenza, dettaglio)}
+                    title="Trasferisci questo UDC intero"
+                  >
+                    🔄 UDC
+                  </button>
+                </td>
+              </tr>
+            {/each}
+          {/if}
         {/each}
       </tbody>
     </table>
   </div>
+
+  {#if data.giacenze.length === 0}
+    <div class="text-center py-12">
+      <div class="text-gray-500 dark:text-gray-400 text-lg mb-4">Nessuna giacenza trovata</div>
+      <button
+        on:click={resetFilters}
+        class="text-blue-600 hover:text-blue-900 font-medium"
+      >
+        Rimuovi filtri
+      </button>
+    </div>
+  {/if}
+
+  <!-- Paginazione -->
+  {#if data.pagination.totalPages > 1}
+    <div class="mt-6 flex justify-center">
+      <nav class="flex space-x-2">
+        {#each Array.from({length: data.pagination.totalPages}, (_, i) => i + 1) as pageNum}
+          <a 
+            href="/auth/giacenze?page={pageNum}{data.filters.search ? `&search=${data.filters.search}` : ''}{data.filters.committente_filter ? `&committente=${data.filters.committente_filter}` : ''}{data.filters.categoria_id ? `&categoria=${data.filters.categoria_id}` : ''}{data.filters.solo_scorte_basse ? `&solo_scorte_basse=true` : ''}"
+            class="px-4 py-2 text-sm font-medium rounded-lg transition-colors {pageNum === data.pagination.page ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'}"
+          >
+            {pageNum}
+          </a>
+        {/each}
+      </nav>
+    </div>
+  {/if}
 </div>
 
-<!-- Paginazione -->
-{#if data.pagination.total_pages > 1}
-  <div class="flex justify-between items-center mt-6">
-    <div class="text-sm text-neutral-600">
-      Pagina {data.pagination.current_page} di {data.pagination.total_pages}
-    </div>
-    
-    <nav class="flex items-center space-x-2">
-      <!-- Precedente -->
-      <button 
-        type="button"
-        class="btn btn-sm btn-secondary"
-        disabled={data.pagination.current_page === 1}
-        on:click={() => changePage(data.pagination.current_page - 1)}
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
+<!-- Transfer Modal -->
+<TransferModal 
+  bind:show={showTransferModal}
+  prodotto={selectedTransferProduct}
+  committente={selectedTransferCommittente}
+  udc={selectedUdc}
+  giacenzaDisponibile={selectedTransferProduct?.quantita || 0}
+  on:success={handleTransferSuccess}
+  on:close={handleTransferClose}
+/>
 
-      <!-- Numeri di pagina -->
-      {#each Array.from({length: Math.min(5, data.pagination.total_pages)}, (_, i) => {
-        const start = Math.max(1, data.pagination.current_page - 2);
-        return Math.min(start + i, data.pagination.total_pages);
-      }) as pageNum}
-        <button 
-          type="button"
-          class="btn btn-sm {pageNum === data.pagination.current_page ? 'btn-primary' : 'btn-secondary'}"
-          on:click={() => changePage(pageNum)}
-        >
-          {pageNum}
-        </button>
-      {/each}
-
-      <!-- Successiva -->
-      <button 
-        type="button"
-        class="btn btn-sm btn-secondary"
-        disabled={data.pagination.current_page === data.pagination.total_pages}
-        on:click={() => changePage(data.pagination.current_page + 1)}
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
-    </nav>
-  </div>
-{/if}
+<style>
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
+  }
+  
+  .form-input {
+    @apply w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  }
+  
+  tr {
+    transition: all 0.2s ease;
+  }
+</style>
