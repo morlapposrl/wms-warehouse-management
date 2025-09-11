@@ -1,5 +1,6 @@
 // @ts-nocheck
 import database from '$lib/server/database.js';
+import { createAuditTrackerForAction } from '$lib/server/helpers/auditHelper';
 import type { PageServerLoad, Actions } from './$types.js';
 import { error, fail } from '@sveltejs/kit';
 import { z } from 'zod';
@@ -64,39 +65,68 @@ export const load = async ({ url }: Parameters<PageServerLoad>[0]) => {
 
     const whereClause = whereConditions.join(' AND ');
 
-    // Movimenti con paginazione - CON ORDER TRACEABILITY
+    // Movimenti ottimizzati con ubicazioni e UDC reali
     const movimenti = database.prepare(`
       SELECT 
-        m.*,
-        p.codice as prodotto_codice,
-        p.descrizione as prodotto_descrizione,
-        c.ragione_sociale as committente_nome,
-        f.ragione_sociale as fornitore_nome,
-        cat.descrizione as categoria_nome,
-        um.descrizione as unita_misura,
-        o.numero_ordine as ordine_numero,
-        o.tipo_ordine as ordine_tipo,
-        -- Calcola saldo progressivo
-        SUM(CASE 
-          WHEN m2.tipo_movimento IN ('CARICO', 'RETTIFICA_POS', 'RESO_CLIENTE') THEN m2.quantita
-          WHEN m2.tipo_movimento IN ('SCARICO', 'RETTIFICA_NEG', 'RESO_FORNITORE', 'TRASFERIMENTO_INTERNO', 'TRASFERIMENTO_INTER_COMMITTENTE') THEN -m2.quantita
-          ELSE 0
-        END) as saldo_progressivo
-      FROM movimenti m
-      JOIN prodotti p ON m.prodotto_id = p.id
-      LEFT JOIN committenti c ON m.committente_id_origine = c.id
-      LEFT JOIN fornitori f ON m.fornitore_id = f.id
-      LEFT JOIN categorie cat ON p.categoria_id = cat.id
-      LEFT JOIN unita_misura um ON p.unita_misura_id = um.id
-      LEFT JOIN ordini o ON m.ordine_id = o.id
-      LEFT JOIN movimenti m2 ON m2.prodotto_id = m.prodotto_id 
-                              AND m2.committente_id_origine = m.committente_id_origine
-                              AND m2.data_movimento <= m.data_movimento
-      WHERE ${whereClause}
-      GROUP BY m.id
-      ORDER BY m.data_movimento DESC, m.id DESC
+        mo.id,
+        mo.committente_id,
+        mo.tipo_movimento,
+        mo.quantita,
+        COALESCE(mo.costo_unitario, 0.0) as prezzo,
+        CASE WHEN mo.costo_unitario IS NOT NULL AND mo.costo_unitario > 0 
+          THEN ROUND(mo.quantita * mo.costo_unitario, 2) 
+          ELSE 0.0 
+        END as valore_totale,
+        '-' as numero_documento,
+        '-' as causale,
+        COALESCE(u.nome || ' ' || u.cognome, 'Sistema') as operatore,
+        COALESCE(m.note, mo.note, '-') as note,
+        strftime('%d-%m-%Y %H:%M', mo.timestamp_inizio, 'localtime') as data_movimento_formatted,
+        mo.timestamp_inizio as data_movimento,
+        mo.sku_code as prodotto_codice,
+        COALESCE(sm.descrizione, mo.sku_code) as prodotto_descrizione,
+        COALESCE(c.ragione_sociale, 'N/A') as committente_nome,
+        '-' as fornitore_nome,
+        '-' as categoria_nome,
+        'PZ' as unita_misura,
+        COALESCE(o.numero_ordine, '-') as ordine_numero,
+        COALESCE(o.tipo_ordine, '-') as ordine_tipo,
+        
+        -- UBICAZIONI REALI
+        COALESCE(u_da.codice_ubicazione, '-') as ubicazione_da,
+        COALESCE(u_a.codice_ubicazione, '-') as ubicazione_a,
+        COALESCE(u_da.zona, '-') as zona_da,
+        COALESCE(u_a.zona, '-') as zona_a,
+        
+        -- UDC REALI
+        COALESCE(udc.barcode, '-') as udc_barcode,
+        COALESCE(tu.nome, '-') as udc_tipo,
+        COALESCE(udc.stato, '-') as udc_stato,
+        
+        -- DATI FACOLTATIVI DA UDC_CONTENUTO
+        COALESCE(uc.lotto, '-') as lotto,
+        COALESCE(DATE(uc.scadenza), '-') as scadenza,
+        COALESCE(uc.peso_kg, 0) as peso_netto,
+        COALESCE(udc.peso_attuale_kg, 0) as peso_lordo
+        
+      FROM movimenti_ottimizzati mo
+      LEFT JOIN committenti c ON mo.committente_id = c.id
+      LEFT JOIN utenti u ON mo.operatore_id = u.id
+      LEFT JOIN sku_master sm ON mo.sku_code = sm.sku_code
+      LEFT JOIN ubicazioni u_da ON mo.from_ubicazione_id = u_da.id
+      LEFT JOIN ubicazioni u_a ON mo.to_ubicazione_id = u_a.id
+      LEFT JOIN ordini o ON mo.ordine_id = o.id
+      LEFT JOIN movimenti m ON mo.ordine_id = m.ordine_id 
+                            AND mo.sku_code = (SELECT codice FROM prodotti WHERE id = m.prodotto_id)
+                            AND datetime(mo.timestamp_inizio) = datetime(m.data_movimento)
+      LEFT JOIN udc ON udc.id = m.udc_id
+      LEFT JOIN tipi_udc tu ON udc.tipo_udc_id = tu.id
+      LEFT JOIN udc_contenuto uc ON udc.id = uc.udc_id 
+                                 AND uc.prodotto_id = (SELECT id FROM prodotti WHERE codice = mo.sku_code LIMIT 1)
+      WHERE 1=1 ${committente_id ? 'AND mo.committente_id = ?' : ''}
+      ORDER BY mo.timestamp_inizio DESC
       LIMIT 200
-    `).all(...params);
+    `).all(...(committente_id ? [committente_id] : []));
 
     // Statistiche per dashboard movimenti (stessi filtri dei movimenti)
     const statistiche = database.prepare(`
@@ -214,7 +244,7 @@ export const load = async ({ url }: Parameters<PageServerLoad>[0]) => {
 
 export const actions = {
   // Azione per creare nuovo movimento
-  create: async ({ request }: import('./$types').RequestEvent) => {
+  create: async ({ request, cookies }: import('./$types').RequestEvent) => {
     try {
       const formData = await request.formData();
       
@@ -298,6 +328,26 @@ export const actions = {
 
         const movimentoId = result.lastInsertRowid;
 
+        // Log audit per creazione movimento
+        const tracker = createAuditTrackerForAction(request, cookies);
+        if (tracker) {
+          await tracker.logOperation({
+            table: 'movimenti_ottimizzati',
+            operation: 'CREATE',
+            description: `Creato movimento ${validatedData.tipo_movimento}: ${validatedData.quantita} x ${validatedData.sku_code}`,
+            module: 'MOVIMENTI',
+            functionality: 'create_movimento',
+            importance: 'ALTA',
+            entities_involved: { 
+              movimento_id: movimentoId,
+              sku_code: validatedData.sku_code,
+              committente_id: validatedData.committente_id,
+              ordine_id: validatedData.ordine_id
+            },
+            data_after: validatedData
+          });
+        }
+
         // Aggiorna giacenze logiche
         await aggiornaGiacenzeLogiche(validatedData, database);
 
@@ -335,7 +385,7 @@ export const actions = {
   },
 
   // Azione per completare movimento in corso
-  complete: async ({ request }: import('./$types').RequestEvent) => {
+  complete: async ({ request, cookies }: import('./$types').RequestEvent) => {
     try {
       const formData = await request.formData();
       const movimento_id = parseInt(formData.get('movimento_id') as string);
@@ -353,11 +403,44 @@ export const actions = {
         WHERE id = ? AND timestamp_fine IS NULL
       `);
 
+      // Recupera dati movimento prima dell'aggiornamento per audit
+      const oldMovimento = database.prepare(`
+        SELECT * FROM movimenti_ottimizzati WHERE id = ?
+      `).get(movimento_id);
+
       const result = updateMovimento.run(durata_secondi, distanza_metri, movimento_id);
 
       if (result.changes === 0) {
         return fail(404, {
           error: 'Movimento non trovato o già completato'
+        });
+      }
+
+      // Log audit per completamento movimento
+      const tracker = createAuditTrackerForAction(request, cookies);
+      if (tracker && oldMovimento) {
+        await tracker.logOperation({
+          table: 'movimenti_ottimizzati',
+          operation: 'UPDATE',
+          description: `Completato movimento ${oldMovimento.tipo_movimento}: ${oldMovimento.sku_code}`,
+          module: 'MOVIMENTI',
+          functionality: 'complete_movimento',
+          importance: 'ALTA',
+          entities_involved: { 
+            movimento_id: movimento_id,
+            sku_code: oldMovimento.sku_code,
+            committente_id: oldMovimento.committente_id
+          },
+          data_before: {
+            timestamp_fine: oldMovimento.timestamp_fine,
+            durata_secondi: oldMovimento.durata_secondi,
+            distanza_metri: oldMovimento.distanza_metri
+          },
+          data_after: {
+            timestamp_fine: 'CURRENT_TIMESTAMP',
+            durata_secondi: durata_secondi,
+            distanza_metri: distanza_metri
+          }
         });
       }
 

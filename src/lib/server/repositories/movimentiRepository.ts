@@ -30,6 +30,13 @@ export interface MovimentoDettaglio extends Movimento {
   committente_destinazione_ragione_sociale?: string;
   ordine_numero?: string;
   ordine_tipo?: string;
+  ubicazione_da?: string;
+  ubicazione_a?: string;
+  zona_da?: string;
+  zona_a?: string;
+  udc_barcode?: string;
+  udc_tipo?: string;
+  udc_stato?: string;
 }
 
 export interface CreateMovimentoData {
@@ -107,7 +114,15 @@ export const movimentiRepository = {
         co.ragione_sociale as committente_origine_ragione_sociale,
         cd.ragione_sociale as committente_destinazione_ragione_sociale,
         o.numero_ordine as ordine_numero,
-        o.tipo_ordine as ordine_tipo
+        o.tipo_ordine as ordine_tipo,
+        -- Placeholder per UDC/ubicazioni (da implementare)
+        '-' as ubicazione_da,
+        '-' as ubicazione_a,
+        '-' as zona_da,
+        '-' as zona_a,
+        '-' as udc_barcode,
+        '-' as udc_tipo,
+        '-' as udc_stato
       FROM movimenti m
       JOIN prodotti p ON m.prodotto_id = p.id
       JOIN categorie c ON p.categoria_id = c.id
@@ -136,7 +151,15 @@ export const movimentiRepository = {
         co.ragione_sociale as committente_origine_ragione_sociale,
         cd.ragione_sociale as committente_destinazione_ragione_sociale,
         o.numero_ordine as ordine_numero,
-        o.tipo_ordine as ordine_tipo
+        o.tipo_ordine as ordine_tipo,
+        -- Placeholder per UDC/ubicazioni (da implementare)
+        '-' as ubicazione_da,
+        '-' as ubicazione_a,
+        '-' as zona_da,
+        '-' as zona_a,
+        '-' as udc_barcode,
+        '-' as udc_tipo,
+        '-' as udc_stato
       FROM movimenti m
       JOIN prodotti p ON m.prodotto_id = p.id
       JOIN categorie c ON p.categoria_id = c.id

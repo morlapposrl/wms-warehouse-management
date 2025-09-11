@@ -21,9 +21,15 @@
   let selectedProdotto = '';
   let selectedOrdine = '';
   let selectedTipoMovimento = '';
+  let selectedUbicazione = '';
+  let selectedUdc = '';
   let loadingProdotti = false;
+  let loadingUbicazioni = false;
+  let loadingUdc = false;
   let prodotti = data.prodotti || [];
   let ordiniIngresso = data.ordiniIngresso || [];
+  let ubicazioni = data.ubicazioni || [];
+  let udcDisponibili = data.udcDisponibili || [];
 
   // Carica prodotti quando cambia il committente
   async function loadProdotti() {
@@ -74,12 +80,12 @@
   <title>Nuovo Movimento - Gestionale Magazzino</title>
 </svelte:head>
 
-<div class="max-w-4xl mx-auto">
+<div class="w-full">
   <!-- Header -->
   <div class="flex items-center justify-between mb-8">
     <div>
       <h1 class="text-3xl font-bold text-neutral-900 mb-2">📦 Nuovo Movimento</h1>
-      <p class="text-neutral-600">
+      <p class="text-neutral-600 dark:text-gray-400">
         Registra una nuova movimentazione di magazzino
       </p>
     </div>
@@ -99,9 +105,9 @@
   {/if}
 
   <!-- Form -->
-  <div class="card">
-    <div class="card-header">
-      <h2 class="text-xl font-semibold text-neutral-900">Dati del Movimento</h2>
+  <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+    <div class="card-header border-b border-gray-200 dark:border-gray-700">
+      <h2 class="text-xl font-semibold text-neutral-900 dark:text-gray-100">Dati del Movimento</h2>
     </div>
     
     <form method="POST" action="?/create" use:enhance class="card-body space-y-6">
@@ -252,6 +258,93 @@
         </div>
       {/if}
 
+      <!-- Sezione Ubicazione e UDC (solo per CARICO) -->
+      {#if selectedTipoMovimento === 'CARICO'}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <!-- Ubicazione di Destinazione -->
+          <div>
+            <label for="ubicazione_id" class="form-label required">
+              📍 Ubicazione di Destinazione
+            </label>
+            <select 
+              id="ubicazione_id" 
+              name="ubicazione_id" 
+              class="form-input"
+              bind:value={selectedUbicazione}
+              required
+            >
+              <option value="">Seleziona ubicazione...</option>
+              {#each ubicazioni as ubicazione}
+                <option value={ubicazione.id}>
+                  {ubicazione.codice_ubicazione} - {ubicazione.zona} 
+                  ({ubicazione.stato} - {ubicazione.volume_occupato_pct}% occupato)
+                </option>
+              {/each}
+            </select>
+            
+            {#if selectedUbicazione}
+              {@const ub = ubicazioni.find(u => u.id.toString() === selectedUbicazione)}
+              {#if ub}
+                <div class="mt-2 p-3 bg-indigo-50 rounded-lg border border-indigo-200">
+                  <div class="text-sm text-indigo-800">
+                    <strong>Ubicazione selezionata:</strong>
+                    <div class="mt-1">
+                      <span class="font-mono">{ub.codice_ubicazione}</span> - Zona {ub.zona}
+                      <br>
+                      Tipo: {ub.tipo} | Stato: <span class="font-semibold">{ub.stato}</span>
+                      <br>
+                      Occupazione: <span class="font-bold">{ub.volume_occupato_pct}%</span> 
+                      ({ub.volume_occupato}m³ / {ub.volume_max}m³)
+                    </div>
+                  </div>
+                </div>
+              {/if}
+            {/if}
+          </div>
+
+          <!-- UDC di Destinazione -->
+          <div>
+            <label for="udc_id" class="form-label">
+              📦 UDC/Pallet di Destinazione
+            </label>
+            <select 
+              id="udc_id" 
+              name="udc_id" 
+              class="form-input"
+              bind:value={selectedUdc}
+            >
+              <option value="">Nessun UDC (carico diretto)</option>
+              {#each udcDisponibili as udc}
+                <option value={udc.id}>
+                  {udc.barcode} - {udc.tipo_udc} 
+                  ({udc.stato} - {udc.volume_occupato_pct}% pieno)
+                </option>
+              {/each}
+            </select>
+            
+            {#if selectedUdc}
+              {@const udcInfo = udcDisponibili.find(u => u.id.toString() === selectedUdc)}
+              {#if udcInfo}
+                <div class="mt-2 p-3 bg-green-50 rounded-lg border border-green-200">
+                  <div class="text-sm text-green-800">
+                    <strong>UDC selezionato:</strong>
+                    <div class="mt-1">
+                      <span class="font-mono">{udcInfo.barcode}</span> - {udcInfo.tipo_udc}
+                      <br>
+                      Stato: <span class="font-semibold">{udcInfo.stato}</span> |
+                      Occupazione: <span class="font-bold">{udcInfo.volume_occupato_pct}%</span>
+                      <br>
+                      Ubicazione attuale: {udcInfo.ubicazione_codice || 'Non posizionato'}
+                    </div>
+                  </div>
+                </div>
+              {/if}
+            {/if}
+          </div>
+        </div>
+      {/if}
+
       <!-- Terza riga: Quantità e Prezzo -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         
@@ -343,7 +436,7 @@
         <button 
           type="submit" 
           class="btn btn-primary"
-          disabled={!selectedCommittente || !selectedProdotto}
+          disabled={!selectedCommittente || !selectedProdotto || (selectedTipoMovimento === 'CARICO' && !selectedUbicazione)}
         >
           💾 Crea Movimento
         </button>
@@ -363,8 +456,10 @@
         <ul class="mt-2 space-y-1 list-disc list-inside">
           <li>I movimenti di <strong>CARICO</strong>, <strong>RETTIFICA_POS</strong> e <strong>RESO_CLIENTE</strong> aumentano le giacenze</li>
           <li>I movimenti di <strong>SCARICO</strong>, <strong>RETTIFICA_NEG</strong> e <strong>RESO_FORNITORE</strong> diminuiscono le giacenze</li>
-          <li><strong>🧾 Per i CARICHI</strong>: verrà mostrata una combobox per collegare il movimento a un ordine di ingresso attivo</li>
-          <li>Il collegamento agli ordini migliora la <strong>tracciabilità</strong> e facilita la gestione delle consegne</li>
+          <li><strong>📍 Per i CARICHI</strong>: è obbligatoria la selezione dell'ubicazione di destinazione</li>
+          <li><strong>📦 UDC/Pallet</strong>: opzionale per organizzare meglio lo stoccaggio</li>
+          <li><strong>🧾 Ordini di riferimento</strong>: collegamento automatico per migliorare la tracciabilità</li>
+          <li>Il sistema aggiorna automaticamente: <strong>giacenze, stato ubicazioni, stato UDC e ordini</strong></li>
         </ul>
       </div>
     </div>

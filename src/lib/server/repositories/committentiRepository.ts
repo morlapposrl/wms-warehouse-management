@@ -235,7 +235,7 @@ export const committentiRepository = {
     return result.changes > 0;
   },
 
-  // DELETE - Hard delete (ATTENZIONE: elimina definitivamente)
+  // DELETE - Hard delete con cascata (ATTENZIONE: elimina tutto il magazzino)
   delete(id: number): boolean {
     // Verifica che non ci siano dati collegati
     const checkStmt = db.prepare(`
@@ -249,12 +249,160 @@ export const committentiRepository = {
     const { total } = checkStmt.get(id, id, id, id) as { total: number };
     
     if (total > 0) {
-      throw new Error('Impossibile eliminare: committente ha dati collegati. Utilizzare soft delete.');
+      throw new Error('Impossibile eliminare: committente ha dati collegati. Utilizzare soft delete o cascading delete.');
     }
     
     const stmt = db.prepare('DELETE FROM committenti WHERE id = ?');
     const result = stmt.run(id);
     return result.changes > 0;
+  },
+
+  // DELETE - Cascading delete completo (PERICOLOSO: elimina tutto il magazzino del committente)
+  cascadeDelete(id: number): { 
+    success: boolean; 
+    deletedRecords: { 
+      prodotti: number; 
+      movimenti: number; 
+      giacenze: number; 
+      categorie: number; 
+      unita_misura: number; 
+      utenti: number; 
+      ordini: number; 
+      committente: boolean; 
+    } 
+  } {
+    // Inizia una transazione per garantire atomicità
+    const transaction = db.transaction(() => {
+      const deletedRecords = {
+        prodotti: 0,
+        movimenti: 0,
+        giacenze: 0,
+        categorie: 0,
+        unita_misura: 0,
+        utenti: 0,
+        ordini: 0,
+        committente: false
+      };
+
+      // 1. Elimina giacenze del committente
+      let stmt = db.prepare('DELETE FROM giacenze WHERE committente_id = ?');
+      let result = stmt.run(id);
+      deletedRecords.giacenze = result.changes;
+
+      // 2. Elimina movimenti dove il committente è origine o destinazione
+      stmt = db.prepare(`
+        DELETE FROM movimenti 
+        WHERE committente_id_origine = ? OR committente_id_destinazione = ?
+      `);
+      result = stmt.run(id, id);
+      deletedRecords.movimenti = result.changes;
+
+      // 3. Elimina ordini del committente
+      stmt = db.prepare('DELETE FROM ordini WHERE committente_id = ?');
+      result = stmt.run(id);
+      deletedRecords.ordini = result.changes;
+
+      // 4. Elimina prodotti del committente
+      stmt = db.prepare('DELETE FROM prodotti WHERE committente_id = ?');
+      result = stmt.run(id);
+      deletedRecords.prodotti = result.changes;
+
+      // 5. Elimina categorie del committente
+      stmt = db.prepare('DELETE FROM categorie WHERE committente_id = ?');
+      result = stmt.run(id);
+      deletedRecords.categorie = result.changes;
+
+      // 6. Elimina unità di misura personalizzate del committente
+      stmt = db.prepare('DELETE FROM unita_misura WHERE committente_id = ?');
+      result = stmt.run(id);
+      deletedRecords.unita_misura = result.changes;
+
+      // 7. Disassocia utenti dal committente (non li elimina)
+      stmt = db.prepare('UPDATE utenti SET committente_id = NULL WHERE committente_id = ?');
+      result = stmt.run(id);
+      deletedRecords.utenti = result.changes;
+
+      // 8. Elimina relazioni committente-fornitori
+      stmt = db.prepare('DELETE FROM committenti_fornitori WHERE committente_id = ?');
+      stmt.run(id);
+
+      // 9. Elimina inventari del committente
+      stmt = db.prepare('DELETE FROM inventari WHERE committente_id = ?');
+      stmt.run(id);
+
+      // 10. Elimina audit trail del committente
+      stmt = db.prepare('DELETE FROM audit_trail WHERE committente_id = ?');
+      stmt.run(id);
+
+      // 11. Elimina giacenze logiche/fisiche/ownership
+      stmt = db.prepare('DELETE FROM giacenze_logiche WHERE committente_id = ?');
+      stmt.run(id);
+      
+      stmt = db.prepare('DELETE FROM giacenze_ownership WHERE committente_id = ?');
+      stmt.run(id);
+
+      stmt = db.prepare('DELETE FROM prodotti_committente_v2 WHERE committente_id = ?');
+      stmt.run(id);
+
+      stmt = db.prepare('DELETE FROM movimenti_ottimizzati WHERE committente_id = ?');
+      stmt.run(id);
+
+      // 12. Infine, elimina il committente stesso
+      stmt = db.prepare('DELETE FROM committenti WHERE id = ?');
+      result = stmt.run(id);
+      deletedRecords.committente = result.changes > 0;
+
+      return deletedRecords;
+    });
+
+    try {
+      const deletedRecords = transaction();
+      return { success: true, deletedRecords };
+    } catch (error) {
+      console.error('Errore durante la cancellazione in cascata:', error);
+      return { 
+        success: false, 
+        deletedRecords: {
+          prodotti: 0, movimenti: 0, giacenze: 0, categorie: 0,
+          unita_misura: 0, utenti: 0, ordini: 0, committente: false
+        } 
+      };
+    }
+  },
+
+  // UTILITY - Conta tutti i record collegati al committente
+  getRelatedRecordsCount(id: number): {
+    prodotti: number;
+    movimenti: number;
+    giacenze: number;
+    categorie: number;
+    unita_misura: number;
+    utenti: number;
+    ordini: number;
+    fornitori: number;
+    inventari: number;
+    total: number;
+  } {
+    const stmt = db.prepare(`
+      SELECT 
+        (SELECT COUNT(*) FROM prodotti WHERE committente_id = ?) as prodotti,
+        (SELECT COUNT(*) FROM movimenti WHERE committente_id_origine = ? OR committente_id_destinazione = ?) as movimenti,
+        (SELECT COUNT(*) FROM giacenze WHERE committente_id = ?) as giacenze,
+        (SELECT COUNT(*) FROM categorie WHERE committente_id = ?) as categorie,
+        (SELECT COUNT(*) FROM unita_misura WHERE committente_id = ?) as unita_misura,
+        (SELECT COUNT(*) FROM utenti WHERE committente_id = ?) as utenti,
+        (SELECT COUNT(*) FROM ordini WHERE committente_id = ?) as ordini,
+        (SELECT COUNT(*) FROM committenti_fornitori WHERE committente_id = ?) as fornitori,
+        (SELECT COUNT(*) FROM inventari WHERE committente_id = ?) as inventari
+    `);
+    
+    const result = stmt.get(id, id, id, id, id, id, id, id, id, id) as any;
+    
+    result.total = result.prodotti + result.movimenti + result.giacenze + 
+                   result.categorie + result.unita_misura + result.utenti + 
+                   result.ordini + result.fornitori + result.inventari;
+    
+    return result;
   },
 
   // UTILITY - Verifica se codice è disponibile

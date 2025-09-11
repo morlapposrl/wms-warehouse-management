@@ -1,9 +1,21 @@
 import Database from 'better-sqlite3';
-import { DB_PATH } from '$env/static/private';
+import path from 'path';
+// import { DB_PATH } from '$env/static/private';
 
-// Inizializza il database
-const db = new Database(DB_PATH || './database/magazzino.db');
-db.pragma('foreign_keys = ON');
+// Inizializza il database con percorso assoluto
+const dbPath = path.resolve(process.cwd(), 'database/magazzino.db');
+console.log('Initializing database at:', dbPath);
+
+let db: Database.Database;
+try {
+  db = new Database(dbPath);
+  db.pragma('foreign_keys = ON');
+  console.log('Database initialized successfully. Methods:', Object.getOwnPropertyNames(db));
+  console.log('Database prepare method available:', typeof db.prepare);
+} catch (error) {
+  console.error('Failed to initialize database:', error);
+  throw error;
+}
 
 // Creazione tabelle per sistema MULTICOMMITTENTE
 export function initializeDatabase() {
@@ -620,6 +632,224 @@ export function initializeDatabase() {
     END;
   `);
 
+  // === SISTEMA AUDIT TRAIL ===
+  
+  // Tabella AUDIT_TRAIL (tracking completo tutte le operazioni)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS audit_trail (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      
+      -- IDENTIFICAZIONE OPERAZIONE
+      operazione_id TEXT NOT NULL, -- UUID o ID univoco operazione
+      tabella_principale TEXT NOT NULL, -- Tabella interessata
+      tipo_operazione TEXT NOT NULL CHECK(tipo_operazione IN (
+        'CREATE', 'READ', 'UPDATE', 'DELETE', 
+        'LOGIN', 'LOGOUT', 'MOVIMENTO', 'ORDINE',
+        'CARICO', 'SCARICO', 'INVENTARIO', 'TRASFERIMENTO'
+      )),
+      
+      -- DETTAGLI OPERAZIONE
+      descrizione_operazione TEXT NOT NULL, -- es: "Carico prodotto XYZ"
+      entita_coinvolte TEXT, -- JSON con ID delle entità coinvolte
+      dati_precedenti TEXT, -- JSON con dati before (per UPDATE/DELETE)
+      dati_nuovi TEXT, -- JSON con dati after (per CREATE/UPDATE)
+      
+      -- UTENTE E CONTESTO
+      utente_id INTEGER NOT NULL,
+      utente_nome TEXT NOT NULL,
+      utente_email TEXT NOT NULL,
+      committente_id INTEGER, -- Se operazione è legata a committente specifico
+      committente_nome TEXT,
+      
+      -- METADATA TECNICA
+      indirizzo_ip TEXT,
+      user_agent TEXT,
+      device_info TEXT,
+      sessione_id TEXT,
+      
+      -- BUSINESS CONTEXT
+      modulo TEXT NOT NULL, -- es: "MOVIMENTI", "ORDINI", "GIACENZE"
+      funzionalita TEXT, -- es: "carico_magazzino", "crea_ordine"
+      importanza TEXT CHECK(importanza IN ('BASSA', 'MEDIA', 'ALTA', 'CRITICA')) DEFAULT 'MEDIA',
+      
+      -- RISULTATO OPERAZIONE
+      esito TEXT CHECK(esito IN ('SUCCESSO', 'ERRORE', 'WARNING')) DEFAULT 'SUCCESSO',
+      messaggio_errore TEXT, -- Se esito = ERRORE
+      durata_ms INTEGER, -- Tempo di esecuzione
+      
+      -- TIMESTAMP
+      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+      data_operazione DATE DEFAULT (date('now')),
+      ora_operazione TIME DEFAULT (time('now')),
+      
+      FOREIGN KEY (utente_id) REFERENCES utenti(id),
+      FOREIGN KEY (committente_id) REFERENCES committenti(id)
+    )
+  `);
+
+  // Tabella SESSIONI_UTENTI (tracking sessioni e accessi)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS sessioni_utenti (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      utente_id INTEGER NOT NULL,
+      sessione_id TEXT UNIQUE NOT NULL,
+      
+      -- ACCESSO
+      data_login DATETIME DEFAULT CURRENT_TIMESTAMP,
+      indirizzo_ip TEXT,
+      user_agent TEXT,
+      device_type TEXT, -- desktop, mobile, tablet
+      browser TEXT,
+      os TEXT,
+      
+      -- ATTIVITA' SESSIONE
+      ultimo_accesso DATETIME DEFAULT CURRENT_TIMESTAMP,
+      pagine_visitate INTEGER DEFAULT 0,
+      operazioni_eseguite INTEGER DEFAULT 0,
+      committente_corrente_id INTEGER, -- Ultimo committente selezionato
+      
+      -- CHIUSURA
+      data_logout DATETIME,
+      durata_sessione_minuti INTEGER,
+      motivo_chiusura TEXT, -- logout, timeout, forced_logout
+      
+      -- STATO
+      attiva BOOLEAN DEFAULT 1,
+      
+      FOREIGN KEY (utente_id) REFERENCES utenti(id),
+      FOREIGN KEY (committente_corrente_id) REFERENCES committenti(id)
+    )
+  `);
+
+  // Tabella PREFERENZE_UTENTE (configurazioni personali)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS preferenze_utente (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      utente_id INTEGER NOT NULL,
+      
+      -- INTERFACCIA
+      tema TEXT DEFAULT 'light', -- light, dark, auto
+      lingua TEXT DEFAULT 'it',
+      fuso_orario TEXT DEFAULT 'Europe/Rome',
+      formato_data TEXT DEFAULT 'DD/MM/YYYY',
+      formato_ora TEXT DEFAULT '24h',
+      
+      -- DASHBOARD
+      dashboard_layout TEXT, -- JSON con layout personalizzato
+      widget_preferiti TEXT, -- JSON con widget abilitati
+      
+      -- FILTRI DEFAULT
+      committente_default_id INTEGER,
+      categoria_default_id INTEGER,
+      
+      -- NOTIFICHE
+      notifiche_email BOOLEAN DEFAULT 1,
+      notifiche_browser BOOLEAN DEFAULT 1,
+      notifiche_mobile BOOLEAN DEFAULT 0,
+      
+      -- MENU E NAVIGAZIONE  
+      menu_compatto BOOLEAN DEFAULT 0,
+      ricordi_ultima_pagina BOOLEAN DEFAULT 1,
+      
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      
+      FOREIGN KEY (utente_id) REFERENCES utenti(id),
+      FOREIGN KEY (committente_default_id) REFERENCES committenti(id),
+      UNIQUE(utente_id)
+    )
+  `);
+
+  // Tabella NOTIFICHE_SISTEMA (alert e comunicazioni)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS notifiche_sistema (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      
+      -- DESTINATARIO
+      utente_destinatario_id INTEGER, -- Se NULL = broadcast
+      committente_destinatario_id INTEGER, -- Se NULL = tutti
+      ruolo_destinatario TEXT, -- Se valorizzato = per ruolo
+      
+      -- CONTENUTO
+      titolo TEXT NOT NULL,
+      messaggio TEXT NOT NULL,
+      tipo TEXT CHECK(tipo IN ('INFO', 'WARNING', 'ERROR', 'SUCCESS')) DEFAULT 'INFO',
+      priorita TEXT CHECK(priorita IN ('BASSA', 'MEDIA', 'ALTA', 'URGENTE')) DEFAULT 'MEDIA',
+      
+      -- AZIONE COLLEGATA
+      azione_url TEXT, -- URL per azione correlata
+      azione_label TEXT, -- Testo pulsante azione
+      
+      -- METADATA
+      modulo_origine TEXT, -- Da quale modulo viene la notifica
+      evento_scatenante TEXT, -- Evento che ha generato notifica
+      dati_aggiuntivi TEXT, -- JSON con dati extra
+      
+      -- STATO
+      letta BOOLEAN DEFAULT 0,
+      data_lettura DATETIME,
+      archiviata BOOLEAN DEFAULT 0,
+      
+      -- SCADENZA
+      data_scadenza DATETIME, -- Dopo questa data non mostrare
+      
+      -- TIMESTAMP
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      
+      FOREIGN KEY (utente_destinatario_id) REFERENCES utenti(id),
+      FOREIGN KEY (committente_destinatario_id) REFERENCES committenti(id)
+    )
+  `);
+
+  // Indici per performance audit system
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_audit_trail_utente ON audit_trail(utente_id, timestamp DESC);
+    CREATE INDEX IF NOT EXISTS idx_audit_trail_committente ON audit_trail(committente_id, timestamp DESC);
+    CREATE INDEX IF NOT EXISTS idx_audit_trail_operazione ON audit_trail(tipo_operazione, timestamp DESC);
+    CREATE INDEX IF NOT EXISTS idx_audit_trail_tabella ON audit_trail(tabella_principale, timestamp DESC);
+    CREATE INDEX IF NOT EXISTS idx_audit_trail_data ON audit_trail(data_operazione, ora_operazione);
+    CREATE INDEX IF NOT EXISTS idx_sessioni_utente ON sessioni_utenti(utente_id, attiva);
+    CREATE INDEX IF NOT EXISTS idx_sessioni_sessione_id ON sessioni_utenti(sessione_id);
+    CREATE INDEX IF NOT EXISTS idx_notifiche_destinatario ON notifiche_sistema(utente_destinatario_id, letta);
+    CREATE INDEX IF NOT EXISTS idx_notifiche_committente ON notifiche_sistema(committente_destinatario_id, letta);
+  `);
+
+  // Trigger per audit trail automatico su tabelle critiche
+  db.exec(`
+    CREATE TRIGGER IF NOT EXISTS audit_movimenti_insert
+    AFTER INSERT ON movimenti
+    BEGIN
+      INSERT INTO audit_trail (
+        operazione_id, tabella_principale, tipo_operazione, descrizione_operazione,
+        entita_coinvolte, dati_nuovi, utente_id, utente_nome, utente_email, 
+        committente_id, modulo, funzionalita, importanza
+      ) VALUES (
+        'MOV_' || NEW.id || '_' || strftime('%Y%m%d%H%M%S', 'now'),
+        'movimenti',
+        'MOVIMENTO',
+        'Nuovo movimento: ' || NEW.tipo_movimento || ' - Qta: ' || NEW.quantita,
+        json_object(
+          'movimento_id', NEW.id,
+          'prodotto_id', NEW.prodotto_id,
+          'ordine_id', NEW.ordine_id
+        ),
+        json_object(
+          'tipo_movimento', NEW.tipo_movimento,
+          'quantita', NEW.quantita,
+          'prezzo', NEW.prezzo,
+          'note', NEW.note
+        ),
+        COALESCE((SELECT id FROM utenti WHERE nome = NEW.operatore LIMIT 1), 1),
+        COALESCE(NEW.operatore, 'Sistema'),
+        COALESCE((SELECT email FROM utenti WHERE nome = NEW.operatore LIMIT 1), 'system@magazzino.it'),
+        NEW.committente_id_origine,
+        'MOVIMENTI',
+        'registrazione_movimento',
+        'ALTA'
+      );
+    END
+  `);
+
   // Inserisci dati di esempio SOLO se tabella committenti è vuota
   const count = db.prepare('SELECT COUNT(*) as count FROM committenti').get() as { count: number };
   
@@ -656,4 +886,8 @@ export function initializeDatabase() {
   }
 }
 
+// Initialize database on import
+initializeDatabase();
+
+export { db };
 export default db;

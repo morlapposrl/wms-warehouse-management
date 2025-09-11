@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { committentiRepository } from '$lib/server/repositories/committentiRepository';
 import { validateCommittente, validateCommittenteFilters } from '$lib/validations/committente';
+import { createAuditTracker } from '$lib/server/middleware/auditMiddleware';
 import type { RequestHandler } from './$types';
 import type { ApiResponse } from '$lib/types';
 
@@ -53,7 +54,7 @@ export const GET: RequestHandler = async ({ url }) => {
 };
 
 // POST - Crea nuovo committente
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, cookies }) => {
   try {
     const data = await request.json();
     
@@ -88,6 +89,31 @@ export const POST: RequestHandler = async ({ request }) => {
     
     // Crea il committente
     const committente = committentiRepository.create(validatedData);
+    
+    // Log audit per creazione committente
+    try {
+      const tracker = createAuditTracker(request, cookies);
+      if (tracker) {
+        await tracker.logOperation({
+          table: 'committenti',
+          operation: 'CREATE',
+          description: `Creato committente "${committente.ragione_sociale}" (${committente.codice})`,
+          module: 'COMMITTENTI',
+          functionality: 'create_committente',
+          importance: 'ALTA',
+          entities_involved: { 
+            committente_id: committente.id,
+            codice: committente.codice,
+            ragione_sociale: committente.ragione_sociale
+          },
+          data_before: null,
+          data_after: committente
+        });
+      }
+    } catch (auditError) {
+      console.error('Errore audit:', auditError);
+      // Non bloccare l'operazione per errori di audit
+    }
     
     return json<ApiResponse>({
       success: true,

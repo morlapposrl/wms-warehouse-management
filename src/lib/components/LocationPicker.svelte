@@ -85,7 +85,7 @@
       case 'HOT': return 'text-red-600 bg-red-100';
       case 'WARM': return 'text-orange-600 bg-orange-100';
       case 'COLD': return 'text-blue-600 bg-blue-100';
-      default: return 'text-neutral-600 bg-neutral-100';
+      default: return 'text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800';
     }
   }
 </script>
@@ -96,7 +96,7 @@
     <button
       type="button"
       on:click={() => isOpen = !isOpen}
-      class="w-full text-left border border-neutral-300 rounded-md px-3 py-2 bg-white hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      class="w-full text-left border border-neutral-300 dark:border-neutral-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:border-blue-400 dark:hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
       class:border-red-300={!selectedLocation && isOpen}
     >
       {#if selectedLocation}
@@ -135,7 +135,7 @@
   
   <!-- Dropdown ubicazioni -->
   {#if isOpen}
-    <div class="absolute z-50 w-full mt-1 bg-white border border-neutral-300 rounded-md shadow-lg max-h-96 overflow-hidden">
+    <div class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-lg max-h-96 overflow-hidden">
       <!-- Campo ricerca -->
       <div class="p-3 border-b">
         <input
@@ -150,7 +150,7 @@
       <div class="max-h-80 overflow-y-auto">
         <!-- Sezione ubicazioni suggerite -->
         {#if suggestedLocations.length > 0}
-          <div class="p-2 bg-green-50 border-b">
+          <div class="p-2 bg-green-50 dark:bg-green-900/20 border-b border-gray-200 dark:border-gray-700">
             <div class="text-xs font-medium text-green-800 mb-2">
               💡 Ubicazioni suggerite ({mode === 'from' ? 'con merce disponibile' : 'ottimali per stoccaggio'})
             </div>
@@ -158,7 +158,7 @@
               <button
                 type="button"
                 on:click={() => selectLocation(location)}
-                class="w-full text-left p-2 hover:bg-green-100 rounded-md transition-colors"
+                class="w-full text-left p-2 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-md transition-colors text-gray-900 dark:text-gray-100"
               >
                 <div class="flex items-center gap-2">
                   <span class="text-lg">{getLocationIcon(location.tipo)}</span>
@@ -204,7 +204,7 @@
               <button
                 type="button"
                 on:click={() => selectLocation(location)}
-                class="w-full text-left p-2 hover:bg-neutral-50 rounded-md transition-colors border-l-4"
+                class="w-full text-left p-2 hover:bg-neutral-50 dark:hover:bg-neutral-700 rounded-md transition-colors border-l-4 text-gray-900 dark:text-gray-100"
                 class:border-l-red-400={location.percentuale_occupazione >= 90}
                 class:border-l-orange-400={location.percentuale_occupazione >= 70 && location.percentuale_occupazione < 90}
                 class:border-l-yellow-400={location.percentuale_occupazione >= 50 && location.percentuale_occupazione < 70}
@@ -240,7 +240,7 @@
       </div>
       
       <!-- Footer con azioni -->
-      <div class="p-3 border-t bg-neutral-50 flex items-center justify-between">
+      <div class="p-3 border-t border-gray-200 dark:border-gray-700 bg-neutral-50 dark:bg-neutral-800 flex items-center justify-between">
         <span class="text-xs text-neutral-600">
           {mode === 'from' ? 'Dove si trova la merce' : 'Dove posizionare la merce'}
         </span>

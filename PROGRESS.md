@@ -177,24 +177,53 @@ admin@magazzino.it (Super Admin)
 
 ---
 
-## 🚀 PROSSIMI STEP: FASE 2
+## ✅ FASE 2: ANAGRAFICHE COMMITTENTE COMPLETATA
+
+**Data aggiornamento**: 2025-09-05  
+**Stato**: FASE 2 COMPLETATA AL 100% ✅
+
+### CATEGORIE per committente ✅ COMPLETATE
+- ✅ Repository completo (`categorieRepository.ts`) con segregazione committente_id
+- ✅ API REST complete (`/api/committenti/[committente_id]/categorie`)  
+- ✅ UI completa con form avanzato (`/auth/committenti/[committente_id]/categorie`)
+- ✅ Validazioni Zod complete (`categoria.ts`) 
+- ✅ **Test funzionanti**: Committente 1 ha 2 categorie attive ("ELETTR", "LIBRI")
+- ✅ Funzionalità: CRUD, filtri, auto-generazione codici, statistiche live
+
+### UNITÀ DI MISURA ✅ COMPLETATE  
+- ✅ Repository con gestione globali + personalizzate (`unitaMisuraRepository.ts`)
+- ✅ API complete per committente (`/api/committenti/[committente_id]/unita-misura`)
+- ✅ UI funzionante con gestione personalizzate
+- ✅ **10 unità globali** di sistema (PZ, KG, LT, MT, MQ, SCATOLA, PALLET, ecc.)
+- ✅ Supporto unità personalizzate per committente
+- ✅ Validazioni e segregazione dati operativa
+
+### FORNITORI per committente ✅ COMPLETATE
+- ✅ Repository con relazione many-to-many (`fornitoriRepository.ts`)
+- ✅ API complete per associazioni (`/api/committenti/[committente_id]/fornitori`)
+- ✅ UI avanzata con gestione associazioni committente-fornitore
+- ✅ **Test funzionanti**: Committente 1 ha 1 fornitore associato ("Fornitore Alfa S.r.l.")
+- ✅ Condizioni specifiche per committente
+- ✅ Statistiche associate: 1 associato, 1 attivo, 1 con condizioni
+
+## 🚀 PROSSIMI STEP: FASE 3 - GESTIONE PRODOTTI
 
 ### In Ordine Rigoroso:
-1. **CATEGORIE per committente**
-   - Repository con filtro committente_id  
-   - API `/api/[committente]/categorie`
-   - UI con selezione committente
-   - Test CRUD completo
+1. **PRODOTTI per committente**
+   - Implementazione CRUD prodotti con categoria e unità misura
+   - Validazioni scorte minime/massime  
+   - Ricerca prodotti avanzata
+   - Associazione con fornitori
 
-2. **UNITÀ DI MISURA**  
-   - Gestione globali + personalizzate
-   - Repository con logica condivisa
-   - Test integrazione
+2. **GESTIONE LOTTI/SCADENZE**
+   - Tracciabilità lotti per prodotto
+   - Gestione date scadenza
+   - FIFO automatico
 
-3. **FORNITORI per committente**
-   - Relazione many-to-many
-   - Repository complex queries
-   - UI avanzata
+3. **RICERCA E FILTRI AVANZATI**
+   - Filtri multipli per prodotti
+   - Ricerca full-text
+   - Export dati Excel
 
 ---
 

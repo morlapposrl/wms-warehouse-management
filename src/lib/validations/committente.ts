@@ -56,14 +56,18 @@ export const committenteSchema = z.object({
     }),
   
   email: z.string()
+    .min(1, 'Email obbligatoria')
     .email('Email non valida')
-    .max(100, 'Email troppo lunga')
-    .optional(),
+    .max(100, 'Email troppo lunga'),
   
   pec: z.string()
-    .email('PEC non valida')
-    .max(100, 'PEC troppo lunga')
-    .optional(),
+    .optional()
+    .refine((val) => !val || val.trim() === '' || z.string().email().safeParse(val).success, {
+      message: 'PEC non valida'
+    })
+    .refine((val) => !val || val.length <= 100, {
+      message: 'PEC troppo lunga (max 100 caratteri)'
+    }),
   
   referente_principale: z.string()
     .max(100, 'Nome referente troppo lungo (max 100 caratteri)')
@@ -93,13 +97,7 @@ export const committenteSchema = z.object({
     .max(1000, 'Note troppo lunghe (max 1000 caratteri)')
     .optional()
 })
-.refine((data) => {
-  // Almeno un contatto deve essere presente
-  return data.telefono || data.email || data.pec;
-}, {
-  message: 'Inserire almeno un contatto (telefono, email o PEC)',
-  path: ['telefono'] // Mostra l'errore sul campo telefono
-})
+// Rimozione vincolo contatti perché email è ora obbligatoria
 .refine((data) => {
   // Se presente partita IVA, deve essere univoca nel sistema (verrà verificato lato server)
   // Se presente email, deve essere valida
@@ -181,12 +179,12 @@ export function validateCommittente(data: unknown) {
   if (!result.success) {
     const errors: Record<string, string[]> = {};
     
-    result.error.errors.forEach((error) => {
-      const field = error.path.join('.');
+    result.error.issues.forEach((issue) => {
+      const field = issue.path.join('.');
       if (!errors[field]) {
         errors[field] = [];
       }
-      errors[field].push(error.message);
+      errors[field].push(issue.message);
     });
     
     return { success: false, errors };
@@ -201,12 +199,12 @@ export function validateUpdateCommittente(data: unknown) {
   if (!result.success) {
     const errors: Record<string, string[]> = {};
     
-    result.error.errors.forEach((error) => {
-      const field = error.path.join('.');
+    result.error.issues.forEach((issue) => {
+      const field = issue.path.join('.');
       if (!errors[field]) {
         errors[field] = [];
       }
-      errors[field].push(error.message);
+      errors[field].push(issue.message);
     });
     
     return { success: false, errors };
@@ -221,12 +219,12 @@ export function validateCommittenteFilters(data: unknown) {
   if (!result.success) {
     const errors: Record<string, string[]> = {};
     
-    result.error.errors.forEach((error) => {
-      const field = error.path.join('.');
+    result.error.issues.forEach((issue) => {
+      const field = issue.path.join('.');
       if (!errors[field]) {
         errors[field] = [];
       }
-      errors[field].push(error.message);
+      errors[field].push(issue.message);
     });
     
     return { success: false, errors };

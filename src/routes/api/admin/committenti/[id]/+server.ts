@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { committentiRepository } from '$lib/server/repositories/committentiRepository';
 import { validateUpdateCommittente } from '$lib/validations/committente';
+import { createAuditTracker } from '$lib/server/middleware/auditMiddleware';
 import type { RequestHandler } from './$types';
 import type { ApiResponse } from '$lib/types';
 
@@ -40,7 +41,7 @@ export const GET: RequestHandler = async ({ params }) => {
 };
 
 // PUT - Aggiorna committente
-export const PUT: RequestHandler = async ({ params, request }) => {
+export const PUT: RequestHandler = async ({ params, request, cookies }) => {
   try {
     const id = parseInt(params.id);
     
@@ -95,6 +96,31 @@ export const PUT: RequestHandler = async ({ params, request }) => {
       }, { status: 500 });
     }
     
+    // Log audit per modifica committente
+    try {
+      const tracker = createAuditTracker(request, cookies);
+      if (tracker) {
+        await tracker.logOperation({
+          table: 'committenti',
+          operation: 'UPDATE',
+          description: `Modificato committente "${committente.ragione_sociale}" (${committente.codice})`,
+          module: 'COMMITTENTI',
+          functionality: 'update_committente',
+          importance: 'MEDIA',
+          entities_involved: { 
+            committente_id: committente.id,
+            codice: committente.codice,
+            ragione_sociale: committente.ragione_sociale
+          },
+          data_before: existing,
+          data_after: committente
+        });
+      }
+    } catch (auditError) {
+      console.error('Errore audit:', auditError);
+      // Non bloccare l'operazione per errori di audit
+    }
+    
     return json<ApiResponse>({
       success: true,
       data: committente
@@ -121,7 +147,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 };
 
 // DELETE - Elimina committente (soft delete)
-export const DELETE: RequestHandler = async ({ params, url }) => {
+export const DELETE: RequestHandler = async ({ params, url, request, cookies }) => {
   try {
     const id = parseInt(params.id);
     
@@ -155,6 +181,31 @@ export const DELETE: RequestHandler = async ({ params, url }) => {
           }, { status: 500 });
         }
         
+        // Log audit per eliminazione definitiva committente
+        try {
+          const tracker = createAuditTracker(request, cookies);
+          if (tracker) {
+            await tracker.logOperation({
+              table: 'committenti',
+              operation: 'DELETE',
+              description: `Eliminato definitivamente committente "${existing.ragione_sociale}" (${existing.codice})`,
+              module: 'COMMITTENTI',
+              functionality: 'delete_hard_committente',
+              importance: 'CRITICA',
+              entities_involved: { 
+                committente_id: id,
+                codice: existing.codice,
+                ragione_sociale: existing.ragione_sociale
+              },
+              data_before: existing,
+              data_after: null
+            });
+          }
+        } catch (auditError) {
+          console.error('Errore audit:', auditError);
+          // Non bloccare l'operazione per errori di audit
+        }
+        
         return json<ApiResponse>({
           success: true,
           data: { message: 'Committente eliminato definitivamente' }
@@ -178,6 +229,31 @@ export const DELETE: RequestHandler = async ({ params, url }) => {
           success: false,
           error: 'Errore nell\'eliminazione del committente'
         }, { status: 500 });
+      }
+      
+      // Log audit per soft delete committente
+      try {
+        const tracker = createAuditTracker(request, cookies);
+        if (tracker) {
+          await tracker.logOperation({
+            table: 'committenti',
+            operation: 'UPDATE',
+            description: `Disattivato committente "${existing.ragione_sociale}" (${existing.codice}) - Stato: cessato`,
+            module: 'COMMITTENTI',
+            functionality: 'soft_delete_committente',
+            importance: 'ALTA',
+            entities_involved: { 
+              committente_id: id,
+              codice: existing.codice,
+              ragione_sociale: existing.ragione_sociale
+            },
+            data_before: existing,
+            data_after: { ...existing, stato: 'cessato', attivo: false }
+          });
+        }
+      } catch (auditError) {
+        console.error('Errore audit:', auditError);
+        // Non bloccare l'operazione per errori di audit
       }
       
       return json<ApiResponse>({

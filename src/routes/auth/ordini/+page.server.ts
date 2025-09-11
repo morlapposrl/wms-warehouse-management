@@ -5,7 +5,8 @@ import { error } from '@sveltejs/kit';
 export const load: PageServerLoad = async ({ url }) => {
   try {
     // Ottieni parametri filtri
-    const committente_id = parseInt(url.searchParams.get('committente') || '1');
+    const committente_param = url.searchParams.get('committente');
+    const committente_id = committente_param ? parseInt(committente_param) : null;
     const search = url.searchParams.get('search') || '';
     const stato = url.searchParams.get('stato') || '';
     const tipo_ordine = url.searchParams.get('tipo') || '';
@@ -16,8 +17,14 @@ export const load: PageServerLoad = async ({ url }) => {
     const offset = (page - 1) * limit;
 
     // Costruisci query base con tutti i filtri
-    let whereConditions: string[] = ['o.committente_id = ?'];
-    let queryParams: any[] = [committente_id];
+    let whereConditions: string[] = [];
+    let queryParams: any[] = [];
+
+    // Solo se specificato il committente, filtra per committente
+    if (committente_id) {
+      whereConditions.push('o.committente_id = ?');
+      queryParams.push(committente_id);
+    }
 
     if (search.trim()) {
       whereConditions.push('(o.numero_ordine LIKE ? OR o.cliente_fornitore LIKE ? OR o.tracking_number LIKE ?)');
@@ -45,7 +52,7 @@ export const load: PageServerLoad = async ({ url }) => {
       queryParams.push(data_a);
     }
 
-    const whereClause = whereConditions.join(' AND ');
+    const whereClause = whereConditions.length > 0 ? 'WHERE ' + whereConditions.join(' AND ') : '';
 
     // Query ordini con paginazione
     const ordiniQuery = `
@@ -66,7 +73,7 @@ export const load: PageServerLoad = async ({ url }) => {
         c.ragione_sociale as committente_nome
       FROM ordini o
       JOIN committenti c ON o.committente_id = c.id
-      WHERE ${whereClause}
+      ${whereClause}
       ORDER BY o.created_at DESC
       LIMIT ? OFFSET ?
     `;
@@ -78,13 +85,13 @@ export const load: PageServerLoad = async ({ url }) => {
       SELECT COUNT(*) as count
       FROM ordini o
       JOIN committenti c ON o.committente_id = c.id
-      WHERE ${whereClause}
+      ${whereClause}
     `;
 
     const totalCount = db.prepare(countQuery).get(queryParams) as { count: number };
 
-    // Statistiche per committente (sempre senza filtri)
-    const statsQuery = `
+    // Statistiche globali o per committente
+    const statsQuery = committente_id ? `
       SELECT
         COUNT(*) as totale_ordini,
         COUNT(CASE WHEN stato = 'NUOVO' THEN 1 END) as ordini_nuovi,
@@ -93,9 +100,19 @@ export const load: PageServerLoad = async ({ url }) => {
         COALESCE(SUM(totale_valore), 0) as valore_totale
       FROM ordini
       WHERE committente_id = ?
+    ` : `
+      SELECT
+        COUNT(*) as totale_ordini,
+        COUNT(CASE WHEN stato = 'NUOVO' THEN 1 END) as ordini_nuovi,
+        COUNT(CASE WHEN stato = 'IN_PREPARAZIONE' THEN 1 END) as ordini_in_preparazione,
+        COUNT(CASE WHEN stato = 'SPEDITO' THEN 1 END) as ordini_spediti,
+        COALESCE(SUM(totale_valore), 0) as valore_totale
+      FROM ordini
     `;
 
-    const stats = db.prepare(statsQuery).get(committente_id);
+    const stats = committente_id ? 
+      db.prepare(statsQuery).get(committente_id) : 
+      db.prepare(statsQuery).get();
 
     // Opzioni per select
     const stati_disponibili = ['NUOVO', 'CONFERMATO', 'IN_PREPARAZIONE', 'PRONTO', 'SPEDITO', 'CONSEGNATO', 'ANNULLATO', 'RESO'];

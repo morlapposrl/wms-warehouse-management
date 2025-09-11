@@ -323,11 +323,11 @@ export const ubicazioniRepository = {
         codice_ubicazione, zona, corridoio, scaffale, ripiano, posizione,
         tipo, coordinata_x, coordinata_y, coordinata_z, larghezza_cm, 
         profondita_cm, altezza_cm, orientamento, colore_hex,
-        volume_max_cm3, peso_max_kg, volume_occupato_cm3, peso_attuale_kg, 
-        percentuale_occupazione, accessibilita, temperatura_controllata,
+        volume_max_cm3, peso_max_kg, volume_occupato_cm3, peso_attuale_kg,
+        accessibilita, temperatura_controllata,
         temperatura_attuale, attiva, priorita_picking, zona_velocita,
         frequenza_prelievi, accesso_limitato, badge_richiesto
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const insertMany = db.transaction((ubicazioni) => {
@@ -362,7 +362,6 @@ export const ubicazioniRepository = {
             peso_max,
             0, // volume_occupato_cm3
             0, // peso_attuale_kg
-            0, // percentuale_occupazione
             ubicazione.accessibilita || 'DIRETTA',
             ubicazione.temperatura_controllata || false,
             ubicazione.temperatura_attuale || null,

@@ -1,106 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Design System Variables */
-:root {
-  /* Primary Colors - Blu professionale moderno */
-  --primary-50: #eff6ff;
-  --primary-100: #dbeafe;
-  --primary-200: #bfdbfe;
-  --primary-300: #93c5fd;
-  --primary-400: #60a5fa;
-  --primary-500: #3b82f6;
-  --primary-600: #2563eb;
-  --primary-700: #1d4ed8;
-  --primary-800: #1e40af;
-  --primary-900: #1e3a8a;
-
-  /* Secondary Colors - Verde moderno per successi */
-  --secondary-50: #f0fdf4;
-  --secondary-100: #dcfce7;
-  --secondary-200: #bbf7d0;
-  --secondary-300: #86efac;
-  --secondary-400: #4ade80;
-  --secondary-500: #22c55e;
-  --secondary-600: #16a34a;
-  --secondary-700: #15803d;
-  --secondary-800: #166534;
-  --secondary-900: #14532d;
-
-  /* Accent Colors - Arancione per highlight */
-  --accent-50: #fff7ed;
-  --accent-100: #ffedd5;
-  --accent-200: #fed7aa;
-  --accent-300: #fdba74;
-  --accent-400: #fb923c;
-  --accent-500: #f97316;
-  --accent-600: #ea580c;
-  --accent-700: #c2410c;
-  --accent-800: #9a3412;
-  --accent-900: #7c2d12;
-
-  /* Neutral Colors - Grigi caldi moderni */
-  --neutral-50: #fafaf9;
-  --neutral-100: #f5f5f4;
-  --neutral-200: #e7e5e4;
-  --neutral-300: #d6d3d1;
-  --neutral-400: #a8a29e;
-  --neutral-500: #78716c;
-  --neutral-600: #57534e;
-  --neutral-700: #44403c;
-  --neutral-800: #292524;
-  --neutral-900: #1c1917;
-
-  /* Semantic Colors */
-  --error-500: #ef4444;
-  --warning-500: #f59e0b;
-  --success-500: #10b981;
-  --info-500: #3b82f6;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-
-  /* Typography */
-  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-
-  /* Border Radius */
-  --radius-sm: 0.375rem;
-  --radius: 0.5rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-
-  /* Spacing */
-  --space-xs: 0.5rem;
-  --space-sm: 0.75rem;
-  --space: 1rem;
-  --space-md: 1.25rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
-  --space-2xl: 2.5rem;
-  --space-3xl: 3rem;
-}
-
-/* Base Styles */
+/* ==========================================
+   SISTEMA BASE CON ROBOTO E DARK MODE
+   ========================================== */
 @layer base {
-  * {
-    @apply border-neutral-200;
+  html {
+    font-family: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
   
   body {
-    @apply bg-neutral-50 text-neutral-900 font-body antialiased;
+    @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 antialiased transition-colors duration-300;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 
-  /* Headings */
+  /* Headings con Roboto */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading font-semibold tracking-tight;
+    @apply font-semibold tracking-tight text-gray-900 dark:text-gray-100;
+    font-family: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 
   h1 {
@@ -118,127 +38,70 @@
   h4 {
     @apply text-lg lg:text-xl;
   }
-
-  /* Form Elements */
-  input, textarea, select {
-    @apply transition-colors duration-200;
-  }
-
-  input:focus, textarea:focus, select:focus {
-    @apply outline-none ring-2 ring-primary-500 ring-offset-2;
-  }
 }
 
-/* Component Styles */
+/* ==========================================
+   COMPONENTI MODERNI CON TAILWIND DARK MODE
+   ========================================== */
 @layer components {
-  /* Buttons - Modern Design System */
+  /* Primary color utilities */
+  .bg-primary-50 { @apply bg-blue-50 dark:bg-blue-900/20; }
+  .bg-primary-100 { @apply bg-blue-100 dark:bg-blue-900/30; }
+  .bg-primary-500 { @apply bg-blue-500; }
+  .bg-primary-600 { @apply bg-blue-600; }
+  .bg-primary-700 { @apply bg-blue-700; }
+  .text-primary-600 { @apply text-blue-600; }
+  .text-primary-700 { @apply text-blue-700; }
+  
+  /* Buttons professionali con gestione dark mode automatica */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden;
-  }
-
-  .btn::before {
-    content: '';
-    @apply absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full transition-transform duration-700;
-  }
-
-  .btn:hover::before {
-    @apply translate-x-full;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-primary {
-    @apply bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 focus:ring-primary-500 shadow-lg hover:shadow-xl border-0;
+    @apply bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white focus:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 dark:active:bg-blue-700 dark:focus:ring-blue-400 shadow-sm;
   }
 
   .btn-secondary {
-    @apply bg-white text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50 focus:ring-neutral-400 border border-neutral-200 shadow-md hover:shadow-lg hover:border-neutral-300;
+    @apply bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-900 focus:ring-gray-500 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-500 dark:text-gray-100 dark:focus:ring-gray-400 border border-gray-300 dark:border-gray-600;
   }
 
   .btn-success {
-    @apply bg-gradient-to-r from-secondary-600 to-secondary-700 text-white hover:from-secondary-700 hover:to-secondary-800 focus:ring-secondary-500 shadow-lg hover:shadow-xl border-0;
+    @apply bg-green-600 hover:bg-green-700 active:bg-green-800 text-white focus:ring-green-500 dark:bg-green-500 dark:hover:bg-green-600 dark:active:bg-green-700 dark:focus:ring-green-400 shadow-sm;
   }
 
   .btn-danger {
-    @apply bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 focus:ring-red-500 shadow-lg hover:shadow-xl border-0;
+    @apply bg-red-600 hover:bg-red-700 active:bg-red-800 text-white focus:ring-red-500 dark:bg-red-500 dark:hover:bg-red-600 dark:active:bg-red-700 dark:focus:ring-red-400 shadow-sm;
   }
 
   .btn-warning {
-    @apply bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 focus:ring-amber-500 shadow-lg hover:shadow-xl border-0;
+    @apply bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white focus:ring-amber-500 dark:bg-amber-400 dark:hover:bg-amber-500 dark:active:bg-amber-600 dark:focus:ring-amber-300 shadow-sm;
   }
 
-  .btn-info {
-    @apply bg-gradient-to-r from-sky-500 to-sky-600 text-white hover:from-sky-600 hover:to-sky-700 focus:ring-sky-500 shadow-lg hover:shadow-xl border-0;
-  }
-
-  /* Button Sizes */
+  /* Button sizes */
   .btn-xs {
-    @apply px-2.5 py-1 text-xs min-h-[1.75rem];
+    @apply px-2 py-1 text-xs;
   }
 
   .btn-sm {
-    @apply px-3 py-1.5 text-sm min-h-[2rem];
+    @apply px-3 py-1.5 text-sm;
   }
 
-  .btn-md, .btn {
-    @apply px-4 py-2.5 text-sm min-h-[2.5rem];
+  .btn, .btn-md {
+    @apply px-4 py-2 text-sm;
   }
 
   .btn-lg {
-    @apply px-6 py-3.5 text-base min-h-[3rem];
+    @apply px-6 py-3 text-base;
   }
 
-  .btn-xl {
-    @apply px-8 py-4 text-lg min-h-[3.5rem];
-  }
-
-  /* Button Variants */
-  .btn-outline {
-    @apply bg-transparent border-2;
-  }
-
-  .btn-outline.btn-primary {
-    @apply border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white;
-  }
-
-  .btn-outline.btn-secondary {
-    @apply border-neutral-300 text-neutral-700 hover:bg-neutral-100;
-  }
-
-  .btn-ghost {
-    @apply bg-transparent border-0 shadow-none;
-  }
-
-  .btn-ghost.btn-primary {
-    @apply text-primary-600 hover:bg-primary-50;
-  }
-
-  .btn-ghost.btn-secondary {
-    @apply text-neutral-600 hover:bg-neutral-100;
-  }
-
-  /* Icon Buttons */
-  .btn-icon {
-    @apply rounded-full aspect-square p-0 justify-center;
-  }
-
-  .btn-icon.btn-sm {
-    @apply w-8 h-8;
-  }
-
-  .btn-icon.btn-md {
-    @apply w-10 h-10;
-  }
-
-  .btn-icon.btn-lg {
-    @apply w-12 h-12;
-  }
-
-  /* Cards */
+  /* Cards professionali con dark mode */
   .card {
-    @apply bg-white rounded-xl border border-neutral-200 shadow-sm hover:shadow-md transition-shadow duration-200;
+    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md transition-all duration-200;
   }
 
   .card-header {
-    @apply px-6 py-4 border-b border-neutral-200 bg-neutral-50 rounded-t-xl;
+    @apply px-6 py-4 border-b border-gray-200 dark:border-gray-700 rounded-t-lg;
   }
 
   .card-body {
@@ -246,144 +109,147 @@
   }
 
   .card-footer {
-    @apply px-6 py-4 border-t border-neutral-200 bg-neutral-50 rounded-b-xl;
+    @apply px-6 py-4 border-t border-gray-200 dark:border-gray-700 rounded-b-lg bg-gray-50 dark:bg-gray-750;
   }
 
-  /* Stats Cards */
+  /* Statistics cards per dashboard e KPI */
   .stat-card {
-    @apply card p-6 hover:scale-[1.02] transition-transform duration-200;
+    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6;
+  }
+
+  /* DaisyUI overrides per dark mode */
+  .table {
+    @apply bg-white dark:bg-gray-800;
+  }
+  
+  .table-zebra tbody tr:nth-child(even) {
+    @apply bg-gray-50 dark:bg-gray-700;
+  }
+
+  .card {
+    @apply shadow-sm dark:shadow-gray-800/50;
+  }
+  
+  .card-header {
+    @apply text-gray-900 dark:text-gray-100;
+  }
+  
+  .card-body {
+    @apply text-gray-900 dark:text-gray-100;
   }
 
   .stat-icon {
-    @apply w-12 h-12 rounded-xl flex items-center justify-center;
+    @apply flex items-center justify-center w-12 h-12 rounded-lg;
   }
 
-  /* Navigation */
-  .nav-item {
-    @apply inline-flex items-center px-4 py-3 text-sm font-medium transition-all duration-200 relative;
-  }
-
-  .nav-item.active {
-    @apply text-primary-600 bg-primary-50 border-b-2 border-primary-600;
-  }
-
-  .nav-item:not(.active) {
-    @apply text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50;
-  }
-
-  /* Form Inputs */
+  /* Form inputs con dark mode automatico */
   .form-input {
-    @apply w-full px-3 py-2.5 border border-neutral-300 rounded-lg bg-white shadow-sm transition-colors duration-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 focus:ring-opacity-20;
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200;
   }
 
   .form-label {
-    @apply block text-sm font-medium text-neutral-700 mb-2;
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2;
+  }
+
+  .form-select {
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200;
   }
 
   .form-error {
-    @apply text-red-600 text-sm mt-1;
+    @apply text-red-600 dark:text-red-400 text-sm mt-1;
   }
 
-  /* Tables */
+  /* Tables con dark mode */
   .table {
-    @apply w-full divide-y divide-neutral-200 overflow-hidden;
+    @apply w-full text-sm;
   }
 
   .table th {
-    @apply px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider bg-neutral-50;
+    @apply px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700;
   }
 
   .table td {
-    @apply px-6 py-4 whitespace-nowrap text-sm text-neutral-900;
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700;
   }
 
   .table tbody tr {
-    @apply hover:bg-neutral-50 transition-colors duration-150;
+    @apply hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150;
   }
 
-  /* Badges */
+  /* Badges con dark mode */
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
 
+  .badge-primary {
+    @apply bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200;
+  }
+
   .badge-success {
-    @apply bg-secondary-100 text-secondary-800;
+    @apply bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200;
   }
 
   .badge-danger {
-    @apply bg-red-100 text-red-800;
+    @apply bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200;
   }
 
   .badge-warning {
-    @apply bg-yellow-100 text-yellow-800;
+    @apply bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200;
   }
 
-  .badge-info {
-    @apply bg-primary-100 text-primary-800;
+  .badge-secondary {
+    @apply bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300;
   }
 
-  /* Alerts */
+  /* Alerts con dark mode */
   .alert {
-    @apply p-4 rounded-lg border-l-4 shadow-sm;
+    @apply p-4 rounded-lg border-l-4;
   }
 
   .alert-success {
-    @apply bg-secondary-50 border-secondary-500 text-secondary-800;
+    @apply bg-green-50 dark:bg-green-900/20 border-green-400 text-green-800 dark:text-green-200;
   }
 
   .alert-error {
-    @apply bg-red-50 border-red-500 text-red-800;
+    @apply bg-red-50 dark:bg-red-900/20 border-red-400 text-red-800 dark:text-red-200;
   }
 
   .alert-warning {
-    @apply bg-yellow-50 border-yellow-500 text-yellow-800;
+    @apply bg-amber-50 dark:bg-amber-900/20 border-amber-400 text-amber-800 dark:text-amber-200;
   }
 
   .alert-info {
-    @apply bg-primary-50 border-primary-500 text-primary-800;
+    @apply bg-blue-50 dark:bg-blue-900/20 border-blue-400 text-blue-800 dark:text-blue-200;
   }
 
-  /* Loading Spinner */
+  /* Navigation con dark mode */
+  .nav-link {
+    @apply flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700;
+  }
+
+  .nav-link-active {
+    @apply bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30;
+  }
+
+  /* Dropdown items con dark mode */
+  .dropdown-item {
+    @apply flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-200 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700;
+  }
+
+  .dropdown-item-active {
+    @apply bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30;
+  }
+
+  /* Spinner */
   .spinner {
-    @apply animate-spin rounded-full border-2 border-neutral-300 border-t-primary-600;
-  }
-
-  /* Modal */
-  .modal-backdrop {
-    @apply fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center p-4;
-  }
-
-  .modal-content {
-    @apply bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100 opacity-100;
-  }
-
-  .modal-header {
-    @apply sticky top-0 bg-white border-b border-neutral-200 px-6 py-4 rounded-t-xl;
+    @apply animate-spin rounded-full border-2 border-gray-300 dark:border-gray-600 border-t-blue-600;
   }
 }
 
-/* Utility Classes */
+/* ==========================================
+   UTILITÀ E ANIMAZIONI
+   ========================================== */
 @layer utilities {
-  .glass {
-    @apply bg-white/80 backdrop-blur-md border-white/20;
-  }
-
-  .gradient-primary {
-    background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
-  }
-
-  .gradient-success {
-    background: linear-gradient(135deg, var(--secondary-500) 0%, var(--secondary-600) 100%);
-  }
-
-  .text-gradient {
-    background: linear-gradient(135deg, var(--primary-600) 0%, var(--secondary-600) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* Animations */
   .fade-in {
     animation: fadeIn 0.3s ease-in-out;
   }
@@ -391,20 +257,12 @@
   .slide-up {
     animation: slideUp 0.3s ease-out;
   }
-
-  .bounce-subtle {
-    animation: bounceSubtle 0.6s ease-out;
-  }
 }
 
-/* Animations */
+/* Animazioni */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {
@@ -418,28 +276,6 @@
   }
 }
 
-@keyframes bounceSubtle {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-4px);
-  }
-  60% {
-    transform: translateY(-2px);
-  }
-}
-
-/* Dark mode support (for future implementation) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-primary: var(--neutral-900);
-    --bg-secondary: var(--neutral-800);
-    --text-primary: var(--neutral-100);
-    --text-secondary: var(--neutral-300);
-  }
-}
-
 /* Print styles */
 @media print {
   .no-print {
@@ -447,6 +283,6 @@
   }
   
   .card {
-    @apply border border-neutral-300 shadow-none !important;
+    @apply border border-gray-300 shadow-none !important;
   }
 }

@@ -16,28 +16,28 @@
 
   function getErrorClasses(type: string) {
     switch (type) {
-      case 'error': return 'alert-error border-red-200 bg-red-50';
-      case 'warning': return 'alert-warning border-yellow-200 bg-yellow-50';
-      case 'info': return 'alert-info border-blue-200 bg-blue-50';
-      case 'success': return 'alert-success border-green-200 bg-green-50';
-      default: return 'border-gray-200 bg-gray-50';
+      case 'error': return 'alert-error border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20';
+      case 'warning': return 'alert-warning border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20';
+      case 'info': return 'alert-info border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20';
+      case 'success': return 'alert-success border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20';
+      default: return 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800';
     }
   }
 
   function getIconClasses(type: string) {
     switch (type) {
-      case 'error': return 'text-red-500';
-      case 'warning': return 'text-yellow-500';
-      case 'info': return 'text-blue-500';
-      case 'success': return 'text-green-500';
-      default: return 'text-gray-500';
+      case 'error': return 'text-red-500 dark:text-red-400';
+      case 'warning': return 'text-yellow-500 dark:text-yellow-400';
+      case 'info': return 'text-blue-500 dark:text-blue-400';
+      case 'success': return 'text-green-500 dark:text-green-400';
+      default: return 'text-gray-500 dark:text-gray-400';
     }
   }
 </script>
 
 {#if errors.length > 0}
   <!-- Error Notifications Container -->
-  <div class="fixed top-4 right-4 z-50 space-y-2 max-w-md">
+  <div class="fixed top-4 right-4 z-50 space-y-2 w-80">
     {#each errors as error (error.id)}
       <div 
         class="alert {getErrorClasses(error.type)} shadow-lg border-l-4 animate-in slide-in-from-right duration-300"
@@ -54,15 +54,15 @@
           
           <!-- Content -->
           <div class="flex-1 min-w-0">
-            <h4 class="text-sm font-semibold text-gray-900 mb-1">
+            <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
               {error.title}
             </h4>
-            <p class="text-sm text-gray-700 mb-2">
+            <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">
               {error.message}
             </p>
             
             <!-- Timestamp -->
-            <div class="flex items-center justify-between text-xs text-gray-500">
+            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
               <span>
                 {error.timestamp.toLocaleTimeString('it-IT', { 
                   hour: '2-digit', 
@@ -73,7 +73,7 @@
               <!-- Details toggle (if present) -->
               {#if error.details}
                 <button 
-                  class="text-blue-500 hover:text-blue-700 underline"
+                  class="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline"
                   on:click={() => {
                     const detailsEl = document.getElementById(`error-details-${error.id}`);
                     if (detailsEl) {
@@ -88,7 +88,7 @@
             
             <!-- Details (collapsible) -->
             {#if error.details}
-              <div id="error-details-{error.id}" class="hidden mt-2 p-2 bg-gray-100 rounded text-xs text-gray-600 font-mono">
+              <div id="error-details-{error.id}" class="hidden mt-2 p-2 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-300 font-mono">
                 <pre class="whitespace-pre-wrap">{error.details}</pre>
               </div>
             {/if}
@@ -96,11 +96,11 @@
           
           <!-- Close Button -->
           <button
-            class="flex-shrink-0 ml-2 p-1 hover:bg-gray-200 rounded-full transition-colors"
+            class="flex-shrink-0 ml-2 p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors"
             on:click={() => errorHandler.removeError(error.id)}
             aria-label="Chiudi notifica"
           >
-            <Icon name="x" class="w-4 h-4 text-gray-400 hover:text-gray-600" />
+            <Icon name="x" class="w-4 h-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" />
           </button>
         </div>
       </div>

@@ -17,25 +17,11 @@
       description: 'Vista aggregata di tutti i committenti'
     },
     {
-      type: 'dropdown',
-      label: 'Committenti',
+      href: '/auth/admin/committenti',
+      label: 'Gestione Committenti',
       icon: 'building-office',
-      description: 'Gestione clienti/committenti',
-      items: [
-        {
-          href: '/auth/committenti',
-          label: 'Lista Committenti',
-          icon: 'list-bullet',
-          description: 'Visualizza tutti i committenti'
-        },
-        {
-          href: '/auth/admin/committenti',
-          label: 'Gestione Admin',
-          icon: 'cog-6-tooth',
-          description: 'CRUD completo e operazioni avanzate',
-          adminOnly: true
-        }
-      ]
+      description: 'CRUD completo committenti',
+      adminOnly: true
     },
     {
       type: 'dropdown',
@@ -57,9 +43,9 @@
         },
         {
           href: '/auth/fornitori',
-          label: 'Fornitori',
+          label: 'Clienti/Fornitori',
           icon: 'truck',
-          description: 'Anagrafica fornitori per committenti'
+          description: 'Anagrafica clienti e fornitori per committenti'
         },
         {
           href: '/auth/magazzini',
@@ -246,53 +232,7 @@
           
           <nav class="flex items-center gap-1">
             {#each mainMenu as item}
-              {#if item.type === 'dropdown' && item.label === 'Committenti'}
-                <div class="relative committenti-menu-container">
-                  <button 
-                    on:click={() => showCommittentiMenu = !showCommittentiMenu}
-                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors {isDropdownActive(item.items) ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'}"
-                    title={item.description}
-                  >
-                    <Icon name={item.icon} class="w-4 h-4" />
-                    <span class="hidden md:inline">{item.label}</span>
-                    <Icon name="chevron-down" class="w-3 h-3 ml-1 transition-transform {showCommittentiMenu ? 'rotate-180' : ''}" />
-                  </button>
-                  
-                  {#if showCommittentiMenu}
-                    <div class="absolute left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-neutral-200 dark:border-gray-700 py-2 z-50">
-                      {#each item.items as subItem}
-                        {#if subItem.type === 'separator'}
-                          <div class="border-t border-neutral-200 dark:border-gray-700 my-2"></div>
-                        {:else}
-                          <a 
-                            href={subItem.adminOnly && $page.data.user?.ruolo !== 'super_admin' ? '#' : subItem.href}
-                            class="flex items-center gap-3 px-4 py-3 text-sm transition-colors {isActive(subItem.href) ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'} {subItem.adminOnly && $page.data.user?.ruolo !== 'super_admin' ? 'cursor-not-allowed opacity-50' : ''}"
-                            title={subItem.adminOnly && $page.data.user?.ruolo !== 'super_admin' ? 'Accesso riservato ai super admin' : subItem.description}
-                            on:click={(e) => {
-                              if (subItem.adminOnly && $page.data.user?.ruolo !== 'super_admin') {
-                                e.preventDefault();
-                              } else {
-                                showCommittentiMenu = false;
-                              }
-                            }}
-                          >
-                            <Icon name={subItem.icon} class="w-4 h-4" />
-                            <div class="flex-1">
-                              <div class="font-medium">{subItem.label}</div>
-                              <div class="text-xs text-neutral-500 dark:text-gray-400 mt-0.5">{subItem.description}</div>
-                              {#if subItem.adminOnly}
-                                <span class="badge {$page.data.user?.ruolo === 'super_admin' ? 'badge-warning' : 'badge-secondary'} text-xs mt-1">
-                                  {$page.data.user?.ruolo === 'super_admin' ? 'Admin' : 'Solo Admin'}
-                                </span>
-                              {/if}
-                            </div>
-                          </a>
-                        {/if}
-                      {/each}
-                    </div>
-                  {/if}
-                </div>
-              {:else if item.type === 'dropdown' && item.label === 'Anagrafiche'}
+              {#if item.type === 'dropdown' && item.label === 'Anagrafiche'}
                 <div class="relative anagrafiche-menu-container">
                   <button 
                     on:click={() => showAnagraficheMenu = !showAnagraficheMenu}
@@ -329,9 +269,14 @@
                 </div>
               {:else}
                 <a 
-                  href={item.href}
-                  class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors {isActive(item.href) ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'}"
-                  title={item.description}
+                  href={item.adminOnly && $page.data.user?.ruolo !== 'super_admin' ? '#' : item.href}
+                  class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors {isActive(item.href) ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'} {item.adminOnly && $page.data.user?.ruolo !== 'super_admin' ? 'cursor-not-allowed opacity-50' : ''}"
+                  title={item.adminOnly && $page.data.user?.ruolo !== 'super_admin' ? 'Accesso riservato ai super admin' : item.description}
+                  on:click={(e) => {
+                    if (item.adminOnly && $page.data.user?.ruolo !== 'super_admin') {
+                      e.preventDefault();
+                    }
+                  }}
                 >
                   <Icon name={item.icon} class="w-4 h-4" />
                   <span class="hidden md:inline">{item.label}</span>

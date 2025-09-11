@@ -1,6 +1,7 @@
 // @ts-nocheck
 import type { PageServerLoad, Actions } from './$types';
 import db from '$lib/server/database';
+import { createAuditTrackerForAction } from '$lib/server/helpers/auditHelper';
 import { error, fail, redirect } from '@sveltejs/kit';
 
 export const load = async ({ params, url }: Parameters<PageServerLoad>[0]) => {
@@ -79,8 +80,10 @@ export const load = async ({ params, url }: Parameters<PageServerLoad>[0]) => {
       ORDER BY data_cambio DESC
     `).all(ordine_id);
 
-    // Stati disponibili per le transizioni
-    const stati_disponibili = ['NUOVO', 'CONFERMATO', 'IN_PREPARAZIONE', 'PRONTO', 'SPEDITO', 'CONSEGNATO', 'ANNULLATO', 'RESO'];
+    // Stati disponibili per le transizioni basati sul tipo ordine
+    const stati_disponibili = ordine.tipo_ordine === 'INBOUND' 
+      ? ['NUOVO', 'IN_PREPARAZIONE', 'CONSEGNATO', 'ANNULLATO']
+      : ['BOZZA', 'NUOVO', 'CONFERMATO', 'IN_PREPARAZIONE', 'PRONTO', 'SPEDITO', 'CONSEGNATO', 'ANNULLATO', 'RESO'];
     
     // Corrieri disponibili
     const corrieri_disponibili = ['DHL', 'UPS', 'FedEx', 'BRT', 'GLS', 'SDA', 'TNT', 'Bartolini'];
@@ -148,7 +151,7 @@ export const load = async ({ params, url }: Parameters<PageServerLoad>[0]) => {
 
 export const actions = {
   // Azione per aggiornare lo stato dell'ordine
-  updateStatus: async ({ request, params, url }: import('./$types').RequestEvent) => {
+  updateStatus: async ({ request, params, url, cookies }: import('./$types').RequestEvent) => {
     try {
       const formData = await request.formData();
       const ordine_id = parseInt(params.id);
@@ -209,6 +212,40 @@ export const actions = {
       });
 
       transaction();
+
+      // Log audit per aggiornamento stato ordine
+      const tracker = createAuditTrackerForAction(request, cookies);
+      if (tracker) {
+        // Recupera dati ordine per audit
+        const ordineUpdated = db.prepare(`
+          SELECT numero_ordine, cliente_fornitore FROM ordini 
+          WHERE id = ? AND committente_id = ?
+        `).get(ordine_id, committente_id);
+
+        await tracker.logOperation({
+          table: 'ordini',
+          operation: 'UPDATE',
+          description: `Aggiornato stato ordine ${ordineUpdated?.numero_ordine}: ${stato_precedente} → ${nuovo_stato}`,
+          module: 'ORDINI',
+          functionality: 'update_order_status',
+          importance: 'ALTA',
+          entities_involved: { 
+            ordine_id: ordine_id,
+            numero_ordine: ordineUpdated?.numero_ordine,
+            committente_id: committente_id,
+            cliente_fornitore: ordineUpdated?.cliente_fornitore
+          },
+          data_before: {
+            stato: stato_precedente
+          },
+          data_after: {
+            stato: nuovo_stato,
+            corriere: corriere,
+            tracking_number: tracking_number,
+            note: note
+          }
+        });
+      }
 
       return {
         success: 'Stato ordine aggiornato con successo'

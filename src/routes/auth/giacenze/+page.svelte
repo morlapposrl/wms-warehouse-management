@@ -320,46 +320,47 @@
 
   <!-- Statistiche Globali -->
   <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border">
+    <div class="stat-card">
       <div class="text-2xl font-bold text-blue-600">{data.statistiche.totale_giacenze || 0}</div>
       <div class="text-sm text-gray-600 dark:text-gray-400">Giacenze Totali</div>
     </div>
-    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border">
+    <div class="stat-card">
       <div class="text-2xl font-bold text-purple-600">{data.statistiche.totale_committenti || 0}</div>
       <div class="text-sm text-gray-600 dark:text-gray-400">Committenti</div>
     </div>
-    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border">
+    <div class="stat-card">
       <div class="text-2xl font-bold text-green-600">{data.statistiche.totale_prodotti || 0}</div>
       <div class="text-sm text-gray-600 dark:text-gray-400">Prodotti</div>
     </div>
-    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border">
+    <div class="stat-card">
       <div class="text-2xl font-bold text-yellow-600">{data.statistiche.totale_udc || 0}</div>
       <div class="text-sm text-gray-600 dark:text-gray-400">UDC Totali</div>
     </div>
-    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border">
+    <div class="stat-card">
       <div class="text-2xl font-bold text-orange-600">{data.statistiche.prodotti_distribuiti || 0}</div>
       <div class="text-sm text-gray-600 dark:text-gray-400">Multi-UDC</div>
     </div>
-    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border">
+    <div class="stat-card">
       <div class="text-2xl font-bold text-indigo-600">{formatCurrency(data.statistiche.valore_totale_magazzino || 0)}</div>
       <div class="text-sm text-gray-600 dark:text-gray-400">Valore Totale</div>
     </div>
   </div>
 
   <!-- Filtri -->
-  <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border mb-6">
-    <div class="flex items-center justify-between mb-3">
-      <h3 class="text-md font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-        <span class="text-lg">🔍</span>
-        <span>Filtri</span>
-        {#if isFromProdotti}
-          <span class="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs font-normal">
-            🔒 Filtri limitati - Vista prodotto specifico
-          </span>
-        {/if}
-      </h3>
-      
-    </div>
+  <div class="card mb-6">
+    <div class="card-body">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-md font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+          <span class="text-lg">🔍</span>
+          <span>Filtri</span>
+          {#if isFromProdotti}
+            <span class="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs font-normal">
+              🔒 Filtri limitati - Vista prodotto specifico
+            </span>
+          {/if}
+        </h3>
+        
+      </div>
     
     <div class="flex items-end gap-2 flex-nowrap">
       <!-- Ricerca -->
@@ -440,11 +441,13 @@
         </div>
       </div>
     {/if}
+    </div>
   </div>
 
   <!-- Tabella Giacenze Globali con UDC -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow border overflow-hidden">
-    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+  <div class="card">
+    <div class="overflow-x-auto">
+      <table class="table table-zebra w-full">
       <thead class="bg-gray-50 dark:bg-gray-800">
         <tr>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -619,6 +622,7 @@
         {/each}
       </tbody>
     </table>
+    </div>
   </div>
 
   {#if data.giacenze.length === 0}

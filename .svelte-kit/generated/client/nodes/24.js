@@ -1,1 +1,1 @@
-export { default as component } from "../../../../src/routes/auth/giacenze/+page.svelte";
+export { default as component } from "../../../../src/routes/auth/tipi-udc/+page.svelte";

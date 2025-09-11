@@ -1,349 +1,246 @@
 // @ts-nocheck
-import type { PageServerLoad, Actions } from './$types.js';
-import database from '$lib/server/database.js';
-import { error } from '@sveltejs/kit';
+import type { PageServerLoad, Actions } from './$types';
+import db from '$lib/server/database';
+import { createAuditTrackerForAction } from '$lib/server/helpers/auditHelper';
+import { wavePlanningRepository } from '$lib/server/repositories/wavePlanningRepository';
+import { WaveOptimizationService } from '$lib/server/services/waveOptimizationService';
+import { fail } from '@sveltejs/kit';
 
-export const load = async ({ url, locals }: Parameters<PageServerLoad>[0]) => {
+export const load = async ({ url }: Parameters<PageServerLoad>[0]) => {
   try {
-    // Ordini pronti per picking (con priorità)
-    const ordiniPronti = database.prepare(`
-      SELECT DISTINCT
-        om.id,
-        om.order_number,
-        om.customer_name,
-        om.service_level,
-        om.promised_date,
-        om.total_amount,
-        om.status,
-        COUNT(od.id) as righe_ordine,
-        SUM(od.quantita) as pezzi_totali,
-        CASE 
-          WHEN om.service_level = 'PRIME' THEN 1
-          WHEN om.service_level = 'STANDARD' THEN 2  
-          ELSE 3
-        END as priorita,
-        CASE
-          WHEN om.promised_date < datetime('now', '+1 day') THEN 'URGENTE'
-          WHEN om.promised_date < datetime('now', '+2 days') THEN 'NORMALE'
-          ELSE 'BASSA'
-        END as urgenza
-      FROM ordini_master om
-      JOIN ordini_dettaglio od ON om.id = od.order_id
-      JOIN giacenze_logiche gl ON od.sku_code = gl.sku_code AND od.committente_id = gl.committente_id
-      WHERE om.status IN ('PAYMENT_CONFIRMED', 'PENDING_PICKING')
-        AND od.quantita <= gl.quantita_disponibile
-        AND om.wave_id IS NULL
-      GROUP BY om.id
-      ORDER BY priorita ASC, om.promised_date ASC
+    // Filtri dalla query string
+    const committente_filter = url.searchParams.get('committente') || '';
+    const stato_filter = url.searchParams.get('stato') || '';
+
+    // Carica tutte le wave con filtri
+    const waves = wavePlanningRepository.getAllWaves(
+      committente_filter ? parseInt(committente_filter) : undefined
+    );
+
+    // Filtra per stato se specificato
+    const filteredWaves = stato_filter 
+      ? waves.filter(w => w.stato === stato_filter)
+      : waves;
+
+    // Carica committenti per filtro
+    const committenti = db.prepare(`
+      SELECT id, ragione_sociale, codice 
+      FROM committenti 
+      WHERE stato = 'attivo'
+      ORDER BY ragione_sociale
     `).all();
 
-    // Wave attive in corso
-    const waveAttive = database.prepare(`
-      SELECT
-        wave_id,
-        COUNT(DISTINCT id) as ordini_count,
-        SUM(total_amount) as valore_totale,
-        MIN(promised_date) as prima_consegna,
-        MAX(promised_date) as ultima_consegna,
-        GROUP_CONCAT(DISTINCT service_level) as livelli_servizio,
-        CASE
-          WHEN COUNT(CASE WHEN timestamp_fine IS NULL THEN 1 END) > 0 AND COUNT(CASE WHEN timestamp_fine IS NOT NULL THEN 1 END) > 0 THEN 'IN_CORSO'
-          WHEN COUNT(CASE WHEN timestamp_fine IS NOT NULL THEN 1 END) = COUNT(mov_id) AND COUNT(mov_id) > 0 THEN 'COMPLETATA'
-          ELSE 'ASSEGNATA'
-        END as status_wave
-      FROM (
-        SELECT
-          om.wave_id,
-          om.id,
-          om.total_amount,
-          om.promised_date,
-          om.service_level,
-          mo.id as mov_id,
-          mo.timestamp_fine
-        FROM ordini_master om
-        LEFT JOIN movimenti_ottimizzati mo ON om.wave_id = mo.wave_id
-        WHERE om.wave_id IS NOT NULL
-      )
-      GROUP BY wave_id
-      ORDER BY prima_consegna ASC
-    `).all();
-
-    // Statistiche magazzino per wave planning
-    const statsUbicazioni = database.prepare(`
-      SELECT 
-        u.zona_velocita,
-        COUNT(DISTINCT u.id) as ubicazioni_totali,
-        COUNT(DISTINCT gf.ubicazione_id) as ubicazioni_occupate,
-        ROUND(AVG(u.coordinata_x), 1) as centro_x,
-        ROUND(AVG(u.coordinata_y), 1) as centro_y,
-        SUM(gf.quantita_totale) as pezzi_totali
-      FROM ubicazioni u
-      LEFT JOIN giacenze_fisiche gf ON u.id = gf.ubicazione_id
-      GROUP BY u.zona_velocita
-      ORDER BY 
-        CASE u.zona_velocita 
-          WHEN 'HOT' THEN 1
-          WHEN 'WARM' THEN 2 
-          WHEN 'COLD' THEN 3
-        END
-    `).all();
-
-    // Operatori disponibili
-    const operatori = database.prepare(`
-      SELECT 
-        id,
-        nome,
-        cognome,
-        specializzazione,
-        COALESCE(
-          (SELECT COUNT(*) FROM movimenti_ottimizzati 
-           WHERE operatore_id = utenti.id 
-             AND DATE(timestamp_inizio) = DATE('now')
-             AND timestamp_fine IS NULL), 0
-        ) as movimenti_attivi
+    // Carica operatori per assegnazione
+    const operatori = db.prepare(`
+      SELECT id, nome, email 
       FROM utenti 
-      WHERE ruolo IN ('operatore_magazzino', 'team_leader')
-        AND attivo = 1
-      ORDER BY movimenti_attivi ASC, specializzazione ASC
+      WHERE attivo = 1 
+      ORDER BY nome
     `).all();
+
+    // Statistiche globali wave
+    const stats = db.prepare(`
+      SELECT 
+        COUNT(*) as totale_waves,
+        COUNT(CASE WHEN stato = 'PIANIFICATA' THEN 1 END) as pianificate,
+        COUNT(CASE WHEN stato = 'IN_CORSO' THEN 1 END) as in_corso,
+        COUNT(CASE WHEN stato = 'COMPLETATA' THEN 1 END) as completate,
+        COUNT(CASE WHEN stato = 'ANNULLATA' THEN 1 END) as annullate,
+        SUM(totale_ordini) as ordini_totali,
+        SUM(totale_picks) as picks_totali,
+        AVG(tempo_stimato_minuti) as tempo_medio_minuti,
+        SUM(distanza_stimata_metri) as distanza_totale_metri
+      FROM wave_planning
+      ${committente_filter ? 'WHERE (committente_id = ? OR committente_id IS NULL)' : ''}
+    `);
+
+    const statistics = committente_filter 
+      ? stats.get(parseInt(committente_filter))
+      : stats.get();
+
+    // Ordini disponibili per nuove wave (solo quelli pronti)
+    const ordiniDisponibili = wavePlanningRepository.getOrdersForWaveCreation({
+      committente_id: committente_filter ? parseInt(committente_filter) : undefined,
+      priorita_minima: 1,
+      stato: ['NUOVO', 'CONFERMATO']
+    });
 
     return {
-      ordiniPronti,
-      waveAttive, 
-      statsUbicazioni,
-      operatori
+      waves: filteredWaves,
+      committenti,
+      operatori,
+      statistics,
+      ordiniDisponibili,
+      filters: {
+        committente_filter,
+        stato_filter
+      }
     };
-  } catch (err) {
-    console.error('Errore caricamento wave planning:', err);
-    throw error(500, 'Errore nel caricamento dei dati');
+
+  } catch (error) {
+    console.error('Errore caricamento wave planning:', error);
+    throw error;
   }
 };
 
 export const actions = {
-  // Crea una nuova wave
-  creaWave: async ({ request }: import('./$types').RequestEvent) => {
+  createWave: async ({ request, cookies }: import('./$types').RequestEvent) => {
     try {
-      const data = await request.formData();
-      const ordiniSelezionati = JSON.parse(data.get('ordini') as string);
-      const operatoreId = parseInt(data.get('operatore_id') as string);
-      const tipoWave = data.get('tipo_wave') as string;
+      const formData = await request.formData();
       
-      const waveId = `WAVE_${Date.now()}`;
+      const committente_id = formData.get('committente_id')?.toString();
+      const tipo_wave = formData.get('tipo_wave')?.toString() || 'BATCH_PICKING';
+      const max_ordini = parseInt(formData.get('max_ordini')?.toString() || '20');
+      const priorita_minima = parseInt(formData.get('priorita_minima')?.toString() || '1');
+      const data_da = formData.get('data_da')?.toString();
+      const data_a = formData.get('data_a')?.toString();
+      const operatore_id = formData.get('operatore_id')?.toString();
       
-      database.transaction(() => {
-        // Assegna wave agli ordini
-        const updateStmt = database.prepare(`
-          UPDATE ordini_master 
-          SET wave_id = ?, status = 'PICKING_IN_PROGRESS', updated_at = CURRENT_TIMESTAMP
-          WHERE id = ?
-        `);
-        
-        ordiniSelezionati.forEach((ordineId: number) => {
-          updateStmt.run(waveId, ordineId);
+      // Gestione ordini selezionati manualmente
+      const selected_orders = formData.getAll('selected_orders');
+      const selected_order_ids = selected_orders
+        .map(id => parseInt(id.toString()))
+        .filter(id => !isNaN(id));
+
+      // Validazione
+      if (!['BATCH_PICKING', 'ZONE_PICKING', 'DISCRETE_PICKING', 'WAVE_PICKING'].includes(tipo_wave)) {
+        return fail(400, {
+          error: 'Tipo wave non valido'
         });
+      }
 
-        // Crea movimenti di picking ottimizzati
-        const ordiniWave = database.prepare(`
-          SELECT od.*, p.descrizione_personalizzata as descrizione, gl.quantita_disponibile
-          FROM ordini_dettaglio od
-          JOIN ordini_master om ON od.order_id = om.id  
-          JOIN prodotti_committente_v2 p ON od.sku_code = p.sku_code AND od.committente_id = p.committente_id
-          JOIN giacenze_logiche gl ON od.sku_code = gl.sku_code AND od.committente_id = gl.committente_id
-          WHERE om.wave_id = ?
-          ORDER BY od.committente_id, od.sku_code
-        `).all(waveId);
+      // Validazione operatore obbligatorio
+      if (!operatore_id) {
+        return fail(400, {
+          error: 'Operatore obbligatorio per l\'assegnazione della wave'
+        });
+      }
 
-        // Raggruppa per SKU per ottimizzare i prelievi
-        const pickingTasks = new Map();
-        
-        ordiniWave.forEach(riga => {
-          const key = `${riga.committente_id}_${riga.sku_code}`;
-          if (pickingTasks.has(key)) {
-            pickingTasks.get(key).quantita_totale += riga.quantita;
-            pickingTasks.get(key).ordini.push(riga.order_id);
-          } else {
-            pickingTasks.set(key, {
-              ...riga,
-              quantita_totale: riga.quantita,
-              ordini: [riga.order_id]
-            });
+      // Validazione ordini selezionati (se presenti)
+      if (selected_order_ids.length === 0) {
+        return fail(400, {
+          error: 'Seleziona almeno un ordine per creare la wave'
+        });
+      }
+
+      // Crea wave ottimizzata con ordini specifici
+      const result = await WaveOptimizationService.createOptimizedWave({
+        committente_id: committente_id ? parseInt(committente_id) : undefined,
+        tipo_wave: tipo_wave as any,
+        max_ordini,
+        priorita_minima,
+        data_da: data_da || undefined,
+        data_a: data_a || undefined,
+        operatore_id: parseInt(operatore_id),
+        selected_order_ids: selected_order_ids.length > 0 ? selected_order_ids : undefined
+      });
+
+      // Log audit per creazione wave
+      const tracker = createAuditTrackerForAction(request, cookies);
+      if (tracker) {
+        await tracker.logOperation({
+          table: 'wave_planning',
+          operation: 'CREATE',
+          description: `Creata wave ${result.wave_number} con ${result.ordini_selezionati} ordini`,
+          module: 'WAVE_PLANNING',
+          functionality: 'create_wave',
+          importance: 'ALTA',
+          entities_involved: { 
+            wave_number: result.wave_number,
+            wave_id: result.wave_id,
+            committente_id: committente_id ? parseInt(committente_id) : undefined,
+            operatore_id: parseInt(operatore_id),
+            ordini_count: result.ordini_selezionati
+          },
+          data_after: {
+            tipo_wave,
+            max_ordini,
+            priorita_minima,
+            selected_order_ids
           }
         });
+      }
 
-        // Trova ubicazioni ottimali per picking
-        const movimentoStmt = database.prepare(`
-          INSERT INTO movimenti_ottimizzati 
-          (committente_id, sku_code, tipo_movimento, quantita, from_ubicazione_id, 
-           operatore_id, wave_id, ordine_id, note, timestamp_inizio)
-          VALUES (?, ?, 'PICK', ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-        `);
-
-        Array.from(pickingTasks.values()).forEach(task => {
-          // Trova ubicazione con più giacenza per questo SKU
-          const ubicazioneOttimale = database.prepare(`
-            SELECT gf.ubicazione_id, gf.quantita_totale,
-                   u.zona_velocita, u.coordinata_x, u.coordinata_y
-            FROM giacenze_fisiche gf
-            JOIN ubicazioni u ON gf.ubicazione_id = u.id
-            JOIN giacenze_ownership go ON gf.ubicazione_id = go.ubicazione_id 
-                                       AND gf.sku_code = go.sku_code
-            WHERE gf.sku_code = ? 
-              AND go.committente_id = ?
-              AND gf.quantita_totale >= ?
-            ORDER BY u.zona_velocita = 'HOT' DESC, gf.quantita_totale DESC
-            LIMIT 1
-          `).get(task.sku_code, task.committente_id, task.quantita_totale);
-
-          if (ubicazioneOttimale) {
-            movimentoStmt.run(
-              task.committente_id,
-              task.sku_code, 
-              task.quantita_totale,
-              ubicazioneOttimale.ubicazione_id,
-              operatoreId,
-              waveId,
-              task.ordini[0], // Ordine principale
-              `Picking wave per ${task.ordini.length} ordini: ${task.ordini.join(', ')}`
-            );
-          }
-        });
-
-        // Riserva le giacenze
-        const riservStmt = database.prepare(`
-          UPDATE giacenze_logiche 
-          SET quantita_riservata = quantita_riservata + ?,
-              quantita_disponibile = quantita_disponibile - ?
-          WHERE committente_id = ? AND sku_code = ?
-        `);
-
-        Array.from(pickingTasks.values()).forEach(task => {
-          riservStmt.run(task.quantita_totale, task.quantita_totale, 
-                        task.committente_id, task.sku_code);
-        });
-      })();
-
-      return { 
-        success: true, 
-        waveId,
-        message: `Wave ${waveId} creata con successo per ${ordiniSelezionati.length} ordini`
+      return {
+        success: `Wave ${result.wave_number} creata con successo! ${result.ordini_selezionati} ordini inclusi.`
       };
 
-    } catch (err) {
-      console.error('Errore creazione wave:', err);
-      return { success: false, error: 'Errore nella creazione della wave' };
+    } catch (error) {
+      console.error('Errore creazione wave:', error);
+      return fail(500, {
+        error: error instanceof Error ? error.message : 'Errore nella creazione della wave'
+      });
     }
   },
 
-  // Ottimizza percorso wave
-  ottimizzaPercorso: async ({ request }: import('./$types').RequestEvent) => {
+  updateWaveStatus: async ({ request, cookies }: import('./$types').RequestEvent) => {
     try {
-      const data = await request.formData();
-      const waveId = data.get('wave_id') as string;
+      const formData = await request.formData();
       
-      // Algoritmo di ottimizzazione percorso (Nearest Neighbor semplificato)
-      const movimenti = database.prepare(`
-        SELECT mo.id, mo.from_ubicazione_id, u.coordinata_x, u.coordinata_y,
-               mo.sku_code, mo.quantita, COALESCE(p.descrizione, mo.sku_code) as descrizione
-        FROM movimenti_ottimizzati mo
-        JOIN ubicazioni u ON mo.from_ubicazione_id = u.id
-        LEFT JOIN prodotti p ON mo.sku_code = p.sku_code AND mo.committente_id = p.committente_id
-        WHERE mo.wave_id = ? AND mo.timestamp_fine IS NULL
-        ORDER BY u.zona_velocita = 'HOT' DESC, u.coordinata_x, u.coordinata_y
-      `).all(waveId);
+      const wave_id = parseInt(formData.get('wave_id')?.toString() || '0');
+      const nuovo_stato = formData.get('nuovo_stato')?.toString();
 
-      // Calcola percorso ottimizzato
-      const percorsoOttimizzato = ottimizzaPercorsoPickering(movimenti);
-      
-      // Aggiorna sequenza movimenti
-      database.transaction(() => {
-        const updateStmt = database.prepare(`
-          UPDATE movimenti_ottimizzati 
-          SET note = COALESCE(note, '') || ' | Sequenza: ' || ?
-          WHERE id = ?
-        `);
-        
-        percorsoOttimizzato.forEach((movimento, index) => {
-          updateStmt.run(index + 1, movimento.id);
+      if (!wave_id || !nuovo_stato) {
+        return fail(400, {
+          error: 'Dati mancanti per aggiornamento'
         });
-      })();
+      }
 
-      return { 
-        success: true,
-        percorso: percorsoOttimizzato,
-        distanzaTotale: calcolaDistanzaTotale(percorsoOttimizzato)
+      // Recupera dati precedenti per audit
+      const oldWave = wavePlanningRepository.getWaveById(wave_id);
+      if (!oldWave) {
+        return fail(404, { error: 'Wave non trovata' });
+      }
+
+      // Determina timestamp in base al nuovo stato
+      let data_inizio: string | undefined;
+      let data_fine: string | undefined;
+
+      if (nuovo_stato === 'IN_CORSO') {
+        data_inizio = new Date().toISOString();
+      } else if (nuovo_stato === 'COMPLETATA' || nuovo_stato === 'ANNULLATA') {
+        data_fine = new Date().toISOString();
+      }
+
+      // Aggiorna stato
+      wavePlanningRepository.updateWaveStatus(wave_id, nuovo_stato as any, data_inizio, data_fine);
+
+      // Log audit per aggiornamento wave
+      const tracker = createAuditTrackerForAction(request, cookies);
+      if (tracker) {
+        await tracker.logOperation({
+          table: 'wave_planning',
+          operation: 'UPDATE',
+          description: `Aggiornato stato wave ${oldWave.numero_wave}: ${oldWave.stato} → ${nuovo_stato}`,
+          module: 'WAVE_PLANNING',
+          functionality: 'update_wave_status',
+          importance: 'ALTA',
+          entities_involved: { 
+            wave_id: wave_id,
+            wave_number: oldWave.numero_wave
+          },
+          data_before: {
+            stato: oldWave.stato,
+            data_inizio: oldWave.data_inizio,
+            data_fine: oldWave.data_fine
+          },
+          data_after: {
+            stato: nuovo_stato,
+            data_inizio: data_inizio,
+            data_fine: data_fine
+          }
+        });
+      }
+
+      return {
+        success: `Wave aggiornata a stato: ${nuovo_stato}`
       };
 
-    } catch (err) {
-      console.error('Errore ottimizzazione percorso:', err);
-      return { success: false, error: 'Errore nell\'ottimizzazione del percorso' };
+    } catch (error) {
+      console.error('Errore aggiornamento wave:', error);
+      return fail(500, {
+        error: 'Errore nell\'aggiornamento della wave'
+      });
     }
   }
-};
-
-// Algoritmo Nearest Neighbor per ottimizzare percorso
-function ottimizzaPercorsoPickering(movimenti: any[]): any[] {
-  if (movimenti.length <= 1) return movimenti;
-  
-  const visitati = new Set();
-  const percorso = [];
-  
-  // Inizia dal punto più vicino all'entrata (0,0)
-  let corrente = movimenti.reduce((nearest, mov) => {
-    const dist = Math.sqrt(mov.coordinata_x ** 2 + mov.coordinata_y ** 2);
-    const nearestDist = Math.sqrt(nearest.coordinata_x ** 2 + nearest.coordinata_y ** 2);
-    return dist < nearestDist ? mov : nearest;
-  });
-  
-  visitati.add(corrente.id);
-  percorso.push(corrente);
-  
-  // Trova il prossimo punto più vicino
-  while (percorso.length < movimenti.length) {
-    let prossimoMinimo = null;
-    let distanzaMinima = Infinity;
-    
-    movimenti.forEach(mov => {
-      if (visitati.has(mov.id)) return;
-      
-      const distanza = Math.sqrt(
-        (mov.coordinata_x - corrente.coordinata_x) ** 2 +
-        (mov.coordinata_y - corrente.coordinata_y) ** 2
-      );
-      
-      if (distanza < distanzaMinima) {
-        distanzaMinima = distanza;
-        prossimoMinimo = mov;
-      }
-    });
-    
-    if (prossimoMinimo) {
-      visitati.add(prossimoMinimo.id);
-      percorso.push(prossimoMinimo);
-      corrente = prossimoMinimo;
-    }
-  }
-  
-  return percorso;
-}
-
-// Calcola distanza totale percorso
-function calcolaDistanzaTotale(percorso: any[]): number {
-  if (percorso.length <= 1) return 0;
-  
-  let distanzaTotale = 0;
-  
-  // Distanza dall'entrata al primo punto
-  distanzaTotale += Math.sqrt(
-    percorso[0].coordinata_x ** 2 + percorso[0].coordinata_y ** 2
-  );
-  
-  // Distanze tra punti consecutivi
-  for (let i = 1; i < percorso.length; i++) {
-    distanzaTotale += Math.sqrt(
-      (percorso[i].coordinata_x - percorso[i-1].coordinata_x) ** 2 +
-      (percorso[i].coordinata_y - percorso[i-1].coordinata_y) ** 2
-    );
-  }
-  
-  return Math.round(distanzaTotale * 10) / 10; // Arrotonda a 1 decimale
-};null as any as Actions;
+};;null as any as Actions;

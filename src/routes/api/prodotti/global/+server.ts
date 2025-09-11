@@ -13,6 +13,7 @@ export const GET: RequestHandler = async ({ url }) => {
         p.committente_id,
         p.codice,
         p.descrizione,
+        p.categoria_id,
         COALESCE(c.descrizione, 'Senza categoria') as categoria_descrizione,
         p.prezzo_acquisto,
         p.prezzo_vendita,

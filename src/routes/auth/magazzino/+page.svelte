@@ -5,6 +5,9 @@
   
   export let data;
   
+  // Modalità vista: 'table' (default) o 'map'
+  let viewMode: 'table' | 'map' = 'table';
+  
   let selectedUbicazione: any = null;
   let zoomLevel = 1;
   let panX = 0;
@@ -15,25 +18,48 @@
   // Initialize default bounds
   let magazzinoBounds = { minX: 0, maxX: 100, minY: 0, maxY: 100 };
   let ubicazioniFiltrate: any[] = [];
+  let ubicazioniMappa: any[] = [];
   
   // Calcola boundaries del magazzino
-  $: if (data && data.ubicazioni && data.ubicazioni.length > 0) {
-    magazzinoBounds = {
-      minX: Math.min(...data.ubicazioni.map(u => u.coordinata_x - u.larghezza_cm/200)),
-      maxX: Math.max(...data.ubicazioni.map(u => u.coordinata_x + u.larghezza_cm/200)),
-      minY: Math.min(...data.ubicazioni.map(u => u.coordinata_y - u.profondita_cm/200)),
-      maxY: Math.max(...data.ubicazioni.map(u => u.coordinata_y + u.profondita_cm/200))
-    };
+  $: {
+    if (data?.ubicazioni && data.ubicazioni.length > 0) {
+      try {
+        magazzinoBounds = {
+          minX: Math.min(...data.ubicazioni.map(u => u.coordinata_x - (u.larghezza_cm || 120)/200)),
+          maxX: Math.max(...data.ubicazioni.map(u => u.coordinata_x + (u.larghezza_cm || 120)/200)),
+          minY: Math.min(...data.ubicazioni.map(u => u.coordinata_y - (u.profondita_cm || 80)/200)),
+          maxY: Math.max(...data.ubicazioni.map(u => u.coordinata_y + (u.profondita_cm || 80)/200))
+        };
+      } catch (error) {
+        console.warn('Errore calcolo boundaries:', error);
+        magazzinoBounds = { minX: 0, maxX: 100, minY: 0, maxY: 100 };
+      }
+    }
   }
   
-  // Filtra ubicazioni in base ai filtri attivi
-  $: if (data && data.ubicazioni) {
-    ubicazioniFiltrate = data.ubicazioni.filter(ubicazione => {
-      if (data.filters && data.filters.zona && ubicazione.zona !== data.filters.zona) return false;
-      if (data.filters && data.filters.tipo && ubicazione.tipo !== data.filters.tipo) return false;
-      if (data.filters && data.filters.zona_velocita && ubicazione.zona_velocita !== data.filters.zona_velocita) return false;
-      return true;
-    });
+  // Usa le ubicazioni già filtrate dal server per la tabella
+  $: {
+    if (data?.ubicazioni) {
+      ubicazioniFiltrate = data.ubicazioni;
+    } else {
+      ubicazioniFiltrate = [];
+    }
+  }
+  
+  // Per la mappa usa tutte le ubicazioni con filtri client-side
+  $: {
+    if (data?.ubicazioniTutte) {
+      ubicazioniMappa = data.ubicazioniTutte.filter(ubicazione => {
+        if (data.filters?.zona && ubicazione.zona !== data.filters.zona) return false;
+        if (data.filters?.tipo && ubicazione.tipo !== data.filters.tipo) return false;
+        if (data.filters?.zona_velocita && ubicazione.zona_velocita !== data.filters.zona_velocita) return false;
+        return true;
+      });
+    } else if (data?.ubicazioni) {
+      ubicazioniMappa = data.ubicazioni;
+    } else {
+      ubicazioniMappa = [];
+    }
   }
   
   function selectUbicazione(ubicazione: any) {
@@ -154,16 +180,22 @@
 
   async function loadUbicazioneContent(ubicazioneId: number) {
     try {
+      console.log('🔍 Caricamento contenuto ubicazione:', ubicazioneId);
       const response = await fetch(`/api/ubicazioni/${ubicazioneId}/content`);
       if (response.ok) {
         const result = await response.json();
+        console.log('📦 Risposta API:', result);
+        console.log('📋 Content ricevuto:', result.content);
         ubicazioneContent = result.content || [];
+        console.log('✅ UbicazioneContent impostato:', ubicazioneContent);
         showContentModal = true;
       } else {
-        console.error('Failed to load content');
+        console.error('❌ Failed to load content, status:', response.status);
+        const errorText = await response.text();
+        console.error('❌ Error response:', errorText);
       }
     } catch (error) {
-      console.error('Error loading content:', error);
+      console.error('❌ Error loading content:', error);
     }
   }
 
@@ -407,10 +439,382 @@
 
 <svelte:window on:mouseup={handleMouseUp} on:mousemove={handleMouseMove} />
 
-<div class="flex h-screen bg-neutral-50">
+<div class="min-h-screen bg-neutral-50 dark:bg-gray-900">
   
-  <!-- Sidebar Controls -->
-  <div class="w-80 bg-white shadow-lg flex flex-col">
+  <!-- Header -->
+  <div class="bg-white dark:bg-gray-800 shadow-sm border-b">
+    <div class="w-full px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+            <span class="text-xl">🏭</span>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-neutral-900 dark:text-gray-100">Gestione Magazzino</h1>
+            <p class="text-sm text-neutral-600 dark:text-gray-400">Ubicazioni e contenuti</p>
+          </div>
+        </div>
+        
+        <!-- Toggle Vista -->
+        <div class="flex items-center gap-4">
+          <div class="flex items-center bg-neutral-100 rounded-lg p-1">
+            <button 
+              on:click={() => viewMode = 'table'}
+              class="px-3 py-1 text-sm font-medium rounded-md transition-colors {viewMode === 'table' ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm' : 'text-neutral-600 dark:text-gray-400 hover:text-neutral-900 dark:hover:text-gray-100'}"
+            >
+              📊 Tabella
+            </button>
+            <button 
+              on:click={() => viewMode = 'map'}
+              class="px-3 py-1 text-sm font-medium rounded-md transition-colors {viewMode === 'map' ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm' : 'text-neutral-600 dark:text-gray-400 hover:text-neutral-900 dark:hover:text-gray-100'}"
+            >
+              🗺️ Mappa
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{#if viewMode === 'table'}
+  <!-- Vista Tabellare -->
+  <div class="w-full px-4 sm:px-6 lg:px-8 py-6">
+    
+    <!-- Filtri Avanzati -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-6 p-4">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-md font-semibold text-neutral-900 dark:text-gray-100 flex items-center gap-2">
+          <span class="text-lg">🔍</span>
+          <span>Filtri</span>
+        </h2>
+        <button on:click={resetFilters} class="btn btn-secondary btn-sm">
+          🔄 Reset
+        </button>
+      </div>
+      
+      <form id="filtersForm">
+        <div class="flex items-end gap-2 flex-nowrap">
+          <!-- Ricerca Libera -->
+          <div class="min-w-24">
+            <input 
+              type="text" 
+              name="search" 
+              placeholder="Codice..."
+              value={data.filters?.search || ''}
+              class="form-input text-sm"
+            />
+          </div>
+          
+          <!-- Zona Filter -->
+          <div class="min-w-24">
+            <select name="zona" value={data.filters?.zona || ''} class="form-input text-sm">
+              <option value="">Tutte zone</option>
+              {#each data.zone || [] as zona}
+                <option value={zona.zona}>{zona.zona}</option>
+              {/each}
+            </select>
+          </div>
+          
+          <!-- Tipo Filter -->
+          <div class="min-w-32">
+            <select name="tipo" value={data.filters?.tipo || ''} class="form-input text-sm">
+              <option value="">Tutti tipi</option>
+              <option value="SCAFFALE">📦 Scaffale</option>
+              <option value="PALLET">🚚 Pallet</option>
+              <option value="FRIGO">🧊 Frigo</option>
+              <option value="CONGELATORE">❄️ Congelatore</option>
+            </select>
+          </div>
+          
+          <!-- Zona Velocità Filter -->
+          <div class="min-w-28">
+            <select name="zona_velocita" value={data.filters?.zona_velocita || ''} class="form-input text-sm">
+              <option value="">Tutte velocità</option>
+              <option value="HOT">🔥 Hot</option>
+              <option value="WARM">🌡️ Warm</option>
+              <option value="COLD">🧊 Cold</option>
+            </select>
+          </div>
+          
+          <!-- Stato -->
+          <div class="min-w-32">
+            <select name="stato" value={data.filters?.stato || ''} class="form-input text-sm">
+              <option value="">Tutti stati</option>
+              <option value="vuoto">🟢 Vuoto</option>
+              <option value="basso">🟡 Poco</option>
+              <option value="medio">🟠 Medio</option>
+              <option value="alto">🔴 Pieno</option>
+            </select>
+          </div>
+          
+          <!-- Azioni -->
+          <div class="flex gap-1">
+            <button type="button" on:click={applyFilters} class="btn btn-primary btn-sm px-2">
+              🔍
+            </button>
+            <button type="button" on:click={startCreationMode} class="btn btn-success btn-sm px-2">
+              ➕
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Statistiche Rapide -->
+    {#if data.statistiche}
+      <div class="grid grid-cols-1 md:grid-cols-6 gap-3 mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                <span class="text-sm">🏭</span>
+              </div>
+            </div>
+            <div class="ml-2">
+              <p class="text-xs font-medium text-neutral-600 dark:text-gray-400">Ubicazioni</p>
+              <p class="text-xl font-bold text-neutral-900 dark:text-gray-100">{data.statistiche.totale_ubicazioni}</p>
+              <p class="text-xs text-neutral-500 dark:text-gray-400">{data.statistiche?.ubicazioni_occupate || 0} occupate</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                <span class="text-sm">📊</span>
+              </div>
+            </div>
+            <div class="ml-2">
+              <p class="text-xs font-medium text-neutral-600 dark:text-gray-400">Occupazione</p>
+              <p class="text-xl font-bold text-green-600">{data.statistiche.occupazione_media}%</p>
+              <p class="text-xs text-neutral-500 dark:text-gray-400">{data.statistiche.volume_occupato_m3}m³</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                <span class="text-sm">📦</span>
+              </div>
+            </div>
+            <div class="ml-2">
+              <p class="text-xs font-medium text-neutral-600 dark:text-gray-400">SKU Totali</p>
+              <p class="text-xl font-bold text-purple-600">{data.statistiche?.sku_totali || 0}</p>
+              <p class="text-xs text-neutral-500 dark:text-gray-400">prodotti</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div class="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center">
+                <span class="text-sm">🔢</span>
+              </div>
+            </div>
+            <div class="ml-2">
+              <p class="text-xs font-medium text-neutral-600 dark:text-gray-400">Pezzi Totali</p>
+              <p class="text-xl font-bold text-cyan-600">{data.statistiche?.pezzi_totali || 0}</p>
+              <p class="text-xs text-neutral-500 dark:text-gray-400">unità</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <span class="text-sm">🔥</span>
+              </div>
+            </div>
+            <div class="ml-2">
+              <p class="text-xs font-medium text-neutral-600 dark:text-gray-400">Zone Hot</p>
+              <p class="text-xl font-bold text-yellow-600">{data.statistiche?.zone_hot || 0}</p>
+              <p class="text-xs text-neutral-500 dark:text-gray-400">veloci</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                <span class="text-sm">⚠️</span>
+              </div>
+            </div>
+            <div class="ml-2">
+              <p class="text-xs font-medium text-neutral-600 dark:text-gray-400">Oltre 90%</p>
+              <p class="text-xl font-bold text-red-600">{data.statistiche?.ubicazioni_piene || 0}</p>
+              <p class="text-xs text-neutral-500 dark:text-gray-400">piene</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    {/if}
+    
+    <!-- Tabella Ubicazioni -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div class="px-6 py-4 border-b border-neutral-200">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-medium text-neutral-900 dark:text-gray-100">
+            📍 Ubicazioni ({ubicazioniFiltrate?.length || 0})
+          </h3>
+          
+          <!-- Paginazione Info -->
+          <div class="text-sm text-neutral-500 dark:text-gray-400">
+            Visualizzati {ubicazioniFiltrate?.length || 0} risultati
+          </div>
+        </div>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-neutral-200 dark:divide-gray-700 dark:divide-gray-700">
+          <thead class="bg-neutral-50 dark:bg-gray-800">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-gray-400 uppercase tracking-wider">
+                Ubicazione
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-gray-400 uppercase tracking-wider">
+                Zona
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-gray-400 uppercase tracking-wider">
+                Tipo
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-gray-400 uppercase tracking-wider">
+                Occupazione
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-gray-400 uppercase tracking-wider">
+                Velocità
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-gray-400 uppercase tracking-wider">
+                Dimensioni
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-gray-400 uppercase tracking-wider">
+                Azioni
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-neutral-200 dark:divide-gray-700 dark:divide-gray-700">
+            {#each ubicazioniFiltrate || [] as ubicazione (ubicazione.id)}
+              <tr class="hover:bg-neutral-50 dark:hover:bg-gray-700 cursor-pointer" on:click={() => selectUbicazione(ubicazione)}>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="text-sm font-medium text-neutral-900 dark:text-gray-100 font-mono">
+                      {ubicazione.codice_ubicazione}
+                    </div>
+                  </div>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-neutral-900 dark:text-gray-100">{ubicazione.zona}</div>
+                  <div class="text-sm text-neutral-500 dark:text-gray-400">Area {ubicazione.area || 'N/A'}</div>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center gap-2">
+                    <span class="text-lg">
+                      {#if ubicazione.tipo === 'SCAFFALE'}📦
+                      {:else if ubicazione.tipo === 'PALLET'}🚚
+                      {:else if ubicazione.tipo === 'FRIGO'}🧊
+                      {:else if ubicazione.tipo === 'CONGELATORE'}❄️
+                      {:else}📍{/if}
+                    </span>
+                    <span class="text-sm text-neutral-900 dark:text-gray-100">{ubicazione.tipo}</span>
+                  </div>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex flex-col">
+                    <!-- Barra occupazione volume -->
+                    <div class="flex items-center mb-1">
+                      <div class="w-16 bg-neutral-200 dark:bg-gray-700 rounded-full h-2 mr-3">
+                        <div 
+                          class="h-2 rounded-full transition-all" 
+                          style="width: {ubicazione.percentuale_occupazione || 0}%; background-color: {getOccupationColor(ubicazione.percentuale_occupazione || 0)}"
+                        ></div>
+                      </div>
+                      <span class="text-sm font-medium text-neutral-900 dark:text-gray-100">
+                        {ubicazione.percentuale_occupazione || 0}%
+                      </span>
+                    </div>
+                    <!-- Informazioni giacenze reali -->
+                    <div class="text-xs text-neutral-600 dark:text-gray-400">
+                      {#if ubicazione.quantita_totale && ubicazione.quantita_totale > 0}
+                        <div class="flex items-center gap-1">
+                          <span>📦 {ubicazione.prodotti_diversi} SKU</span>
+                          <span class="text-neutral-400 dark:text-gray-500">•</span>
+                          <span>🔢 {ubicazione.quantita_totale} pz</span>
+                        </div>
+                      {:else}
+                        <div class="text-neutral-400 dark:text-gray-500">🔵 Vuota</div>
+                      {/if}
+                    </div>
+                  </div>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {ubicazione.zona_velocita === 'HOT' ? 'bg-red-100 text-red-800' : ubicazione.zona_velocita === 'WARM' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}">
+                    {#if ubicazione.zona_velocita === 'HOT'}🔥 Hot
+                    {:else if ubicazione.zona_velocita === 'WARM'}🌡️ Warm
+                    {:else}🧊 Cold{/if}
+                  </span>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500 dark:text-gray-400">
+                  <div>{ubicazione.larghezza_cm}×{ubicazione.profondita_cm}×{ubicazione.altezza_cm} cm</div>
+                  <div class="text-xs text-neutral-400 dark:text-gray-500">
+                    Vol: {((ubicazione.volume_max_cm3 || ubicazione.larghezza_cm * ubicazione.profondita_cm * ubicazione.altezza_cm) / 1000000).toFixed(2)} m³
+                    {#if ubicazione.peso_attuale_kg && ubicazione.peso_attuale_kg > 0}
+                      <br>Peso: {ubicazione.peso_attuale_kg} kg
+                    {/if}
+                  </div>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div class="flex items-center gap-1">
+                    <button 
+                      on:click|stopPropagation={() => loadUbicazioneContent(ubicazione.id)}
+                      class="text-blue-600 hover:text-blue-900 p-1 rounded" 
+                      title="Vedi contenuto"
+                    >
+                      📦
+                    </button>
+                    <button 
+                      class="text-neutral-600 dark:text-gray-400 hover:text-neutral-900 dark:hover:text-gray-100 p-1 rounded" 
+                      title="Modifica"
+                    >
+                      ✏️
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+        
+        {#if !ubicazioniFiltrate || ubicazioniFiltrate.length === 0}
+          <div class="text-center py-12">
+            <div class="text-4xl mb-4">📭</div>
+            <h3 class="text-lg font-medium text-neutral-900 mb-2">Nessuna ubicazione trovata</h3>
+            <p class="text-neutral-500">Prova a modificare i filtri di ricerca</p>
+            <button on:click={resetFilters} class="mt-4 btn btn-primary">
+              🔄 Reset Filtri
+            </button>
+          </div>
+        {/if}
+      </div>
+    </div>
+  </div>
+  
+{:else if viewMode === 'map'}
+  <!-- Vista Mappa (Codice originale) -->
+  <div class="flex h-screen bg-neutral-50 dark:bg-gray-900">
+  
+  <!-- Sidebar Controls (Codice originale mantenuto) -->
+  <div class="w-80 bg-white dark:bg-gray-800 shadow-lg flex flex-col">
     
     <!-- Header -->
     <div class="p-6 border-b">
@@ -419,8 +823,8 @@
           <span class="text-xl">🏭</span>
         </div>
         <div>
-          <h1 class="text-xl font-bold text-neutral-900">Layout Magazzino</h1>
-          <p class="text-sm text-neutral-600">Vista interattiva ubicazioni</p>
+          <h1 class="text-xl font-bold text-neutral-900 dark:text-gray-100">Layout Magazzino</h1>
+          <p class="text-sm text-neutral-600 dark:text-gray-400">Vista interattiva ubicazioni</p>
         </div>
       </div>
       
@@ -429,19 +833,19 @@
         <div class="grid grid-cols-2 gap-3">
           <div class="stat-mini">
             <div class="text-lg font-bold text-blue-600">{data.statistiche.totale_ubicazioni}</div>
-            <div class="text-xs text-neutral-600">Ubicazioni</div>
+            <div class="text-xs text-neutral-600 dark:text-gray-400">Ubicazioni</div>
           </div>
           <div class="stat-mini">
             <div class="text-lg font-bold text-green-600">{data.statistiche.occupazione_media}%</div>
-            <div class="text-xs text-neutral-600">Occupazione</div>
+            <div class="text-xs text-neutral-600 dark:text-gray-400">Occupazione</div>
           </div>
         </div>
       {/if}
     </div>
     
     <!-- Filters -->
-    <div class="p-6 border-b">
-      <h3 class="font-semibold text-neutral-900 mb-4">🔍 Filtri</h3>
+    <div class="p-4 border-b">
+      <h3 class="font-semibold text-neutral-900 dark:text-gray-100 mb-4">🔍 Filtri</h3>
       <form id="filtersForm" class="space-y-4">
         
         <!-- Zona Filter -->
@@ -490,11 +894,11 @@
     </div>
     
     <!-- Map Controls -->
-    <div class="p-6 border-b">
-      <h3 class="font-semibold text-neutral-900 mb-4">🎛️ Controlli Vista</h3>
+    <div class="p-4 border-b">
+      <h3 class="font-semibold text-neutral-900 dark:text-gray-100 mb-4">🎛️ Controlli Vista</h3>
       <div class="space-y-3">
         <div class="flex items-center justify-between">
-          <span class="text-sm text-neutral-700">Zoom: {Math.round(zoomLevel * 100)}%</span>
+          <span class="text-sm text-neutral-700 dark:text-gray-300">Zoom: {Math.round(zoomLevel * 100)}%</span>
           <button on:click={resetView} class="btn btn-secondary btn-sm">Reset Vista</button>
         </div>
         
@@ -510,7 +914,7 @@
           {/if}
         </div>
         
-        <div class="text-sm text-neutral-600">
+        <div class="text-sm text-neutral-600 dark:text-gray-400">
           {#if creationMode}
             <div class="bg-blue-50 p-2 rounded text-blue-800">
               📍 <strong>Modalità Creazione Attiva</strong><br>
@@ -527,42 +931,42 @@
     
     <!-- Ubicazione Details -->
     {#if selectedUbicazione}
-      <div class="p-6 flex-1 overflow-y-auto">
-        <h3 class="font-semibold text-neutral-900 mb-4">📍 Dettagli Ubicazione</h3>
+      <div class="p-4 flex-1 overflow-y-auto min-h-[400px]">
+        <h3 class="font-semibold text-neutral-900 dark:text-gray-100 mb-4">📍 Dettagli Ubicazione</h3>
         <div class="space-y-3">
           
           <div class="flex justify-between">
-            <span class="text-sm text-neutral-600">Codice:</span>
+            <span class="text-sm text-neutral-600 dark:text-gray-400">Codice:</span>
             <span class="text-sm font-mono font-medium">{selectedUbicazione.codice_ubicazione}</span>
           </div>
           
           <div class="flex justify-between">
-            <span class="text-sm text-neutral-600">Zona:</span>
+            <span class="text-sm text-neutral-600 dark:text-gray-400">Zona:</span>
             <span class="text-sm font-medium">{selectedUbicazione.zona}</span>
           </div>
           
           <div class="flex justify-between">
-            <span class="text-sm text-neutral-600">Tipo:</span>
+            <span class="text-sm text-neutral-600 dark:text-gray-400">Tipo:</span>
             <span class="text-sm">{selectedUbicazione.tipo}</span>
           </div>
           
           {#if selectedUbicazione.percentuale_occupazione !== null}
             <div class="space-y-1">
               <div class="flex justify-between">
-                <span class="text-sm text-neutral-600">Occupazione:</span>
+                <span class="text-sm text-neutral-600 dark:text-gray-400">Occupazione:</span>
                 <span class="text-sm font-medium">{selectedUbicazione.percentuale_occupazione}%</span>
               </div>
-              <div class="w-full bg-neutral-200 rounded-full h-2">
+              <div class="w-full bg-neutral-200 dark:bg-gray-700 rounded-full h-2">
                 <div 
                   class="h-2 rounded-full" 
-                  style="width: {selectedUbicazione.percentuale_occupazione}%; background-color: {getOccupationColor(selectedUbicazione.percentuale_occupazione)}"
+                  style="width: {selectedUbicazione?.percentuale_occupazione || 0}%; background-color: {getOccupationColor(selectedUbicazione?.percentuale_occupazione || 0)}"
                 ></div>
               </div>
             </div>
           {/if}
           
           <div class="flex justify-between">
-            <span class="text-sm text-neutral-600">Zona Velocità:</span>
+            <span class="text-sm text-neutral-600 dark:text-gray-400">Zona Velocità:</span>
             <span class="text-sm">
               {#if selectedUbicazione.zona_velocita === 'HOT'}🔥 Hot
               {:else if selectedUbicazione.zona_velocita === 'WARM'}🌡️ Warm
@@ -571,13 +975,13 @@
           </div>
           
           <div class="flex justify-between">
-            <span class="text-sm text-neutral-600">Accessibilità:</span>
+            <span class="text-sm text-neutral-600 dark:text-gray-400">Accessibilità:</span>
             <span class="text-sm">{selectedUbicazione.accessibilita}</span>
           </div>
           
           {#if selectedUbicazione.temperatura_controllata}
             <div class="flex justify-between">
-              <span class="text-sm text-neutral-600">Temperatura:</span>
+              <span class="text-sm text-neutral-600 dark:text-gray-400">Temperatura:</span>
               <span class="text-sm">{selectedUbicazione.temperatura_attuale}°C</span>
             </div>
           {/if}
@@ -588,12 +992,6 @@
               on:click={() => loadUbicazioneContent(selectedUbicazione.id)}
             >
               📦 Vedi Contenuto
-            </button>
-            <button 
-              class="btn btn-secondary w-full"
-              on:click={() => suggestOptimization(selectedUbicazione)}
-            >
-              🎯 Ottimizza Posizione
             </button>
           </div>
           
@@ -653,7 +1051,7 @@
         {/each}
         
         <!-- Ubicazioni -->
-        {#each ubicazioniFiltrate as ubicazione}
+        {#each ubicazioniMappa as ubicazione}
           <rect
             x={ubicazione.coordinata_x - ubicazione.larghezza_cm/200}
             y={ubicazione.coordinata_y - ubicazione.profondita_cm/200}
@@ -701,7 +1099,7 @@
     </div>
     
     <!-- Legend -->
-    <div class="absolute bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 max-w-sm">
+    <div class="absolute bottom-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 w-64">
       <h4 class="font-semibold text-neutral-900 mb-3">🎨 Legenda Occupazione</h4>
       <div class="space-y-2 text-sm">
         <div class="flex items-center gap-2">
@@ -728,60 +1126,196 @@
     </div>
     
     <!-- Zoom Level Indicator -->
-    <div class="absolute top-4 right-4 bg-white rounded-lg shadow px-3 py-1">
+    <div class="absolute top-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow px-3 py-1">
       <span class="text-sm font-medium">Zoom: {Math.round(zoomLevel * 100)}%</span>
     </div>
     
   </div>
   
 </div>
+{/if}
+</div>
 
 <!-- Content Modal -->
 {#if showContentModal}
   <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" on:click={closeModals}>
-    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto" on:click|stopPropagation>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl mx-4 max-h-[80vh] overflow-y-auto" on:click|stopPropagation>
       <div class="p-6">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-neutral-900">
+          <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">
             📦 Contenuto Ubicazione {selectedUbicazione?.codice_ubicazione}
           </h3>
-          <button on:click={closeModals} class="text-neutral-500 hover:text-neutral-700">
+          <button on:click={closeModals} class="text-neutral-500 hover:text-neutral-700 dark:text-gray-300">
             ✕
           </button>
         </div>
         
         {#if ubicazioneContent.length > 0}
-          <div class="space-y-3">
-            {#each ubicazioneContent as item}
-              <div class="border rounded-lg p-4 bg-neutral-50">
-                <div class="flex justify-between items-start mb-2">
-                  <div>
-                    <div class="font-semibold text-blue-600">{item.sku_code}</div>
-                    <div class="text-sm text-neutral-600">{item.descrizione || 'Prodotto'}</div>
-                  </div>
-                  <div class="text-right">
-                    <div class="text-lg font-bold text-green-600">{item.quantita} pz</div>
-                    <div class="text-xs text-neutral-500">Committente #{item.committente_id}</div>
+          <!-- Statistiche riassuntive -->
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div class="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div class="text-xl font-bold text-blue-600">{ubicazioneContent.length}</div>
+                <div class="text-xs text-blue-800">SKU Diversi</div>
+              </div>
+              <div>
+                <div class="text-xl font-bold text-green-600">{ubicazioneContent.reduce((sum, sku) => sum + sku.quantita_fisica_totale, 0)}</div>
+                <div class="text-xs text-green-800">Pezzi Totali</div>
+              </div>
+              <div>
+                <div class="text-xl font-bold text-orange-600">{new Set(ubicazioneContent.flatMap(sku => sku.proprietari.map(p => p.committente_id))).size}</div>
+                <div class="text-xs text-orange-800">Committenti</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Contenuto gerarchico: SKU → Proprietari → Lotti -->
+          <div class="space-y-4">
+            {#each ubicazioneContent as sku}
+              <div class="border rounded-lg bg-white dark:bg-gray-800 shadow-sm">
+                <!-- Header SKU -->
+                <div class="bg-neutral-50 px-4 py-3 border-b">
+                  <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                        <div class="font-semibold text-lg text-blue-700">{sku.sku_code}</div>
+                      </div>
+                      <div class="text-sm text-neutral-600 mt-1">{sku.prodotto_nome || 'Prodotto senza descrizione'}</div>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-xl font-bold text-neutral-900 dark:text-gray-100">{sku.quantita_fisica_totale} pz</div>
+                      <div class="text-xs text-neutral-500 dark:text-gray-400">{(sku.volume_occupato_cm3 / 1000).toFixed(1)} L</div>
+                    </div>
                   </div>
                 </div>
                 
-                <div class="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span class="text-neutral-600">Lotto:</span>
-                    <span class="font-medium">{item.lotto || 'N/A'}</span>
-                  </div>
-                  <div>
-                    <span class="text-neutral-600">Data carico:</span>
-                    <span class="font-medium">{new Date(item.data_posizionamento).toLocaleDateString()}</span>
-                  </div>
-                  <div>
-                    <span class="text-neutral-600">Volume:</span>
-                    <span class="font-medium">{item.volume?.toFixed(1)} cm³</span>
-                  </div>
-                  <div>
-                    <span class="text-neutral-600">Peso:</span>
-                    <span class="font-medium">{item.peso?.toFixed(1)} kg</span>
-                  </div>
+                <!-- Proprietari (Multi-committente) -->
+                <div class="p-4">
+                  {#if sku.proprietari && sku.proprietari.length > 0}
+                    <div class="space-y-3">
+                      {#each sku.proprietari as proprietario}
+                        <div class="bg-neutral-50 rounded-lg p-3 border-l-4" 
+                             class:border-l-green-500={proprietario.stato === 'DISPONIBILE'}
+                             class:border-l-yellow-500={proprietario.stato === 'RISERVATO'}
+                             class:border-l-red-500={proprietario.stato === 'DANNEGGIATO'}>
+                          
+                          <!-- Header Proprietario -->
+                          <div class="flex justify-between items-start mb-2">
+                            <div class="flex-1">
+                              <div class="flex items-center gap-2">
+                                <span class="text-sm font-medium text-neutral-900 dark:text-gray-100">
+                                  {proprietario.committente_nome}
+                                </span>
+                                <span class="text-xs px-2 py-1 rounded-full bg-neutral-200 text-neutral-600 dark:text-gray-400">
+                                  {proprietario.committente_codice}
+                                </span>
+                                <span class="text-xs px-2 py-1 rounded-full" 
+                                      class:bg-green-100={proprietario.stato === 'DISPONIBILE'}
+                                      class:text-green-700={proprietario.stato === 'DISPONIBILE'}
+                                      class:bg-yellow-100={proprietario.stato === 'RISERVATO'}
+                                      class:text-yellow-700={proprietario.stato === 'RISERVATO'}
+                                      class:bg-red-100={proprietario.stato === 'DANNEGGIATO'}
+                                      class:text-red-700={proprietario.stato === 'DANNEGGIATO'}>
+                                  {proprietario.stato}
+                                </span>
+                              </div>
+                            </div>
+                            <div class="text-right">
+                              <div class="text-lg font-semibold text-green-600">{proprietario.quantita} pz</div>
+                              <div class="text-xs text-neutral-500 dark:text-gray-400">{proprietario.percentuale}% del totale</div>
+                            </div>
+                          </div>
+                          
+                          <!-- Dettagli Lotto e Date -->
+                          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                            <div>
+                              <div class="text-neutral-600 text-xs">Lotto</div>
+                              <div class="font-medium">{proprietario.lotto || '—'}</div>
+                            </div>
+                            <div>
+                              <div class="text-neutral-600 text-xs">Caricato</div>
+                              <div class="font-medium">
+                                {proprietario.data_posizionamento ? 
+                                  new Date(proprietario.data_posizionamento).toLocaleDateString('it-IT') : '—'}
+                              </div>
+                              {#if proprietario.giorni_stoccaggio}
+                                <div class="text-xs text-neutral-500 dark:text-gray-400">{proprietario.giorni_stoccaggio} giorni fa</div>
+                              {/if}
+                            </div>
+                            <div>
+                              <div class="text-neutral-600 text-xs">Scadenza</div>
+                              <div class="font-medium" 
+                                   class:text-red-600={proprietario.giorni_a_scadenza !== null && proprietario.giorni_a_scadenza < 30}
+                                   class:text-yellow-600={proprietario.giorni_a_scadenza !== null && proprietario.giorni_a_scadenza < 90}>
+                                {proprietario.data_scadenza ? 
+                                  new Date(proprietario.data_scadenza).toLocaleDateString('it-IT') : '—'}
+                              </div>
+                              {#if proprietario.giorni_a_scadenza !== null}
+                                <div class="text-xs" 
+                                     class:text-red-500={proprietario.giorni_a_scadenza < 30}
+                                     class:text-yellow-500={proprietario.giorni_a_scadenza < 90}>
+                                  {proprietario.giorni_a_scadenza > 0 ? 
+                                    `${proprietario.giorni_a_scadenza} giorni` : 
+                                    'SCADUTO'}
+                                </div>
+                              {/if}
+                            </div>
+                            <div>
+                              <div class="text-neutral-600 text-xs">Valore</div>
+                              <div class="font-medium">
+                                {proprietario.costo_acquisto ? 
+                                  `€${(proprietario.costo_acquisto * proprietario.quantita).toFixed(2)}` : '—'}
+                              </div>
+                              {#if proprietario.costo_acquisto}
+                                <div class="text-xs text-neutral-500 dark:text-gray-400">€{proprietario.costo_acquisto}/pz</div>
+                              {/if}
+                            </div>
+                          </div>
+                          
+                          <!-- Note se presenti -->
+                          {#if proprietario.note}
+                            <div class="mt-2 pt-2 border-t border-neutral-200">
+                              <div class="text-xs text-neutral-600 dark:text-gray-400">Note: <span class="text-neutral-800 dark:text-gray-200">{proprietario.note}</span></div>
+                            </div>
+                          {/if}
+                          
+                          <!-- Dettagli UDC -->
+                          {#if proprietario.udc_details && proprietario.udc_details.length > 0}
+                            <div class="mt-3 pt-3 border-t border-neutral-200">
+                              <div class="text-xs font-medium text-neutral-700 mb-2">🏗️ Dettagli UDC ({proprietario.udc_count})</div>
+                              <div class="space-y-2">
+                                {#each proprietario.udc_details as udc}
+                                  <div class="bg-white dark:bg-gray-800 border border-neutral-200 rounded p-2 text-xs">
+                                    <div class="flex justify-between items-start">
+                                      <div class="flex-1">
+                                        <div class="font-medium text-blue-700">{udc.udc_barcode}</div>
+                                        <div class="text-neutral-600 dark:text-gray-400">{udc.tipo_udc || 'Tipo UDC'} • {udc.udc_stato}</div>
+                                        {#if udc.posizione}
+                                          <div class="text-neutral-500">📍 {udc.posizione}</div>
+                                        {/if}
+                                      </div>
+                                      <div class="text-right">
+                                        <div class="font-semibold">{udc.quantita} pz</div>
+                                        {#if udc.lotto}
+                                          <div class="text-neutral-500">Lotto: {udc.lotto}</div>
+                                        {/if}
+                                      </div>
+                                    </div>
+                                  </div>
+                                {/each}
+                              </div>
+                            </div>
+                          {/if}
+                        </div>
+                      {/each}
+                    </div>
+                  {:else}
+                    <div class="text-center py-4 text-neutral-500">
+                      <div class="text-2xl mb-2">⚠️</div>
+                      <div class="text-sm">Nessun proprietario definito per questo SKU</div>
+                    </div>
+                  {/if}
                 </div>
               </div>
             {/each}
@@ -800,13 +1334,13 @@
 <!-- Optimization Modal -->
 {#if showOptimizationModal}
   <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" on:click={closeModals}>
-    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto" on:click|stopPropagation>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl mx-4 max-h-[80vh] overflow-y-auto" on:click|stopPropagation>
       <div class="p-6">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-neutral-900">
+          <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">
             🎯 Ottimizzazione Ubicazione {selectedUbicazione?.codice_ubicazione}
           </h3>
-          <button on:click={closeModals} class="text-neutral-500 hover:text-neutral-700">
+          <button on:click={closeModals} class="text-neutral-500 hover:text-neutral-700 dark:text-gray-300">
             ✕
           </button>
         </div>
@@ -819,7 +1353,7 @@
                 <div class="text-sm text-neutral-600 mt-1">
                   Sposta {suggestion.quantita} x {suggestion.sku_code}
                 </div>
-                <div class="text-sm text-neutral-500">
+                <div class="text-sm text-neutral-500 dark:text-gray-400">
                   Da: {suggestion.from_location.codice_ubicazione} → 
                   A: {suggestion.to_location.codice_ubicazione}
                 </div>
@@ -844,10 +1378,10 @@
 <!-- Modal Creazione Ubicazione -->
 {#if showCreateModal}
   <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" on:click={closeModals}>
-    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" on:click|stopPropagation>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl mx-4 max-h-[90vh] overflow-y-auto" on:click|stopPropagation>
       <div class="p-6">
         <div class="flex items-center justify-between mb-6">
-          <h3 class="text-xl font-semibold text-neutral-900">
+          <h3 class="text-xl font-semibold text-neutral-900 dark:text-gray-100">
             {bulkMode ? '⚡ Creazione Multipla Ubicazioni' : '➕ Crea Nuova Ubicazione'}
           </h3>
           <button on:click={closeModals} class="text-neutral-500 hover:text-neutral-700 text-xl">
@@ -859,8 +1393,8 @@
         <div class="mb-6 p-4 bg-neutral-50 rounded-lg">
           <div class="flex items-center justify-between">
             <div>
-              <h4 class="font-medium text-neutral-900">Modalità Creazione</h4>
-              <p class="text-sm text-neutral-600">
+              <h4 class="font-medium text-neutral-900 dark:text-gray-100">Modalità Creazione</h4>
+              <p class="text-sm text-neutral-600 dark:text-gray-400">
                 {bulkMode ? 'Genera multiple ubicazioni con range di coordinate' : 'Crea una singola ubicazione'}
               </p>
             </div>
@@ -872,7 +1406,7 @@
                 class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 {bulkMode ? 'bg-blue-600' : 'bg-neutral-300'}"
               >
                 <span class="sr-only">Toggle bulk mode</span>
-                <span class="inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform duration-200 {bulkMode ? 'translate-x-6' : 'translate-x-1'}"></span>
+                <span class="inline-block h-4 w-4 rounded-full bg-white dark:bg-gray-800 shadow transform transition-transform duration-200 {bulkMode ? 'translate-x-6' : 'translate-x-1'}"></span>
               </button>
               <span class="text-sm {bulkMode ? 'font-semibold text-blue-600' : 'text-neutral-500'}">Multipla</span>
             </div>
@@ -1001,12 +1535,12 @@
                 
                 <!-- Preview Generazione -->
                 {#if previewCount > 0}
-                  <div class="p-3 bg-white rounded border border-purple-200">
+                  <div class="p-3 bg-white dark:bg-gray-800 rounded border border-purple-200">
                     <div class="flex items-center justify-between">
-                      <div class="text-sm text-neutral-600">Ubicazioni da creare:</div>
+                      <div class="text-sm text-neutral-600 dark:text-gray-400">Ubicazioni da creare:</div>
                       <div class="text-lg font-bold text-purple-600">{previewCount}</div>
                     </div>
-                    <div class="text-xs text-neutral-500 mt-1">
+                    <div class="text-xs text-neutral-500 dark:text-gray-400 mt-1">
                       Range: {bulkGeneration.area_start}-{bulkGeneration.zona_start}-{bulkGeneration.fronte_start}-{bulkGeneration.colonna_start}-{bulkGeneration.piano_start}
                       → {bulkGeneration.area_end}-{bulkGeneration.zona_end}-{bulkGeneration.fronte_end}-{bulkGeneration.colonna_end}-{bulkGeneration.piano_end}
                     </div>
@@ -1081,8 +1615,8 @@
               </div>
               
               <!-- Anteprima Codice -->
-              <div class="mt-3 p-3 bg-white rounded border">
-                <div class="text-sm text-neutral-600">Codice Ubicazione:</div>
+              <div class="mt-3 p-3 bg-white dark:bg-gray-800 rounded border">
+                <div class="text-sm text-neutral-600 dark:text-gray-400">Codice Ubicazione:</div>
                 <div class="text-lg font-bold text-blue-600 font-mono">
                   {newUbicazione.area}-{newUbicazione.zona}-{newUbicazione.fronte}-{newUbicazione.colonna}-{newUbicazione.piano}
                 </div>
@@ -1142,10 +1676,10 @@
           {#if bulkMode}
             <!-- Coordinate e Spaziatura Bulk -->
             <div class="bg-gray-50 p-4 rounded-lg">
-              <h4 class="font-semibold text-gray-700 mb-3">📍 Posizione e Spaziatura</h4>
+              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">📍 Posizione e Spaziatura</h4>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Coordinata X Inizio</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coordinata X Inizio</label>
                   <input 
                     type="number" 
                     bind:value={bulkGeneration.coordinata_x_start}
@@ -1156,7 +1690,7 @@
                 </div>
                 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Coordinata Y Inizio</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coordinata Y Inizio</label>
                   <input 
                     type="number" 
                     bind:value={bulkGeneration.coordinata_y_start}
@@ -1167,7 +1701,7 @@
                 </div>
                 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Spaziatura X (cm)</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Spaziatura X (cm)</label>
                   <input 
                     type="number" 
                     bind:value={bulkGeneration.coordinata_x_spacing}
@@ -1176,11 +1710,11 @@
                     class="form-input w-full"
                     required
                   />
-                  <div class="text-xs text-gray-600 mt-1">Distanza tra ubicazioni orizzontalmente</div>
+                  <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">Distanza tra ubicazioni orizzontalmente</div>
                 </div>
                 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Spaziatura Y (cm)</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Spaziatura Y (cm)</label>
                   <input 
                     type="number" 
                     bind:value={bulkGeneration.coordinata_y_spacing}
@@ -1189,7 +1723,7 @@
                     class="form-input w-full"
                     required
                   />
-                  <div class="text-xs text-gray-600 mt-1">Distanza tra file verticalmente</div>
+                  <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">Distanza tra file verticalmente</div>
                 </div>
               </div>
             </div>
@@ -1235,10 +1769,10 @@
           {:else}
             <!-- Coordinate Singola -->
             <div class="bg-gray-50 p-4 rounded-lg">
-              <h4 class="font-semibold text-gray-700 mb-3">📍 Posizione</h4>
+              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">📍 Posizione</h4>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Coordinata X</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coordinata X</label>
                   <input 
                     type="number" 
                     bind:value={newUbicazione.coordinata_x}
@@ -1249,7 +1783,7 @@
                 </div>
                 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Coordinata Y</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coordinata Y</label>
                   <input 
                     type="number" 
                     bind:value={newUbicazione.coordinata_y}
@@ -1259,7 +1793,7 @@
                   />
                 </div>
               </div>
-              <div class="text-sm text-gray-600 mt-2">
+              <div class="text-sm text-gray-600 dark:text-gray-400 mt-2">
                 💡 Clicca sulla mappa per impostare automaticamente le coordinate
               </div>
             </div>
@@ -1328,6 +1862,6 @@
 
 <style>
   .stat-mini {
-    @apply bg-neutral-50 rounded-lg p-3 text-center;
+    @apply bg-neutral-50 dark:bg-gray-800 rounded-lg p-3 text-center;
   }
 </style>

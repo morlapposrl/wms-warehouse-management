@@ -90,7 +90,7 @@
   };
 </script>
 
-<div class="container mx-auto px-6 py-8">
+<div class="w-full px-6 py-8">
   
   <!-- Header -->
   <div class="flex items-center justify-between mb-6">
@@ -127,8 +127,8 @@
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     
     <!-- Colonna 1: Dati Ordine -->
-    <div class="card">
-      <div class="card-header">
+    <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+      <div class="card-header border-b border-gray-200 dark:border-gray-700">
         <h2 class="text-lg font-semibold">Informazioni Ordine</h2>
       </div>
       <div class="card-body space-y-4">
@@ -198,8 +198,8 @@
     </div>
 
     <!-- Colonna 2: Indirizzi e Note -->
-    <div class="card">
-      <div class="card-header">
+    <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+      <div class="card-header border-b border-gray-200 dark:border-gray-700">
         <h2 class="text-lg font-semibold">
           {data.ordine.tipo_ordine === 'INBOUND' ? 'Dati Ricevimento' : 'Dati Spedizione'}
         </h2>
@@ -231,27 +231,27 @@
     </div>
 
     <!-- Colonna 3: Riepilogo Quantità -->
-    <div class="card">
-      <div class="card-header">
+    <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+      <div class="card-header border-b border-gray-200 dark:border-gray-700">
         <h2 class="text-lg font-semibold">Riepilogo</h2>
       </div>
       <div class="card-body space-y-4">
         
         <div class="stat-card text-center">
           <div class="text-2xl font-bold text-blue-600">{totaleOrdinato}</div>
-          <div class="text-sm text-neutral-600">Colli Ordinati</div>
+          <div class="text-sm text-neutral-600 dark:text-gray-400">Colli Ordinati</div>
         </div>
 
         <div class="stat-card text-center">
           <div class="text-2xl font-bold text-green-600">{totaleEvaso}</div>
-          <div class="text-sm text-neutral-600">
+          <div class="text-sm text-neutral-600 dark:text-gray-400">
             {data.ordine.tipo_ordine === 'INBOUND' ? 'Colli Ricevuti' : 'Colli Spediti'}
           </div>
         </div>
 
         <div class="stat-card text-center">
           <div class="text-2xl font-bold text-purple-600">€ {(data.ordine.totale_valore || 0).toFixed(2)}</div>
-          <div class="text-sm text-neutral-600">Valore Totale</div>
+          <div class="text-sm text-neutral-600 dark:text-gray-400">Valore Totale</div>
         </div>
 
       </div>
@@ -261,7 +261,7 @@
 
   <!-- Sezione Cambio Stato -->
   <div class="card mt-6">
-    <div class="card-header">
+    <div class="card-header border-b border-gray-200 dark:border-gray-700">
       <h2 class="text-lg font-semibold">Aggiorna Stato Ordine</h2>
     </div>
     <div class="card-body">
@@ -333,14 +333,14 @@
 
   <!-- Sezione Righe Ordine -->
   <div class="card mt-6">
-    <div class="card-header">
+    <div class="card-header border-b border-gray-200 dark:border-gray-700">
       <h2 class="text-lg font-semibold">Righe Ordine ({data.righe.length})</h2>
     </div>
     <div class="card-body">
       
       <!-- Tabella righe -->
       <div class="overflow-x-auto">
-        <table class="table">
+        <table class="table table-zebra">
           <thead>
             <tr>
               <th>Prodotto</th>
@@ -358,7 +358,7 @@
                 <td>
                   <div>
                     <div class="font-medium">{riga.prodotto_codice}</div>
-                    <div class="text-sm text-neutral-600">{riga.prodotto_descrizione}</div>
+                    <div class="text-sm text-neutral-600 dark:text-gray-400">{riga.prodotto_descrizione}</div>
                     {#if riga.categoria}
                       <div class="text-xs text-neutral-500">({riga.categoria})</div>
                     {/if}
@@ -391,7 +391,7 @@
                 </td>
                 
                 <!-- Note -->
-                <td class="text-sm text-neutral-600">
+                <td class="text-sm text-neutral-600 dark:text-gray-400">
                   {riga.note_riga || '-'}
                 </td>
               </tr>
@@ -400,7 +400,7 @@
           
           <!-- Totale -->
           <tfoot>
-            <tr class="bg-neutral-50 font-medium">
+            <tr class="bg-neutral-50 dark:bg-gray-700 font-medium">
               <td colspan="4" class="text-right">TOTALE:</td>
               <td class="text-right font-mono">€ {(data.ordine.totale_valore || 0).toFixed(2)}</td>
               <td></td>
@@ -414,10 +414,10 @@
 
   <!-- Sezione Movimenti di Magazzino -->
   <div class="card mt-6">
-    <div class="card-header">
+    <div class="card-header border-b border-gray-200 dark:border-gray-700">
       <div class="flex justify-between items-center">
         <h2 class="text-lg font-semibold">Movimenti di Magazzino</h2>
-        <div class="flex gap-4 text-sm text-neutral-600">
+        <div class="flex gap-4 text-sm text-neutral-600 dark:text-gray-400">
           <span>Totale: <strong>{movimenti_stats.totale_movimenti}</strong></span>
           <span>Collegati: <strong>{movimenti_stats.movimenti_collegati}</strong></span>
         </div>
@@ -448,7 +448,7 @@
       {#if movimenti.length > 0}
         <!-- Tabella movimenti -->
         <div class="overflow-x-auto">
-          <table class="table">
+          <table class="table table-zebra">
             <thead>
               <tr>
                 <th>Data/Ora</th>
@@ -483,7 +483,7 @@
                   <!-- Prodotto -->
                   <td>
                     <div class="font-medium">{movimento.prodotto_codice}</div>
-                    <div class="text-sm text-neutral-600 max-w-xs truncate">{movimento.prodotto_descrizione}</div>
+                    <div class="text-sm text-neutral-600 w-full truncate">{movimento.prodotto_descrizione}</div>
                   </td>
                   
                   <!-- Quantità -->
@@ -537,7 +537,7 @@
                   </td>
                   
                   <!-- Note -->
-                  <td class="text-sm text-neutral-600 max-w-xs">
+                  <td class="text-sm text-neutral-600 w-full">
                     <div class="truncate">
                       {movimento.note || movimento.causale || '-'}
                     </div>
@@ -563,14 +563,14 @@
   <!-- Sezione Storico Stati -->
   {#if data.tracking.length > 0}
     <div class="card mt-6">
-      <div class="card-header">
+      <div class="card-header border-b border-gray-200 dark:border-gray-700">
         <h2 class="text-lg font-semibold">Storico Cambi Stato</h2>
       </div>
       <div class="card-body">
         
         <div class="space-y-3">
           {#each data.tracking as track}
-            <div class="flex items-start gap-3 p-3 bg-neutral-50 rounded-lg">
+            <div class="flex items-start gap-3 p-3 bg-neutral-50 dark:bg-gray-700 rounded-lg">
               <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
               <div class="flex-grow">
                 <div class="flex items-center gap-2">

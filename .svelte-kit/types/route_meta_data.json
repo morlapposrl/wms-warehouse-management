@@ -1,5 +1,8 @@
 {
-	"/": [],
+	"/": [
+		"src/routes/+layout.server.ts",
+		"src/routes/+layout.server.ts"
+	],
 	"/api/admin/categorie/copy": [
 		"src/routes/api/admin/categorie/copy/+server.ts"
 	],
@@ -17,6 +20,9 @@
 	],
 	"/api/admin/committenti/[id]": [
 		"src/routes/api/admin/committenti/[id]/+server.ts"
+	],
+	"/api/admin/committenti/[id]/cascade-delete": [
+		"src/routes/api/admin/committenti/[id]/cascade-delete/+server.ts"
 	],
 	"/api/admin/fornitori": [
 		"src/routes/api/admin/fornitori/+server.ts"
@@ -39,86 +45,50 @@
 	"/api/admin/unita-misura/init": [
 		"src/routes/api/admin/unita-misura/init/+server.ts"
 	],
+	"/api/categorie": [
+		"src/routes/api/categorie/+server.js"
+	],
+	"/api/categorie/global": [
+		"src/routes/api/categorie/global/+server.js"
+	],
+	"/api/categorie/[id]": [
+		"src/routes/api/categorie/[id]/+server.js"
+	],
+	"/api/causali-trasferimento": [
+		"src/routes/api/causali-trasferimento/+server.ts"
+	],
+	"/api/causali": [
+		"src/routes/api/causali/+server.js"
+	],
+	"/api/causali/[id]": [
+		"src/routes/api/causali/[id]/+server.js"
+	],
 	"/api/committenti": [
 		"src/routes/api/committenti/+server.ts"
 	],
-	"/api/committenti/[committente_id]/categorie": [
-		"src/routes/api/committenti/[committente_id]/categorie/+server.ts"
+	"/api/dashboard/alerts-live": [
+		"src/routes/api/dashboard/alerts-live/+server.ts"
 	],
-	"/api/committenti/[committente_id]/categorie/check": [
-		"src/routes/api/committenti/[committente_id]/categorie/check/+server.ts"
+	"/api/dashboard/full-data": [
+		"src/routes/api/dashboard/full-data/+server.ts"
 	],
-	"/api/committenti/[committente_id]/categorie/[id]": [
-		"src/routes/api/committenti/[committente_id]/categorie/[id]/+server.ts"
+	"/api/dashboard/giacenze-live": [
+		"src/routes/api/dashboard/giacenze-live/+server.ts"
 	],
-	"/api/committenti/[committente_id]/fornitori": [
-		"src/routes/api/committenti/[committente_id]/fornitori/+server.ts"
+	"/api/dashboard/kpi-live": [
+		"src/routes/api/dashboard/kpi-live/+server.ts"
 	],
-	"/api/committenti/[committente_id]/fornitori/associate": [
-		"src/routes/api/committenti/[committente_id]/fornitori/associate/+server.ts"
+	"/api/dashboard/operatori-live": [
+		"src/routes/api/dashboard/operatori-live/+server.ts"
 	],
-	"/api/committenti/[committente_id]/fornitori/[fornitore_id]": [
-		"src/routes/api/committenti/[committente_id]/fornitori/[fornitore_id]/+server.ts"
+	"/api/fornitori": [
+		"src/routes/api/fornitori/+server.js"
 	],
-	"/api/committenti/[committente_id]/giacenze": [
-		"src/routes/api/committenti/[committente_id]/giacenze/+server.ts"
+	"/api/fornitori/global": [
+		"src/routes/api/fornitori/global/+server.js"
 	],
-	"/api/committenti/[committente_id]/giacenze/scorta-bassa": [
-		"src/routes/api/committenti/[committente_id]/giacenze/scorta-bassa/+server.ts"
-	],
-	"/api/committenti/[committente_id]/giacenze/[prodotto_id]": [
-		"src/routes/api/committenti/[committente_id]/giacenze/[prodotto_id]/+server.ts"
-	],
-	"/api/committenti/[committente_id]/inventari": [
-		"src/routes/api/committenti/[committente_id]/inventari/+server.ts"
-	],
-	"/api/committenti/[committente_id]/inventari/[inventario_id]": [
-		"src/routes/api/committenti/[committente_id]/inventari/[inventario_id]/+server.ts"
-	],
-	"/api/committenti/[committente_id]/inventari/[inventario_id]/actions": [
-		"src/routes/api/committenti/[committente_id]/inventari/[inventario_id]/actions/+server.ts"
-	],
-	"/api/committenti/[committente_id]/inventari/[inventario_id]/conteggi": [
-		"src/routes/api/committenti/[committente_id]/inventari/[inventario_id]/conteggi/+server.ts"
-	],
-	"/api/committenti/[committente_id]/inventari/[inventario_id]/conteggi/[prodotto_id]": [
-		"src/routes/api/committenti/[committente_id]/inventari/[inventario_id]/conteggi/[prodotto_id]/+server.ts"
-	],
-	"/api/committenti/[committente_id]/movimenti": [
-		"src/routes/api/committenti/[committente_id]/movimenti/+server.ts"
-	],
-	"/api/committenti/[committente_id]/movimenti/dropdown-data": [
-		"src/routes/api/committenti/[committente_id]/movimenti/dropdown-data/+server.ts"
-	],
-	"/api/committenti/[committente_id]/movimenti/[movimento_id]": [
-		"src/routes/api/committenti/[committente_id]/movimenti/[movimento_id]/+server.ts"
-	],
-	"/api/committenti/[committente_id]/prodotti": [
-		"src/routes/api/committenti/[committente_id]/prodotti/+server.ts"
-	],
-	"/api/committenti/[committente_id]/prodotti/check": [
-		"src/routes/api/committenti/[committente_id]/prodotti/check/+server.ts"
-	],
-	"/api/committenti/[committente_id]/prodotti/scorte-basse": [
-		"src/routes/api/committenti/[committente_id]/prodotti/scorte-basse/+server.ts"
-	],
-	"/api/committenti/[committente_id]/prodotti/suggestions": [
-		"src/routes/api/committenti/[committente_id]/prodotti/suggestions/+server.ts"
-	],
-	"/api/committenti/[committente_id]/prodotti/[id]": [
-		"src/routes/api/committenti/[committente_id]/prodotti/[id]/+server.ts"
-	],
-	"/api/committenti/[committente_id]/unita-misura": [
-		"src/routes/api/committenti/[committente_id]/unita-misura/+server.ts"
-	],
-	"/api/committenti/[committente_id]/unita-misura/check": [
-		"src/routes/api/committenti/[committente_id]/unita-misura/check/+server.ts"
-	],
-	"/api/committenti/[committente_id]/unita-misura/suggestions": [
-		"src/routes/api/committenti/[committente_id]/unita-misura/suggestions/+server.ts"
-	],
-	"/api/committenti/[committente_id]/unita-misura/[id]": [
-		"src/routes/api/committenti/[committente_id]/unita-misura/[id]/+server.ts"
+	"/api/fornitori/[id]": [
+		"src/routes/api/fornitori/[id]/+server.js"
 	],
 	"/api/fornitori/[fornitore_id]/prodotti": [
 		"src/routes/api/fornitori/[fornitore_id]/prodotti/+server.ts"
@@ -126,11 +96,41 @@
 	"/api/giacenze/global": [
 		"src/routes/api/giacenze/global/+server.ts"
 	],
+	"/api/giacenze/realtime": [
+		"src/routes/api/giacenze/realtime/+server.ts"
+	],
+	"/api/logs": [
+		"src/routes/api/logs/+server.ts"
+	],
+	"/api/magazzini": [
+		"src/routes/api/magazzini/+server.js"
+	],
+	"/api/magazzini/[id]": [
+		"src/routes/api/magazzini/[id]/+server.js"
+	],
 	"/api/movimenti/global": [
 		"src/routes/api/movimenti/global/+server.ts"
 	],
+	"/api/ordini": [
+		"src/routes/api/ordini/+server.ts"
+	],
+	"/api/prodotti": [
+		"src/routes/api/prodotti/+server.ts"
+	],
 	"/api/prodotti/global": [
 		"src/routes/api/prodotti/global/+server.ts"
+	],
+	"/api/test-db": [
+		"src/routes/api/test-db/+server.ts"
+	],
+	"/api/tipi-udc": [
+		"src/routes/api/tipi-udc/+server.ts"
+	],
+	"/api/tipi-udc/[id]": [
+		"src/routes/api/tipi-udc/[id]/+server.js"
+	],
+	"/api/trasferimenti": [
+		"src/routes/api/trasferimenti/+server.ts"
 	],
 	"/api/ubicazioni": [
 		"src/routes/api/ubicazioni/+server.ts"
@@ -147,58 +147,142 @@
 	"/api/ubicazioni/[id]/content": [
 		"src/routes/api/ubicazioni/[id]/content/+server.ts"
 	],
-	"/auth": [],
-	"/auth/admin/committenti": [],
-	"/auth/committenti": [],
-	"/auth/committenti/[committente_id]": [
-		"src/routes/auth/committenti/[committente_id]/+page.server.ts"
+	"/api/udc": [
+		"src/routes/api/udc/+server.ts"
 	],
-	"/auth/committenti/[committente_id]/categorie": [],
-	"/auth/committenti/[committente_id]/fornitori": [],
-	"/auth/committenti/[committente_id]/giacenze": [],
-	"/auth/committenti/[committente_id]/giacenze/scorta-bassa": [],
-	"/auth/committenti/[committente_id]/inventari": [],
-	"/auth/committenti/[committente_id]/inventari/[inventario_id]": [],
-	"/auth/committenti/[committente_id]/magazzino": [
-		"src/routes/auth/committenti/[committente_id]/magazzino/+page.server.ts"
+	"/api/unita-misura": [
+		"src/routes/api/unita-misura/+server.js"
 	],
-	"/auth/committenti/[committente_id]/movimenti-simple": [],
-	"/auth/committenti/[committente_id]/movimenti": [],
-	"/auth/committenti/[committente_id]/movimenti/debug": [],
-	"/auth/committenti/[committente_id]/prodotti": [],
-	"/auth/committenti/[committente_id]/super-simple": [],
-	"/auth/committenti/[committente_id]/test-js": [],
-	"/auth/committenti/[committente_id]/unita-misura": [],
+	"/api/unita-misura/global": [
+		"src/routes/api/unita-misura/global/+server.js"
+	],
+	"/api/unita-misura/[id]": [
+		"src/routes/api/unita-misura/[id]/+server.js"
+	],
+	"/api/wave-planning": [
+		"src/routes/api/wave-planning/+server.ts"
+	],
+	"/api/wave-planning/performance-report": [
+		"src/routes/api/wave-planning/performance-report/+server.ts"
+	],
+	"/api/wave-planning/preview-report": [
+		"src/routes/api/wave-planning/preview-report/+server.ts"
+	],
+	"/api/wave-planning/[id]": [
+		"src/routes/api/wave-planning/[id]/+server.ts"
+	],
+	"/api/wave-planning/[id]/picking-pdf": [
+		"src/routes/api/wave-planning/[id]/picking-pdf/+server.ts"
+	],
+	"/auth": [
+		"src/routes/+layout.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/auth/admin/committenti": [
+		"src/routes/auth/admin/committenti/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/auth/admin/committenti/[id]/modifica": [
+		"src/routes/auth/admin/committenti/[id]/modifica/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/auth/audit": [
+		"src/routes/auth/audit/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/auth/categorie": [
+		"src/routes/+layout.server.ts"
+	],
+	"/auth/causali": [
+		"src/routes/+layout.server.ts"
+	],
+	"/auth/dashboard-compact": [
+		"src/routes/auth/dashboard-compact/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
 	"/auth/dashboard": [
-		"src/routes/auth/dashboard/+page.server.ts"
+		"src/routes/auth/dashboard/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/auth/fornitori": [
+		"src/routes/+layout.server.ts"
 	],
 	"/auth/giacenze": [
-		"src/routes/auth/giacenze/+page.server.ts"
+		"src/routes/auth/giacenze/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/auth/magazzini": [
+		"src/routes/+layout.server.ts"
 	],
 	"/auth/magazzino": [
-		"src/routes/auth/magazzino/+page.server.ts"
+		"src/routes/auth/magazzino/+page.server.ts",
+		"src/routes/+layout.server.ts"
 	],
 	"/auth/movimenti": [
-		"src/routes/auth/movimenti/+page.server.ts"
+		"src/routes/auth/movimenti/+page.server.ts",
+		"src/routes/+layout.server.ts"
 	],
 	"/auth/movimenti/nuovo": [
-		"src/routes/auth/movimenti/nuovo/+page.server.ts"
+		"src/routes/auth/movimenti/nuovo/+page.server.ts",
+		"src/routes/+layout.server.ts"
 	],
 	"/auth/ordini": [
-		"src/routes/auth/ordini/+page.server.ts"
+		"src/routes/auth/ordini/+page.server.ts",
+		"src/routes/+layout.server.ts"
 	],
 	"/auth/ordini/nuovo": [
-		"src/routes/auth/ordini/nuovo/+page.server.ts"
+		"src/routes/auth/ordini/nuovo/+page.server.ts",
+		"src/routes/+layout.server.ts"
 	],
 	"/auth/ordini/[id]": [
-		"src/routes/auth/ordini/[id]/+page.server.ts"
+		"src/routes/auth/ordini/[id]/+page.server.ts",
+		"src/routes/+layout.server.ts"
 	],
 	"/auth/ottimizzazione": [
-		"src/routes/auth/ottimizzazione/+page.server.ts"
+		"src/routes/auth/ottimizzazione/+page.server.ts",
+		"src/routes/+layout.server.ts"
 	],
-	"/auth/prodotti": [],
+	"/auth/prodotti": [
+		"src/routes/+layout.server.ts"
+	],
+	"/auth/sistema": [
+		"src/routes/+layout.server.ts"
+	],
+	"/auth/tipi-udc": [
+		"src/routes/auth/tipi-udc/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/auth/udc": [
+		"src/routes/auth/udc/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/auth/udc/[id]": [
+		"src/routes/auth/udc/[id]/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/auth/unita-misura": [
+		"src/routes/+layout.server.ts"
+	],
+	"/auth/utenti": [
+		"src/routes/auth/utenti/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
 	"/auth/wave-planning": [
-		"src/routes/auth/wave-planning/+page.server.ts"
+		"src/routes/auth/wave-planning/+page.server.ts",
+		"src/routes/+layout.server.ts"
 	],
-	"/test-css": []
+	"/auth/wave-planning/[id]": [
+		"src/routes/auth/wave-planning/[id]/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/login": [
+		"src/routes/login/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/logs": [
+		"src/routes/+layout.server.ts"
+	],
+	"/test-css": [
+		"src/routes/+layout.server.ts"
+	]
 }

@@ -29,15 +29,15 @@ class RealTimeManager {
     this.isConnected = true;
     connectionStatus.set('connected');
     
-    // DISABLED: API endpoints non esistono, causano refresh continuo
-    // this.interval = setInterval(() => {
-    //   this.fetchUpdates();
-    // }, this.updateFrequency);
+    // ENABLED: Database connection issues resolved, re-enabling polling
+    this.interval = setInterval(() => {
+      this.fetchUpdates();
+    }, this.updateFrequency);
     
-    // DISABLED: primo aggiornamento immediato
-    // this.fetchUpdates();
+    // ENABLED: primo aggiornamento immediato
+    this.fetchUpdates();
     
-    console.log('Realtime manager connected but polling disabled (API endpoints not available)');
+    console.log('Realtime manager connected - polling every', this.updateFrequency, 'ms');
   }
 
   disconnect() {

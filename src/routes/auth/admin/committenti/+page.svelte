@@ -105,16 +105,20 @@
       });
 
       const result: ApiResponse<Committente> = await response.json();
+      
+      console.log('Risposta server:', result); // DEBUG
 
       if (result.success) {
         success = editingId ? 'Committente aggiornato con successo' : 'Committente creato con successo';
         await loadCommittenti();
         resetForm();
       } else {
-        if (result.errors) {
+        // Gestione errori più robusta
+        if (result.errors && typeof result.errors === 'object') {
           formErrors = result.errors;
         } else {
           error = result.error || 'Errore nel salvataggio';
+          formErrors = {}; // Reset errori del form
         }
       }
     } catch (e) {
@@ -209,31 +213,31 @@
 
   function getStatusBadgeClass(stato: string) {
     switch (stato) {
-      case 'attivo': return 'bg-green-100 text-green-800';
-      case 'sospeso': return 'bg-yellow-100 text-yellow-800';
-      case 'cessato': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'attivo': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'sospeso': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'cessato': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
     }
   }
 
   function getContractBadgeClass(tipo: string) {
     switch (tipo) {
-      case 'deposito': return 'bg-blue-100 text-blue-800';
-      case 'logistica': return 'bg-purple-100 text-purple-800';
-      case 'misto': return 'bg-indigo-100 text-indigo-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'deposito': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'logistica': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'misto': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
     }
   }
 </script>
 
-<div class="min-h-screen bg-gray-50 py-8">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+  <div class="w-full px-4 sm:px-6 lg:px-8">
     
     <!-- Header -->
     <div class="flex justify-between items-center mb-8">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900">🏢 Gestione Committenti</h1>
-        <p class="text-gray-600 mt-2">Amministrazione clienti/proprietari merce in deposito</p>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">🏢 Gestione Committenti</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">Amministrazione clienti/proprietari merce in deposito</p>
       </div>
       
       <button
@@ -247,24 +251,24 @@
 
     <!-- Messaggi -->
     {#if error}
-      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+      <div class="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded-lg mb-6">
         <strong>Errore:</strong> {error}
       </div>
     {/if}
 
     {#if success}
-      <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
+      <div class="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-200 px-4 py-3 rounded-lg mb-6">
         <strong>Successo:</strong> {success}
       </div>
     {/if}
 
     <!-- Filtri -->
-    <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">🔍 Filtri</h3>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-6 mb-6">
+      <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">🔍 Filtri</h3>
       
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
-          <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
+          <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Ricerca
           </label>
           <input
@@ -272,18 +276,18 @@
             type="text"
             bind:value={searchTerm}
             placeholder="Ragione sociale, codice, email..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         
         <div>
-          <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-2">
+          <label for="status-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Stato
           </label>
           <select
             id="status-filter"
             bind:value={statusFilter}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">Tutti</option>
             {#each STATI_COMMITTENTE as stato}
@@ -293,13 +297,13 @@
         </div>
         
         <div>
-          <label for="contract-filter" class="block text-sm font-medium text-gray-700 mb-2">
+          <label for="contract-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Tipo Contratto
           </label>
           <select
             id="contract-filter"
             bind:value={contractFilter}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">Tutti</option>
             {#each TIPI_CONTRATTO as tipo}
@@ -311,7 +315,7 @@
         <div class="flex items-end">
           <button
             on:click={() => { searchTerm = ''; statusFilter = ''; contractFilter = ''; }}
-            class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50"
+            class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50"
           >
             Pulisci Filtri
           </button>
@@ -322,15 +326,15 @@
     <!-- Form Modale -->
     {#if showForm}
       <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-          <div class="sticky top-0 bg-white border-b px-6 py-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          <div class="sticky top-0 bg-white dark:bg-gray-800 border-b px-6 py-4">
             <div class="flex justify-between items-center">
-              <h2 class="text-xl font-semibold text-gray-900">
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 {editingId ? 'Modifica Committente' : 'Nuovo Committente'}
               </h2>
               <button
                 on:click={resetForm}
-                class="text-gray-400 hover:text-gray-600"
+                class="text-gray-400 hover:text-gray-600 dark:text-gray-400"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -339,11 +343,15 @@
             </div>
           </div>
           
-          <form on:submit|preventDefault={handleSubmit} class="p-6 space-y-6">
-            <!-- Dati principali -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <form on:submit|preventDefault={handleSubmit} class="p-6">
+            <!-- Layout principale: form + note -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <!-- Colonna principale form (2/3) -->
+              <div class="lg:col-span-2 space-y-4">
+                <!-- Dati principali -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label for="codice" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="codice" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Codice Committente *
                 </label>
                 <input
@@ -352,7 +360,7 @@
                   bind:value={formData.codice}
                   required
                   disabled={editingId !== null}
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
                   class:border-red-500={formErrors.codice}
                 />
                 {#if formErrors.codice}
@@ -361,7 +369,7 @@
               </div>
 
               <div>
-                <label for="ragione_sociale" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="ragione_sociale" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Ragione Sociale *
                 </label>
                 <input
@@ -369,7 +377,7 @@
                   type="text"
                   bind:value={formData.ragione_sociale}
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   class:border-red-500={formErrors.ragione_sociale}
                 />
                 {#if formErrors.ragione_sociale}
@@ -379,9 +387,9 @@
             </div>
 
             <!-- Dati fiscali -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label for="partita_iva" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="partita_iva" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Partita IVA
                 </label>
                 <input
@@ -389,7 +397,7 @@
                   type="text"
                   bind:value={formData.partita_iva}
                   placeholder="11 cifre"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   class:border-red-500={formErrors.partita_iva}
                 />
                 {#if formErrors.partita_iva}
@@ -398,7 +406,7 @@
               </div>
 
               <div>
-                <label for="codice_fiscale" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="codice_fiscale" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Codice Fiscale
                 </label>
                 <input
@@ -406,7 +414,7 @@
                   type="text"
                   bind:value={formData.codice_fiscale}
                   placeholder="16 caratteri"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   class:border-red-500={formErrors.codice_fiscale}
                 />
                 {#if formErrors.codice_fiscale}
@@ -418,14 +426,14 @@
             <!-- Indirizzi -->
             <div class="space-y-4">
               <div>
-                <label for="indirizzo_sede" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="indirizzo_sede" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Indirizzo Sede
                 </label>
                 <input
                   id="indirizzo_sede"
                   type="text"
                   bind:value={formData.indirizzo_sede}
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   class:border-red-500={formErrors.indirizzo_sede}
                 />
                 {#if formErrors.indirizzo_sede}
@@ -434,7 +442,7 @@
               </div>
 
               <div>
-                <label for="indirizzo_fatturazione" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="indirizzo_fatturazione" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Indirizzo Fatturazione
                 </label>
                 <input
@@ -442,7 +450,7 @@
                   type="text"
                   bind:value={formData.indirizzo_fatturazione}
                   placeholder="Se diverso dalla sede"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   class:border-red-500={formErrors.indirizzo_fatturazione}
                 />
                 {#if formErrors.indirizzo_fatturazione}
@@ -452,9 +460,9 @@
             </div>
 
             <!-- Località -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <label for="cap" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="cap" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   CAP
                 </label>
                 <input
@@ -462,7 +470,7 @@
                   type="text"
                   bind:value={formData.cap}
                   placeholder="12345"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   class:border-red-500={formErrors.cap}
                 />
                 {#if formErrors.cap}
@@ -471,14 +479,14 @@
               </div>
 
               <div>
-                <label for="citta" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="citta" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Città
                 </label>
                 <input
                   id="citta"
                   type="text"
                   bind:value={formData.citta}
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   class:border-red-500={formErrors.citta}
                 />
                 {#if formErrors.citta}
@@ -487,7 +495,7 @@
               </div>
 
               <div>
-                <label for="provincia" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="provincia" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Provincia
                 </label>
                 <input
@@ -496,7 +504,7 @@
                   bind:value={formData.provincia}
                   placeholder="MI"
                   maxlength="2"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   class:border-red-500={formErrors.provincia}
                 />
                 {#if formErrors.provincia}
@@ -506,16 +514,16 @@
             </div>
 
             <!-- Contatti -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="telefono" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Telefono
                 </label>
                 <input
                   id="telefono"
                   type="text"
                   bind:value={formData.telefono}
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   class:border-red-500={formErrors.telefono}
                 />
                 {#if formErrors.telefono}
@@ -524,14 +532,14 @@
               </div>
 
               <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Email
                 </label>
                 <input
                   id="email"
                   type="email"
                   bind:value={formData.email}
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   class:border-red-500={formErrors.email}
                 />
                 {#if formErrors.email}
@@ -540,14 +548,14 @@
               </div>
 
               <div>
-                <label for="pec" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="pec" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   PEC
                 </label>
                 <input
                   id="pec"
                   type="email"
                   bind:value={formData.pec}
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   class:border-red-500={formErrors.pec}
                 />
                 {#if formErrors.pec}
@@ -559,14 +567,14 @@
             <!-- Referente e contratto -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label for="referente_principale" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="referente_principale" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Referente Principale
                 </label>
                 <input
                   id="referente_principale"
                   type="text"
                   bind:value={formData.referente_principale}
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   class:border-red-500={formErrors.referente_principale}
                 />
                 {#if formErrors.referente_principale}
@@ -575,13 +583,13 @@
               </div>
 
               <div>
-                <label for="tipo_contratto" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="tipo_contratto" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Tipo Contratto
                 </label>
                 <select
                   id="tipo_contratto"
                   bind:value={formData.tipo_contratto}
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   class:border-red-500={formErrors.tipo_contratto}
                 >
                   {#each TIPI_CONTRATTO as tipo}
@@ -595,16 +603,16 @@
             </div>
 
             <!-- Date e stato -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <label for="data_inizio_rapporto" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="data_inizio_rapporto" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Data Inizio Rapporto
                 </label>
                 <input
                   id="data_inizio_rapporto"
                   type="date"
                   bind:value={formData.data_inizio_rapporto}
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   class:border-red-500={formErrors.data_inizio_rapporto}
                 />
                 {#if formErrors.data_inizio_rapporto}
@@ -613,14 +621,14 @@
               </div>
 
               <div>
-                <label for="data_fine_rapporto" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="data_fine_rapporto" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Data Fine Rapporto
                 </label>
                 <input
                   id="data_fine_rapporto"
                   type="date"
                   bind:value={formData.data_fine_rapporto}
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   class:border-red-500={formErrors.data_fine_rapporto}
                 />
                 {#if formErrors.data_fine_rapporto}
@@ -629,13 +637,13 @@
               </div>
 
               <div>
-                <label for="stato" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="stato" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Stato
                 </label>
                 <select
                   id="stato"
                   bind:value={formData.stato}
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   class:border-red-500={formErrors.stato}
                 >
                   {#each STATI_COMMITTENTE as stato}
@@ -647,24 +655,28 @@
                 {/if}
               </div>
             </div>
-
-            <!-- Note -->
-            <div>
-              <label for="note" class="block text-sm font-medium text-gray-700 mb-2">
-                Note
+          </div>
+          
+          <!-- Colonna Note (1/3) -->
+          <div class="lg:col-span-1">
+            <div class="sticky top-4">
+              <label for="note" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                📝 Note
               </label>
               <textarea
                 id="note"
                 bind:value={formData.note}
-                rows="3"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                rows="10"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500 resize-none"
                 class:border-red-500={formErrors.note}
-                placeholder="Note aggiuntive..."
+                placeholder="Note aggiuntive...&#10;&#10;• Condizioni particolari&#10;• Requisiti speciali&#10;• Comunicazioni&#10;• Promemoria"
               ></textarea>
               {#if formErrors.note}
                 <p class="text-red-600 text-sm mt-1">{formErrors.note.join(', ')}</p>
               {/if}
             </div>
+          </div>
+        </div>
 
             <!-- Errori generali -->
             {#if Object.keys(formErrors).length > 0 && !Object.keys(formErrors).some(key => formErrors[key]?.length)}
@@ -679,7 +691,7 @@
                 type="button"
                 on:click={resetForm}
                 disabled={loading}
-                class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                class="px-6 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
               >
                 Annulla
               </button>
@@ -697,9 +709,9 @@
     {/if}
 
     <!-- Tabella -->
-    <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-900">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
           Committenti ({filteredCommittenti.length})
         </h3>
       </div>
@@ -707,46 +719,46 @@
       {#if loading}
         <div class="p-8 text-center">
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p class="text-gray-600 mt-2">Caricamento...</p>
+          <p class="text-gray-600 dark:text-gray-400 mt-2">Caricamento...</p>
         </div>
       {:else if filteredCommittenti.length === 0}
-        <div class="p-8 text-center text-gray-600">
+        <div class="p-8 text-center text-gray-600 dark:text-gray-400">
           <p>Nessun committente trovato.</p>
         </div>
       {:else}
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Committente
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Contatti
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Contratto
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Stato
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Statistiche
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Azioni
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {#each filteredCommittenti as committente}
-                <tr class="hover:bg-gray-50">
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div>
-                      <div class="text-sm font-medium text-gray-900">
+                      <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
                         {committente.ragione_sociale}
                       </div>
-                      <div class="text-sm text-gray-500">
+                      <div class="text-sm text-gray-500 dark:text-gray-400">
                         {committente.codice}
                       </div>
                       {#if committente.partita_iva}
@@ -757,7 +769,7 @@
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">
+                    <div class="text-sm text-gray-900 dark:text-gray-100">
                       {#if committente.email}
                         <div>📧 {committente.email}</div>
                       {/if}
@@ -786,18 +798,12 @@
                       {committente.stato}
                     </span>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     <div>🏷️ Prodotti: {committente.num_prodotti || 0}</div>
                     <div>📦 Movimenti: {committente.num_movimenti_mese || 0}/mese</div>
                     <div>💰 Valore: €{(committente.valore_giacenza || 0).toFixed(2)}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <a
-                      href="/committenti/{committente.id}/categorie"
-                      class="text-blue-600 hover:text-blue-900"
-                    >
-                      Categorie
-                    </a>
                     <button
                       on:click={() => handleEdit(committente)}
                       class="text-indigo-600 hover:text-indigo-900"

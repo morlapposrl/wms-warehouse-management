@@ -22,7 +22,10 @@ export const GET: RequestHandler = async () => {
       ORDER BY ragione_sociale ASC
     `).all();
 
-    return json(committenti);
+    return json({
+      success: true,
+      data: committenti
+    });
   } catch (error) {
     console.error('Errore recupero committenti:', error);
     return new Response('Errore interno del server', { 

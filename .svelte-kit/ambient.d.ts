@@ -66,6 +66,7 @@ declare module '$env/static/private' {
 	export const npm_package_name: string;
 	export const COREPACK_ENABLE_AUTO_PIN: string;
 	export const XDG_RUNTIME_DIR: string;
+	export const NoDefaultCurrentDirectoryInExePath: string;
 	export const LANG: string;
 	export const DOTNET_BUNDLE_EXTRACT_BASE_DIR: string;
 	export const LS_COLORS: string;
@@ -155,6 +156,7 @@ declare module '$env/dynamic/private' {
 		npm_package_name: string;
 		COREPACK_ENABLE_AUTO_PIN: string;
 		XDG_RUNTIME_DIR: string;
+		NoDefaultCurrentDirectoryInExePath: string;
 		LANG: string;
 		DOTNET_BUNDLE_EXTRACT_BASE_DIR: string;
 		LS_COLORS: string;
