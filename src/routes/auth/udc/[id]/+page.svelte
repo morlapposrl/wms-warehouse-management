@@ -1,5 +1,6 @@
 <script>
   import { page } from '$app/stores';
+  import { t } from '$lib/i18n';
   export let data;
 
   $: udc = data.udc || {};
@@ -52,16 +53,16 @@
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-bold text-neutral-900 mb-2">
-          📦 Dettaglio UDC - {udc.barcode}
+          📦 {$t('udc.detail.title')} - {udc.barcode}
         </h1>
         <p class="text-neutral-600 dark:text-gray-400">
-          Visualizzazione completa dell'Unità di Carico con tracking e movimentazioni
+          {$t('udc.detail.subtitle')}
         </p>
       </div>
       
       <div class="flex space-x-2">
         <a href={backLink} class="btn btn-secondary">
-          ← Torna alla Lista UDC
+          ← {$t('udc.detail.back')}
         </a>
       </div>
     </div>
@@ -73,38 +74,38 @@
     <!-- Card Info Principale -->
     <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
       <div class="card-header border-b border-gray-200 dark:border-gray-700">
-        <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">ℹ️ Informazioni Generali</h3>
+        <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">ℹ️ {$t('udc.detail.generalInfo')}</h3>
       </div>
       <div class="card-body space-y-4">
         <div>
-          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">Barcode UDC</label>
+          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('udc.detail.barcodeLabel')}</label>
           <p class="text-lg font-mono font-bold text-blue-600">{udc.barcode}</p>
         </div>
         
         <div>
-          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">Tipo UDC</label>
+          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('udc.detail.typeLabel')}</label>
           <p class="font-semibold">{udc.tipo_udc}</p>
         </div>
         
         <div>
-          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">Stato Attuale</label>
+          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('udc.detail.statusLabel')}</label>
           <span class="badge {getStatoClass(udc.stato)}">{udc.stato}</span>
         </div>
         
         <div>
-          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">Committente Proprietario</label>
+          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('udc.detail.ownerLabel')}</label>
           <p class="font-semibold">{udc.committente_nome || 'Non assegnato'}</p>
         </div>
         
         <div>
-          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">Ubicazione Attuale</label>
+          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('udc.detail.locationLabel')}</label>
           <p class="font-mono text-blue-600">
             {udc.codice_ubicazione} - {udc.zona}
           </p>
         </div>
         
         <div>
-          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">Data Creazione</label>
+          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('udc.detail.creationDateLabel')}</label>
           <p class="text-sm">{udc.data_creazione}</p>
         </div>
       </div>
@@ -113,31 +114,31 @@
     <!-- Card Specifiche Fisiche -->
     <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
       <div class="card-header border-b border-gray-200 dark:border-gray-700">
-        <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">📏 Specifiche Fisiche</h3>
+        <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">📏 {$t('udc.detail.physicalSpecs')}</h3>
       </div>
       <div class="card-body space-y-4">
         <div class="grid grid-cols-3 gap-4">
           <div>
-            <label class="text-xs font-medium text-neutral-600 dark:text-gray-400">Lunghezza</label>
+            <label class="text-xs font-medium text-neutral-600 dark:text-gray-400">{$t('udc.detail.lengthLabel')}</label>
             <p class="text-sm font-semibold">{saturazione.lunghezza_effettiva} cm</p>
           </div>
           <div>
-            <label class="text-xs font-medium text-neutral-600 dark:text-gray-400">Larghezza</label>
+            <label class="text-xs font-medium text-neutral-600 dark:text-gray-400">{$t('udc.detail.widthLabel')}</label>
             <p class="text-sm font-semibold">{saturazione.larghezza_effettiva} cm</p>
           </div>
           <div>
-            <label class="text-xs font-medium text-neutral-600 dark:text-gray-400">Altezza Max</label>
+            <label class="text-xs font-medium text-neutral-600 dark:text-gray-400">{$t('udc.detail.heightLabel')}</label>
             <p class="text-sm font-semibold">{saturazione.altezza_effettiva} cm</p>
           </div>
         </div>
         
         <div>
-          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">Peso Massimo</label>
+          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('udc.detail.weightLabel')}</label>
           <p class="text-lg font-bold">{saturazione.peso_max_effettivo} kg</p>
         </div>
         
         <div>
-          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">Volume Massimo</label>
+          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('udc.detail.maxVolumeLabel')}</label>
           <p class="text-sm font-semibold">
             {Math.round(saturazione.volume_max / 1000000)} litri
           </p>
@@ -145,7 +146,7 @@
         
         {#if udc.qr_code}
           <div>
-            <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">QR Code</label>
+            <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('udc.detail.qrCodeLabel')}</label>
             <p class="text-sm font-mono">{udc.qr_code}</p>
           </div>
         {/if}
@@ -155,21 +156,21 @@
     <!-- Card Saturazione -->
     <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
       <div class="card-header border-b border-gray-200 dark:border-gray-700">
-        <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">📊 Stato Saturazione</h3>
+        <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">📊 {$t('udc.detail.saturationStatus')}</h3>
       </div>
       <div class="card-body space-y-4">
         <div>
-          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">Prodotti Diversi</label>
+          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('udc.detail.differentProducts')}</label>
           <p class="text-2xl font-bold text-blue-600">{stats.prodotti_diversi}</p>
         </div>
         
         <div>
-          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">Quantità Totale</label>
+          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('udc.detail.totalQuantity')}</label>
           <p class="text-xl font-semibold">{stats.quantita_totale} pz</p>
         </div>
         
         <div>
-          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">Saturazione Peso</label>
+          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('udc.detail.weightSaturation')}</label>
           <div class="flex items-center justify-between">
             <span class="text-sm font-semibold {getSaturazioneClass(saturazione.peso)}">
               {saturazione.peso.toFixed(1)}%
@@ -187,7 +188,7 @@
         </div>
         
         <div>
-          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">Saturazione Volume</label>
+          <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('udc.detail.volumeSaturation')}</label>
           <div class="flex items-center justify-between">
             <span class="text-sm font-semibold {getSaturazioneClass(saturazione.volume)}">
               {saturazione.volume.toFixed(1)}%
@@ -211,7 +212,7 @@
   <div class="card mb-8">
     <div class="card-header border-b border-gray-200 dark:border-gray-700">
       <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">
-        📦 Contenuto UDC ({contenuto.length} prodotti)
+        📦 {$t('udc.detail.contentLabel')} ({contenuto.length} {$t('common.products')})
       </h3>
     </div>
     
@@ -220,16 +221,16 @@
         <table class="table table-zebra">
           <thead>
             <tr>
-              <th>Prodotto</th>
-              <th>Descrizione</th>
-              <th class="text-center">Quantità</th>
-              <th>Unità Misura</th>
-              <th>Lotto</th>
-              <th>Posizione in UDC</th>
-              <th>Peso</th>
-              <th>Volume</th>
-              <th>Data Inserimento</th>
-              <th>Operatore</th>
+              <th>{$t('udc.detail.product')}</th>
+              <th>{$t('udc.detail.description')}</th>
+              <th class="text-center">{$t('udc.detail.quantity')}</th>
+              <th>{$t('udc.detail.unitOfMeasure')}</th>
+              <th>{$t('udc.detail.lot')}</th>
+              <th>{$t('udc.detail.positionInUdc')}</th>
+              <th>{$t('udc.detail.weight')}</th>
+              <th>{$t('udc.detail.volume')}</th>
+              <th>{$t('udc.detail.insertDate')}</th>
+              <th>{$t('udc.detail.operator')}</th>
             </tr>
           </thead>
           <tbody>
@@ -274,8 +275,8 @@
       <div class="card-body">
         <div class="text-center py-8">
           <div class="text-4xl mb-4">📦</div>
-          <h3 class="text-lg font-semibold text-neutral-700 mb-2">UDC Vuoto</h3>
-          <p class="text-neutral-600 dark:text-gray-400">Questo UDC non contiene ancora nessun prodotto</p>
+          <h3 class="text-lg font-semibold text-neutral-700 mb-2">{$t('udc.detail.emptyUdc')}</h3>
+          <p class="text-neutral-600 dark:text-gray-400">{$t('udc.detail.emptyUdcMessage')}</p>
         </div>
       </div>
     {/if}
@@ -285,7 +286,7 @@
   <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
     <div class="card-header border-b border-gray-200 dark:border-gray-700">
       <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">
-        🔄 Storico Movimenti ({movimenti.length} movimenti)
+        🔄 {$t('udc.detail.movementHistory')} ({movimenti.length} {$t('udc.detail.movements')})
       </h3>
     </div>
     
@@ -294,14 +295,14 @@
         <table class="table table-zebra">
           <thead>
             <tr>
-              <th>Data/Ora</th>
-              <th>Tipo Movimento</th>
-              <th>Da Ubicazione</th>
-              <th>A Ubicazione</th>
-              <th>Operatore</th>
-              <th class="text-center">Quantità</th>
-              <th class="text-right">Durata</th>
-              <th>Note</th>
+              <th>{$t('udc.detail.dateTime')}</th>
+              <th>{$t('udc.detail.movementType')}</th>
+              <th>{$t('udc.detail.fromLocation')}</th>
+              <th>{$t('udc.detail.toLocation')}</th>
+              <th>{$t('udc.detail.operator')}</th>
+              <th class="text-center">{$t('udc.detail.quantity')}</th>
+              <th class="text-right">{$t('udc.detail.duration')}</th>
+              <th>{$t('udc.detail.notes')}</th>
             </tr>
           </thead>
           <tbody>
@@ -320,7 +321,7 @@
                 <td class="text-sm font-mono">
                   {movimento.ubicazione_a || '-'}
                 </td>
-                <td class="text-sm">{movimento.operatore_nome || 'Sistema'}</td>
+                <td class="text-sm">{movimento.operatore_nome || $t('udc.detail.system')}</td>
                 <td class="text-center">
                   {movimento.quantita_movimentata || '-'}
                 </td>
@@ -339,8 +340,8 @@
       <div class="card-body">
         <div class="text-center py-8">
           <div class="text-4xl mb-4">🔄</div>
-          <h3 class="text-lg font-semibold text-neutral-700 mb-2">Nessun Movimento</h3>
-          <p class="text-neutral-600 dark:text-gray-400">Questo UDC non ha ancora movimenti registrati</p>
+          <h3 class="text-lg font-semibold text-neutral-700 mb-2">{$t('udc.detail.noMovements')}</h3>
+          <p class="text-neutral-600 dark:text-gray-400">{$t('udc.detail.noMovementsMessage')}</p>
         </div>
       </div>
     {/if}

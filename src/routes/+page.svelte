@@ -448,7 +448,7 @@
   <meta name="description" content={content.hero.description} />
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900 dark:to-purple-900 relative overflow-hidden">
+<div class="min-h-screen bg-white dark:bg-gray-900 relative overflow-hidden">
   
   <!-- Decorative Background Elements -->
   <div class="absolute inset-0 overflow-hidden">
@@ -475,7 +475,7 @@
   </div>
 
   <!-- Hero Section -->
-  <section class="relative pt-20 pb-16 px-4">
+  <section class="relative pt-20 pb-16 px-4 bg-white dark:bg-gray-900">
     <div class="max-w-6xl mx-auto text-center">
       
       <!-- Logo/Brand -->
@@ -497,10 +497,32 @@
       </div>
       
       <!-- Description -->
-      <div class="mb-12 {isVisible ? 'animate-fade-in-up animation-delay-200' : 'opacity-0'}">
-        <p class="text-xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+      <div class="mb-8 {isVisible ? 'animate-fade-in-up animation-delay-200' : 'opacity-0'}">
+        <p class="text-xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed mb-4">
           {content.hero.description}
         </p>
+        <!-- Cloud Professional Badge -->
+        <div class="flex justify-center">
+          <div class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-400/20 to-blue-500/20 rounded-full border border-slate-400/30 backdrop-blur-sm">
+            <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">
+              {#if currentLang === 'it'}
+                Disponibile anche in <strong class="text-blue-600 dark:text-blue-400">Cloud Professionale</strong>
+              {:else if currentLang === 'en'}
+                Also available as <strong class="text-blue-600 dark:text-blue-400">Professional Cloud</strong>
+              {:else if currentLang === 'fr'}
+                Également disponible en <strong class="text-blue-600 dark:text-blue-400">Cloud Professionnel</strong>
+              {:else if currentLang === 'de'}
+                Auch verfügbar als <strong class="text-blue-600 dark:text-blue-400">Professional Cloud</strong>
+              {:else if currentLang === 'es'}
+                También disponible en <strong class="text-blue-600 dark:text-blue-400">Cloud Profesional</strong>
+              {:else if currentLang === 'zh'}
+                还提供<strong class="text-blue-600 dark:text-blue-400">专业云版本</strong>
+              {/if}
+            </span>
+            <div class="w-2 h-2 bg-slate-400 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+          </div>
+        </div>
       </div>
       
       <!-- CTA Buttons -->
@@ -523,11 +545,7 @@
   </section>
 
   <!-- Features Section -->
-  <section class="relative py-16 px-4 bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-900/30 dark:to-purple-900/30">
-    <!-- Subtle Pattern Background -->
-    <div class="absolute inset-0 opacity-5 dark:opacity-10">
-      <div class="absolute inset-0" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(59, 130, 246, 0.1) 20px, rgba(59, 130, 246, 0.1) 21px);"></div>
-    </div>
+  <section class="relative py-16 px-4 bg-gray-50 dark:bg-gray-800">
     <div class="max-w-6xl mx-auto relative z-10">
       
       <h2 class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-gray-200">
@@ -548,7 +566,7 @@
   </section>
 
   <!-- Stats Section -->
-  <section class="py-16 px-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-500/5 dark:to-purple-500/5">
+  <section class="relative py-16 px-4 bg-white dark:bg-gray-900">
     <div class="max-w-4xl mx-auto text-center">
       
       <h2 class="text-3xl font-bold mb-12 text-gray-800 dark:text-gray-200">
@@ -572,7 +590,7 @@
   </section>
 
   <!-- Tech Stack Section -->
-  <section class="py-16 px-4">
+  <section class="relative py-16 px-4 bg-gray-50 dark:bg-gray-800">
     <div class="max-w-4xl mx-auto">
       
       <h2 class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-gray-200">
@@ -595,24 +613,123 @@
     </div>
   </section>
 
-  <!-- GitHub Section -->
-  <section class="relative py-16 px-4 bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 text-white overflow-hidden">
-    <!-- Animated Background Pattern -->
-    <div class="absolute inset-0 opacity-10">
-      <div class="absolute inset-0" style="background-image: radial-gradient(circle at 25% 25%, white 2px, transparent 2px), radial-gradient(circle at 75% 75%, white 2px, transparent 2px); background-size: 100px 100px; animation: slide 20s linear infinite;"></div>
-      <div class="absolute inset-0" style="background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 50px 50px; animation: slide-reverse 15s linear infinite;"></div>
-    </div>
+  <!-- Cloud Premium Section -->
+  <section class="relative py-20 px-4 bg-white dark:bg-gray-900 overflow-hidden">
     
-    <!-- Floating Elements -->
-    <div class="absolute top-10 left-10 w-20 h-20 bg-blue-400/20 rounded-full animate-float"></div>
-    <div class="absolute top-32 right-16 w-14 h-14 bg-purple-400/20 rounded-full animate-float-delay"></div>
-    <div class="absolute bottom-20 left-1/4 w-16 h-16 bg-indigo-400/20 rounded-full animate-float"></div>
-    <div class="absolute bottom-32 right-1/3 w-12 h-12 bg-pink-400/20 rounded-full animate-float-delay"></div>
+    <div class="max-w-6xl mx-auto text-center relative z-10">
+      
+      <!-- Premium Header -->
+      <div class="mb-12">
+        <div class="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold rounded-full shadow-lg mb-4">
+          <span class="text-2xl">👑</span>
+          <span>VERSIONE CLOUD PREMIUM</span>
+        </div>
+        <h2 class="text-4xl font-bold mb-4 text-gray-800 dark:text-gray-200">
+          Gestione Professionale su Cloud
+        </h2>
+        <p class="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
+          Servizio cloud completo gestito da Morlappo con supporto 24/7, backup automatici e aggiornamenti garantiti
+        </p>
+      </div>
+      
+      <!-- Premium Features Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        
+        <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-yellow-200 dark:border-yellow-600/50 hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+          <div class="text-4xl mb-4">☁️</div>
+          <h3 class="text-xl font-bold mb-3 text-gray-800 dark:text-gray-200">Cloud Hosting</h3>
+          <p class="text-gray-600 dark:text-gray-400">Hosting professionale su server dedicati con uptime 99.9%</p>
+        </div>
+        
+        <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-orange-200 dark:border-orange-600/50 hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+          <div class="text-4xl mb-4">🛡️</div>
+          <h3 class="text-xl font-bold mb-3 text-gray-800 dark:text-gray-200">Backup & Sicurezza</h3>
+          <p class="text-gray-600 dark:text-gray-400">Backup giornalieri automatici e sicurezza enterprise-grade</p>
+        </div>
+        
+        <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-amber-200 dark:border-amber-600/50 hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+          <div class="text-4xl mb-4">🚀</div>
+          <h3 class="text-xl font-bold mb-3 text-gray-800 dark:text-gray-200">Aggiornamenti</h3>
+          <p class="text-gray-600 dark:text-gray-400">Aggiornamenti automatici con nuove funzionalità ogni mese</p>
+        </div>
+        
+        <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-yellow-200 dark:border-yellow-600/50 hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+          <div class="text-4xl mb-4">📞</div>
+          <h3 class="text-xl font-bold mb-3 text-gray-800 dark:text-gray-200">Supporto 24/7</h3>
+          <p class="text-gray-600 dark:text-gray-400">Assistenza telefonica e remote dedicated 24 ore su 24</p>
+        </div>
+        
+        <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-orange-200 dark:border-orange-600/50 hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+          <div class="text-4xl mb-4">⚡</div>
+          <h3 class="text-xl font-bold mb-3 text-gray-800 dark:text-gray-200">Performance</h3>
+          <p class="text-gray-600 dark:text-gray-400">Server ottimizzati per performance elevate e tempi di risposta minimi</p>
+        </div>
+        
+        <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-amber-200 dark:border-amber-600/50 hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+          <div class="text-4xl mb-4">🔧</div>
+          <h3 class="text-xl font-bold mb-3 text-gray-800 dark:text-gray-200">Personalizzazioni</h3>
+          <p class="text-gray-600 dark:text-gray-400">Customizzazioni dedicate e integrazione con sistemi esistenti</p>
+        </div>
+        
+      </div>
+      
+      <!-- Pricing -->
+      <div class="bg-gradient-to-r from-white/95 to-blue-50/95 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border-2 border-blue-300 mb-8">
+        <div class="text-center">
+          <div class="text-6xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+            €2.500
+          </div>
+          <div class="text-xl text-gray-600 mb-4">Canone annuale</div>
+          <div class="text-sm text-gray-500 mb-6">
+            Include: Hosting, Supporto, Backup, Aggiornamenti, SSL, Monitoraggio
+          </div>
+          
+          <!-- CTA Button -->
+          <button
+            on:click={() => window.open('mailto:info@morlappo.com?subject=Richiesta%20WMS%20Cloud%20Premium&body=Buongiorno,%0A%0ASono%20interessato%20alla%20versione%20Cloud%20Premium%20del%20sistema%20WMS.%0A%0AAzienda:%20%0ASettore:%20%0ANumero%20committenti%20previsti:%20%0AVolumi%20mensili%20stimati:%20%0A%0AGrazie%20per%20il%20contatto.', '_self')}
+            class="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+          >
+            <span class="text-2xl">📧</span>
+            <span>Richiedi Iscrizione</span>
+          </button>
+          
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">
+            Invia richiesta a info@morlappo.com per attivazione servizio cloud
+          </p>
+        </div>
+      </div>
+      
+      <!-- Contact Info -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-yellow-200 dark:border-yellow-600/30">
+          <div class="text-2xl mb-2">📧</div>
+          <div class="font-semibold text-gray-800 dark:text-gray-200">Email</div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">info@morlappo.com</div>
+        </div>
+        
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-orange-200 dark:border-orange-600/30">
+          <div class="text-2xl mb-2">📱</div>
+          <div class="font-semibold text-gray-800 dark:text-gray-200">Telefono</div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">+39 395 348 147 95</div>
+        </div>
+        
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-amber-200 dark:border-amber-600/30">
+          <div class="text-2xl mb-2">🌐</div>
+          <div class="font-semibold text-gray-800 dark:text-gray-200">Website</div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">morlappo.com</div>
+        </div>
+      </div>
+      
+    </div>
+  </section>
+
+  <!-- GitHub Section -->
+  <section class="relative py-16 px-4 bg-gray-50 dark:bg-gray-800 overflow-hidden">
     <div class="max-w-4xl mx-auto text-center">
       
       <div class="mb-8">
-        <h2 class="text-3xl font-bold mb-4">🚀 Open Source</h2>
-        <p class="text-lg text-gray-300 max-w-2xl mx-auto">
+        <h2 class="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-200">🚀 Open Source</h2>
+        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
           Sistema completamente open source disponibile su GitHub. Contribuisci, forka, e personalizza secondo le tue esigenze.
         </p>
       </div>
@@ -621,19 +738,19 @@
         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
           <div class="text-3xl mb-3">⭐</div>
           <h3 class="font-bold text-lg mb-2">MIT License</h3>
-          <p class="text-gray-300 text-sm">Licenza permissiva per uso commerciale e privato</p>
+          <p class="text-gray-600 dark:text-gray-400 text-sm">Licenza permissiva per uso commerciale e privato</p>
         </div>
         
         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
           <div class="text-3xl mb-3">🔧</div>
           <h3 class="font-bold text-lg mb-2">Customizable</h3>
-          <p class="text-gray-300 text-sm">Facilmente personalizzabile per ogni business</p>
+          <p class="text-gray-600 dark:text-gray-400 text-sm">Facilmente personalizzabile per ogni business</p>
         </div>
         
         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
           <div class="text-3xl mb-3">👥</div>
           <h3 class="font-bold text-lg mb-2">Community</h3>
-          <p class="text-gray-300 text-sm">Supporto della community e contributi welcome</p>
+          <p class="text-gray-600 dark:text-gray-400 text-sm">Supporto della community e contributi welcome</p>
         </div>
       </div>
       
@@ -797,5 +914,144 @@
   .animate-float-delay {
     animation: float-delay 8s ease-in-out infinite;
     animation-delay: 2s;
+  }
+  
+  /* New Professional Animations */
+  @keyframes gradientShift {
+    0%, 100% {
+      transform: scale(1) rotate(0deg);
+      opacity: 0.6;
+    }
+    50% {
+      transform: scale(1.05) rotate(2deg);
+      opacity: 0.8;
+    }
+  }
+  
+  @keyframes meshRotate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
+  @keyframes gridMove {
+    0% {
+      transform: translateX(0) translateY(0);
+    }
+    100% {
+      transform: translateX(40px) translateY(40px);
+    }
+  }
+  
+  @keyframes pathFlow {
+    0% {
+      transform: translateX(-50px) translateY(-50px);
+    }
+    100% {
+      transform: translateX(50px) translateY(50px);
+    }
+  }
+  
+  @keyframes barcodeScroll {
+    0%, 100% {
+      opacity: 0.3;
+      transform: scaleX(1);
+    }
+    50% {
+      opacity: 0.6;
+      transform: scaleX(1.1);
+    }
+  }
+  
+  @keyframes circuitFlow {
+    0% {
+      transform: translateX(0) translateY(0);
+    }
+    100% {
+      transform: translateX(60px) translateY(60px);
+    }
+  }
+  
+  @keyframes dataStream {
+    0%, 100% {
+      transform: translateX(0) translateY(0);
+      opacity: 0.2;
+    }
+    50% {
+      transform: translateX(20px) translateY(-20px);
+      opacity: 0.4;
+    }
+  }
+  
+  @keyframes metricsGlow {
+    0%, 100% {
+      opacity: 0.15;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.25;
+      transform: scale(1.02);
+    }
+  }
+  
+  @keyframes statsWave {
+    0%, 100% {
+      transform: translateX(0) translateY(0);
+    }
+    33% {
+      transform: translateX(15px) translateY(-10px);
+    }
+    66% {
+      transform: translateX(-10px) translateY(15px);
+    }
+  }
+  
+  @keyframes float-slow {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-25px) rotate(180deg);
+    }
+  }
+  
+  @keyframes float-medium {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg) scale(1);
+    }
+    50% {
+      transform: translateY(-15px) rotate(90deg) scale(1.05);
+    }
+  }
+  
+  .animate-float-slow {
+    animation: float-slow 8s ease-in-out infinite;
+  }
+  
+  .animate-float-medium {
+    animation: float-medium 6s ease-in-out infinite;
+  }
+  
+  @keyframes conveyorMove {
+    0% {
+      transform: translateX(-100px);
+    }
+    100% {
+      transform: translateX(200px);
+    }
+  }
+  
+  @keyframes scanLine {
+    0%, 100% {
+      transform: translateY(-50px);
+      opacity: 0;
+    }
+    50% {
+      transform: translateY(50px);
+      opacity: 1;
+    }
   }
 </style>

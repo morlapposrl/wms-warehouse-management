@@ -36,3 +36,48 @@ export const GET: RequestHandler = async ({ url }) => {
     return json({ error: 'Errore interno server' }, { status: 500 });
   }
 };
+
+export const POST: RequestHandler = async ({ request }) => {
+  try {
+    const data = await request.json();
+    
+    // Validazione dati richiesti
+    if (!data.codice || !data.descrizione || !data.committente_id || !data.categoria_id || !data.unita_misura_id) {
+      return json({ error: 'Codice, descrizione, committente, categoria e unità di misura sono obbligatori' }, { status: 400 });
+    }
+    
+    // Verifica se il codice esiste già per questo committente
+    const existing = db.prepare(`
+      SELECT id FROM prodotti 
+      WHERE codice = ? AND committente_id = ?
+    `).get(data.codice, data.committente_id);
+    
+    if (existing) {
+      return json({ error: 'Codice prodotto già esistente per questo committente' }, { status: 400 });
+    }
+    
+    // Inserisci il nuovo prodotto
+    const result = db.prepare(`
+      INSERT INTO prodotti (
+        committente_id, codice, descrizione, categoria_id, 
+        unita_misura_id, prezzo_vendita, scorta_minima, scorta_massima,
+        attivo, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `).run(
+      data.committente_id,
+      data.codice,
+      data.descrizione,
+      data.categoria_id,
+      data.unita_misura_id,
+      data.prezzo_vendita || 0,
+      data.scorta_minima || 0,
+      data.scorta_massima || 0
+    );
+    
+    return json({ success: true, id: result.lastInsertRowid });
+    
+  } catch (error) {
+    console.error('Errore creazione prodotto:', error);
+    return json({ error: 'Errore interno server' }, { status: 500 });
+  }
+};

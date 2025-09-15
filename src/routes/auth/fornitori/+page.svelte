@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { t } from '$lib/i18n';
   
   let fornitori = [];
   let fornitoriOriginali = [];
@@ -45,7 +46,7 @@
       await loadFornitori();
     } catch (err) {
       console.error('Errore caricamento:', err);
-      error = 'Errore nel caricamento dei dati';
+      error = $t('errors.network');
     }
   });
   
@@ -59,10 +60,10 @@
           fornitoriOriginali = result.data;
           applyClientFilters();
         } else {
-          error = result.error || 'Errore nel caricamento';
+          error = result.error || $t('errors.network');
         }
       } else {
-        error = 'Errore di connessione';
+        error = $t('errors.network');
       }
     } catch (err) {
       console.error('Errore fornitori:', err);
@@ -91,18 +92,18 @@
   
   async function handleSubmit() {
     if (!formData.ragione_sociale.trim()) {
-      formErrors.ragione_sociale = ['Inserisci una ragione sociale'];
+      formErrors.ragione_sociale = [$t('validation.required')];
       return;
     }
     
     if (!formData.codice.trim()) {
-      formErrors.codice = ['Inserisci un codice'];
+      formErrors.codice = [$t('validation.required')];
       return;
     }
 
     // Validazione committenti solo per creazione, non per aggiornamento
     if (!editingId && formData.committenti_selezionati.length === 0) {
-      formErrors.committenti_selezionati = ['Seleziona almeno un committente'];
+      formErrors.committenti_selezionati = [$t('validation.required')];
       return;
     }
     
@@ -123,11 +124,11 @@
       const result = await response.json();
 
       if (result.success) {
-        success = editingId ? 'Fornitore aggiornato con successo' : 'Fornitore creato con successo';
+        success = editingId ? $t('suppliers.edit') + ' ' + $t('common.confirm') : $t('suppliers.add') + ' ' + $t('common.confirm');
         await loadFornitori();
         resetForm();
       } else {
-        error = result.error || 'Errore nel salvataggio';
+        error = result.error || $t('errors.generic');
         if (result.errors) {
           formErrors = result.errors;
         }
@@ -140,7 +141,7 @@
   }
 
   async function handleDelete(id, ragione_sociale) {
-    if (!confirm(`Sei sicuro di voler eliminare il fornitore "${ragione_sociale}"?`)) return;
+    if (!confirm(`${$t('suppliers.delete')} "${ragione_sociale}"?`)) return;
     
     loading = true;
     try {
@@ -151,10 +152,10 @@
       const result = await response.json();
       
       if (result.success) {
-        success = 'Fornitore eliminato con successo';
+        success = $t('suppliers.delete') + ' ' + $t('common.confirm');
         await loadFornitori();
       } else {
-        error = result.error || 'Errore nell\'eliminazione';
+        error = result.error || $t('errors.generic');
       }
     } catch (e) {
       error = 'Errore di connessione';
@@ -212,7 +213,7 @@
 </script>
 
 <svelte:head>
-  <title>Gestione Clienti/Fornitori - WMS Morlappo</title>
+  <title>{$t('suppliers.title')} - WMS Morlappo</title>
 </svelte:head>
 
 <div class="w-full">
@@ -220,17 +221,17 @@
     <div>
       <div class="flex items-center gap-3 mb-2">
         <h1 class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
-          🚚 Gestione Clienti/Fornitori - Vista Globale
+          🚚 {$t('suppliers.title')}
         </h1>
       </div>
-      <p class="text-neutral-600 dark:text-gray-400">Gestione clienti e fornitori per tutti i committenti</p>
+      <p class="text-neutral-600 dark:text-gray-400">{$t('layout.suppliersDesc')}</p>
     </div>
     
     <div class="flex items-center gap-4">
       <button 
         on:click={loadFornitori}
         class="btn btn-sm btn-secondary"
-        title="Ricarica fornitori"
+        title="{$t('common.refresh')}"
         disabled={loading}
       >
         🔄
@@ -241,7 +242,7 @@
         class="btn btn-primary"
         disabled={loading}
       >
-        ➕ Nuovo Cliente/Fornitore
+        ➕ {$t('suppliers.add')}
       </button>
     </div>
   </div>
@@ -251,7 +252,7 @@
       <div class="flex items-center space-x-3">
         <span class="text-lg">❌</span>
         <div>
-          <p class="font-semibold">Errore</p>
+          <p class="font-semibold">{$t('errors.generic')}</p>
           <p class="text-sm mt-1">{error}</p>
         </div>
       </div>
@@ -263,7 +264,7 @@
       <div class="flex items-center space-x-3">
         <span class="text-lg">✅</span>
         <div>
-          <p class="font-semibold">Successo</p>
+          <p class="font-semibold">{$t('common.confirm')}</p>
           <p class="text-sm mt-1">{success}</p>
         </div>
       </div>
@@ -273,14 +274,14 @@
   {#if loading}
     <div class="flex justify-center items-center py-12">
       <div class="spinner w-8 h-8"></div>
-      <span class="ml-3 text-neutral-600 dark:text-gray-400">Caricamento fornitori...</span>
+      <span class="ml-3 text-neutral-600 dark:text-gray-400">{$t('common.loading')}</span>
     </div>
   {:else}
     <div class="card mb-6">
       <div class="card-body py-4">
         <div class="flex items-center gap-2 mb-3">
           <span class="text-lg">🔍</span>
-          <span class="text-md font-semibold text-neutral-900 dark:text-gray-100">Filtri</span>
+          <span class="text-md font-semibold text-neutral-900 dark:text-gray-100">{$t('common.filter')}</span>
         </div>
         <div class="flex items-end gap-2 flex-nowrap">
           <div class="min-w-28">
@@ -288,7 +289,7 @@
               type="text" 
               bind:value={searchTerm}
               on:input={applyClientFilters}
-              placeholder="Cerca fornitore..."
+              placeholder="{$t('common.search')} {$t('suppliers.title').toLowerCase()}..."
               class="form-input text-sm"
             >
           </div>
@@ -297,14 +298,14 @@
             <button
               class="btn btn-secondary btn-sm px-2"
               on:click={clearAllFilters}
-              title="Reset filtri"
+              title="{$t('common.refresh')} {$t('common.filter').toLowerCase()}"
             >
               ↻
             </button>
           </div>
           
           <div class="text-sm text-neutral-600 dark:text-gray-400">
-            {fornitori.length} fornitori
+            {fornitori.length} {$t('layout.suppliers').toLowerCase()}
           </div>
         </div>
       </div>
@@ -317,7 +318,7 @@
             <span class="text-blue-600 text-xl">🚚</span>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Clienti/Fornitori Totali</p>
+            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('suppliers.title')}</p>
             <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">{fornitori.length}</p>
           </div>
         </div>
@@ -329,7 +330,7 @@
             <span class="text-green-600 text-xl">📧</span>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Con Email</p>
+            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('suppliers.email')}</p>
             <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
               {fornitori.filter(f => f.email).length}
             </p>
@@ -356,7 +357,7 @@
       <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div class="card-header border-b border-gray-200 dark:border-gray-700">
           <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">
-            Lista Clienti/Fornitori
+            {$t('suppliers.title')}
           </h3>
         </div>
         
@@ -364,11 +365,11 @@
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th>Codice</th>
-                <th>Ragione Sociale</th>
+                <th>{$t('suppliers.code')}</th>
+                <th>{$t('suppliers.name')}</th>
                 <th>P.IVA</th>
-                <th>Contatti</th>
-                <th>Azioni</th>
+                <th>{$t('suppliers.contact')}</th>
+                <th>{$t('common.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -393,14 +394,14 @@
                       <button 
                         class="btn btn-primary btn-sm"
                         on:click={() => handleEdit(fornitore)}
-                        title="Modifica fornitore"
+                        title="{$t('suppliers.edit')}"
                       >
                         ✏️
                       </button>
                       <button 
                         class="btn btn-danger btn-sm"
                         on:click={() => handleDelete(fornitore.id, fornitore.ragione_sociale)}
-                        title="Elimina fornitore"
+                        title="{$t('suppliers.delete')}"
                       >
                         🗑️
                       </button>
@@ -416,9 +417,9 @@
       <div class="text-center py-12">
         <div class="text-6xl mb-4">🚚</div>
         <h3 class="text-xl font-semibold text-neutral-700 mb-2">
-          Nessun fornitore trovato
+          {$t('common.noData')}
         </h3>
-        <p class="text-neutral-600 dark:text-gray-400">Non ci sono fornitori nel sistema</p>
+        <p class="text-neutral-600 dark:text-gray-400">{$t('common.noData')}</p>
       </div>
     {/if}
   {/if}
@@ -427,26 +428,21 @@
 {#if showForm}
   <div class="modal-backdrop" on:click={resetForm}>
     <div class="modal-content" on:click|stopPropagation>
-      <div class="modal-header">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-          {editingId ? 'Modifica Cliente/Fornitore' : 'Nuovo Cliente/Fornitore'}
+      <div class="modal-header bg-white dark:bg-gray-800">
+        <h2 class="text-xl font-semibold text-neutral-900 dark:text-gray-100">
+          {editingId ? $t('suppliers.edit') : $t('suppliers.add')}
         </h2>
         <button on:click={resetForm} class="text-neutral-400 hover:text-neutral-600 dark:text-gray-400 dark:hover:text-gray-200">✖️</button>
       </div>
       
-      <form on:submit|preventDefault={handleSubmit} class="p-6">
+      <form on:submit|preventDefault={handleSubmit} class="p-6 space-y-4 bg-white dark:bg-gray-800">
         
-        <!-- Grid layout con sezioni -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          
-          <!-- Sezione Dati Principali -->
-          <div class="space-y-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-600 pb-2">
-              📄 Dati Principali
-            </h3>
+        <!-- Grid layout semplificato -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             
+            <!-- Ragione Sociale -->
             <div>
-              <label class="form-label">Ragione Sociale *</label>
+              <label class="form-label">{$t('suppliers.name')} *</label>
               <input
                 type="text"
                 bind:value={formData.ragione_sociale}
@@ -461,8 +457,9 @@
               {/if}
             </div>
 
+            <!-- Codice -->
             <div>
-              <label class="form-label">Codice *</label>
+              <label class="form-label">{$t('suppliers.code')} *</label>
               <input
                 type="text"
                 bind:value={formData.codice}
@@ -476,8 +473,9 @@
               {/if}
             </div>
 
+            <!-- Partita IVA -->
             <div>
-              <label class="form-label">Partita IVA</label>
+              <label class="form-label">{$t('suppliers.vatNumber')}</label>
               <input
                 type="text"
                 bind:value={formData.partita_iva}
@@ -487,8 +485,9 @@
               />
             </div>
 
+            <!-- Indirizzo -->
             <div>
-              <label class="form-label">Indirizzo</label>
+              <label class="form-label">{$t('suppliers.address')}</label>
               <input
                 type="text"
                 bind:value={formData.indirizzo}
@@ -496,16 +495,9 @@
                 placeholder="Via, numero, città"
               />
             </div>
-          </div>
-
-          <!-- Sezione Contatti -->
-          <div class="space-y-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-600 pb-2">
-              📞 Contatti
-            </h3>
-            
+            <!-- Telefono -->
             <div>
-              <label class="form-label">Telefono</label>
+              <label class="form-label">{$t('suppliers.phone')}</label>
               <input
                 type="tel"
                 bind:value={formData.telefono}
@@ -514,8 +506,9 @@
               />
             </div>
 
+            <!-- Email -->
             <div>
-              <label class="form-label">Email</label>
+              <label class="form-label">{$t('suppliers.email')}</label>
               <input
                 type="email"
                 bind:value={formData.email}
@@ -523,36 +516,27 @@
                 placeholder="Es: info@fornitore.com"
               />
             </div>
-            
-            <!-- Spazio vuoto per bilanciare l'altezza -->
-            <div class="invisible">
-              <label class="form-label">Placeholder</label>
-              <input class="form-input" />
-            </div>
-          </div>
         </div>
 
-        <!-- Sezione Committenti su due colonne -->
-        <div class="border-t border-gray-200 dark:border-gray-600 pt-6">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-            🏢 Committenti Associati *
-          </h3>
+        <!-- Committenti -->
+        <div>
+          <label class="form-label">{$t('suppliers.clients')} *</label>
           
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             
-            <!-- Colonna 1: Committenti Selezionati -->
+            <!-- Committenti Selezionati -->
             <div>
-              <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                ✅ Selezionati ({formData.committenti_selezionati.length})
-              </h4>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                {$t('suppliers.selectedClients')} ({formData.committenti_selezionati.length})
+              </p>
               
               {#if formData.committenti_selezionati.length > 0}
-                <div class="space-y-1 max-h-32 overflow-y-auto border border-green-300 dark:border-green-600 rounded-lg p-3 bg-green-50 dark:bg-green-900/20">
+                <div class="space-y-1 max-h-32 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded p-2">
                   {#each formData.committenti_selezionati as committente_id}
                     {@const committente = committenti.find(c => c.id === committente_id)}
                     {#if committente}
-                      <div class="flex items-center justify-between py-2 px-2 bg-white dark:bg-gray-700 rounded border">
-                        <span class="text-xs text-gray-800 dark:text-gray-200 font-medium">
+                      <div class="flex items-center justify-between py-1 px-2 bg-gray-50 dark:bg-gray-700 rounded text-sm">
+                        <span class="text-gray-800 dark:text-gray-200">
                           {committente.codice} - {committente.ragione_sociale}
                         </span>
                         <button
@@ -560,50 +544,44 @@
                           on:click={() => {
                             formData.committenti_selezionati = formData.committenti_selezionati.filter(id => id !== committente_id);
                           }}
-                          class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-bold"
-                          title="Rimuovi committente"
+                          class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                          title="{$t('common.delete')}"
                         >
-                          ✖️
+                          ×
                         </button>
                       </div>
                     {/if}
                   {/each}
                 </div>
               {:else}
-                <div class="text-center py-8 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800">
-                  <div class="text-gray-400 text-2xl mb-2">📋</div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Nessun committente selezionato
-                  </p>
+                <div class="text-center py-4 border border-dashed border-gray-300 dark:border-gray-600 rounded text-sm text-gray-500 dark:text-gray-400">
+                  {$t('common.none')} {$t('suppliers.clients').toLowerCase()}
                 </div>
               {/if}
             </div>
             
-            <!-- Colonna 2: Ricerca e Selezione -->
+            <!-- Ricerca -->
             <div>
-              <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                🔍 Cerca e aggiungi committenti
-              </h4>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                {$t('common.search')}
+              </p>
               
-              <div class="relative mb-3">
+              <div class="mb-2">
                 <input
                   type="text"
                   bind:value={searchCommittenti}
-                  placeholder="Cerca committenti..."
-                  class="form-input w-full text-sm pl-8"
+                  placeholder="{$t('common.search')} {$t('suppliers.clients').toLowerCase()}..."
+                  class="form-input text-sm"
                 />
-                <div class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400">
-                  🔍
-                </div>
               </div>
               
               {#if searchCommittenti}
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                  {committeniFiltrati.length} di {(committenti || []).length} committenti trovati
+                  {committeniFiltrati.length} {$t('suppliers.found')}
                 </p>
               {/if}
               
-              <div class="space-y-1 max-h-32 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-white dark:bg-gray-700">
+              <div class="space-y-1 max-h-32 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded p-2">
                 {#each committeniFiltrati as committente}
                   {#if !formData.committenti_selezionati.includes(committente.id)}
                     <button
@@ -611,20 +589,15 @@
                       on:click={() => {
                         formData.committenti_selezionati = [...formData.committenti_selezionati, committente.id];
                       }}
-                      class="w-full text-left px-3 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded border hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
-                      title="Aggiungi committente alla selezione"
+                      class="w-full text-left px-2 py-1 text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-600 rounded"
                     >
-                      <span class="text-green-600 dark:text-green-400 mr-2 font-bold">+</span>
-                      <span class="font-mono text-xs text-blue-600 dark:text-blue-400 mr-2">{committente.codice}</span>
-                      <span class="text-gray-800 dark:text-gray-200">{committente.ragione_sociale}</span>
+                      <span class="text-blue-600 dark:text-blue-400 mr-2">{committente.codice}</span>
+                      <span>{committente.ragione_sociale}</span>
                     </button>
                   {/if}
                 {:else}
-                  <div class="text-center py-4">
-                    <div class="text-gray-400 text-xl mb-1">🔍</div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                      {searchCommittenti ? 'Nessun committente trovato o tutti già selezionati' : 'Digita per cercare committenti...'}
-                    </p>
+                  <div class="text-center py-2 text-sm text-gray-500 dark:text-gray-400">
+                    {searchCommittenti ? $t('common.noData') : $t('common.search') + '...'}
                   </div>
                 {/each}
               </div>
@@ -632,21 +605,17 @@
             
           </div>
           
-          <div class="mt-3 text-center">
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              💡 Suggerimento: Cerca committenti nella colonna di destra e clicca per aggiungerli. Usa ✖️ per rimuovere.
-            </p>
-            {#if formErrors.committenti_selezionati}
-              <p class="form-error mt-2">{formErrors.committenti_selezionati.join(', ')}</p>
-            {/if}
-          </div>
+          {#if formErrors.committenti_selezionati}
+            <p class="form-error mt-2">{formErrors.committenti_selezionati.join(', ')}</p>
+          {/if}
         </div>
 
+        <!-- Bottoni -->
         <div class="flex justify-end space-x-3 pt-4">
-          <button type="button" on:click={resetForm} class="btn btn-secondary">Annulla</button>
+          <button type="button" on:click={resetForm} class="btn btn-secondary">{$t('common.cancel')}</button>
           <button type="submit" disabled={loading} class="btn btn-primary">
             {#if loading}<div class="spinner w-4 h-4 mr-2"></div>{/if}
-            {editingId ? 'Aggiorna' : 'Crea'}
+            {editingId ? $t('common.save') : $t('common.add')}
           </button>
         </div>
       </form>
@@ -660,24 +629,10 @@
   }
   
   .modal-content {
-    background-color: white;
-    @apply rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-screen overflow-y-auto;
-  }
-
-  :global(.dark) .modal-content {
-    background-color: rgb(31, 41, 55); /* gray-800 */
-  }
-
-  .modal-content form {
-    background: inherit !important;
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-screen overflow-y-auto;
   }
   
   .modal-header {
-    @apply flex justify-between items-center p-6 border-b border-gray-200;
-    background: inherit;
-  }
-
-  :global(.dark) .modal-header {
-    border-color: rgb(55, 65, 81); /* gray-700 */
+    @apply flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700;
   }
 </style>

@@ -2,6 +2,7 @@
   import type { PageData, ActionData } from './$types';
   import { enhance } from '$app/forms';
   import { goto } from '$app/navigation';
+  import { t } from '$lib/i18n';
 
   export let data: PageData;
   export let form: ActionData;
@@ -26,7 +27,7 @@
 
   // Funzione per formattare il tipo ordine
   function formatTipoOrdine(tipo: string): string {
-    return tipo === 'INBOUND' ? 'In Entrata' : 'In Uscita';
+    return tipo === 'INBOUND' ? $t('orders.type.inbound') : $t('orders.type.outbound');
   }
 
   // Funzione per formattare data
@@ -61,14 +62,14 @@
 
   function formatMovementType(tipo: string): string {
     const types = {
-      'CARICO': 'Carico',
-      'SCARICO': 'Scarico', 
-      'RETTIFICA_POS': 'Rettifica +',
-      'RETTIFICA_NEG': 'Rettifica -',
-      'RESO_CLIENTE': 'Reso Cliente',
-      'RESO_FORNITORE': 'Reso Fornitore',
-      'TRASFERIMENTO_INTERNO': 'Trasf. Interno',
-      'TRASFERIMENTO_INTER_COMMITTENTE': 'Trasf. Inter-Comm.'
+      'CARICO': $t('orders.movements.load'),
+      'SCARICO': $t('orders.movements.unload'),
+      'RETTIFICA_POS': $t('orders.movements.adjustmentPlus'),
+      'RETTIFICA_NEG': $t('orders.movements.adjustmentMinus'),
+      'RESO_CLIENTE': $t('orders.movements.customerReturn'),
+      'RESO_FORNITORE': $t('orders.movements.supplierReturn'),
+      'TRASFERIMENTO_INTERNO': $t('orders.movements.internalTransfer'),
+      'TRASFERIMENTO_INTER_COMMITTENTE': $t('orders.movements.interCompanyTransfer')
     };
     return types[tipo] || tipo;
   }
@@ -95,10 +96,10 @@
   <!-- Header -->
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="h1">Dettaglio Ordine #{data.ordine.numero_ordine}</h1>
+      <h1 class="h1">{$t('orders.detail')} #{data.ordine.numero_ordine}</h1>
       <p class="text-neutral-600 mt-1">
-        Committente: <strong>{data.ordine.committente_nome}</strong>
-        | Creato il {formatDateTime(data.ordine.created_at)}
+        {$t('orders.labels.client')}: <strong>{data.ordine.committente_nome}</strong>
+        | {$t('orders.created')} {formatDateTime(data.ordine.created_at)}
       </p>
     </div>
     <div class="flex gap-2">
@@ -106,7 +107,7 @@
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
         </svg>
-        Torna alla lista
+{$t('orders.actions.backToList')}
       </a>
     </div>
   </div>
@@ -114,13 +115,13 @@
   <!-- Alert successo/errore -->
   {#if form?.success}
     <div class="alert alert-success mb-6">
-      <strong>Successo:</strong> {form.success}
+<strong>{$t('orders.labels.success')}:</strong> {form.success}
     </div>
   {/if}
   
   {#if form?.error}
     <div class="alert alert-error mb-6">
-      <strong>Errore:</strong> {form.error}
+<strong>{$t('orders.labels.error')}:</strong> {form.error}
     </div>
   {/if}
 
@@ -129,18 +130,18 @@
     <!-- Colonna 1: Dati Ordine -->
     <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
       <div class="card-header border-b border-gray-200 dark:border-gray-700">
-        <h2 class="text-lg font-semibold">Informazioni Ordine</h2>
+        <h2 class="text-lg font-semibold">{$t('orders.labels.orderInfo')}</h2>
       </div>
       <div class="card-body space-y-4">
         
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="form-label">Numero Ordine</label>
+            <label class="form-label">{$t('orders.labels.orderNumber')}</label>
             <div class="font-mono font-medium">{data.ordine.numero_ordine}</div>
           </div>
           
           <div>
-            <label class="form-label">Tipo</label>
+            <label class="form-label">{$t('orders.labels.type')}</label>
             <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full {data.ordine.tipo_ordine === 'INBOUND' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">
               {formatTipoOrdine(data.ordine.tipo_ordine)}
             </span>
@@ -201,28 +202,28 @@
     <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
       <div class="card-header border-b border-gray-200 dark:border-gray-700">
         <h2 class="text-lg font-semibold">
-          {data.ordine.tipo_ordine === 'INBOUND' ? 'Dati Ricevimento' : 'Dati Spedizione'}
+{data.ordine.tipo_ordine === 'INBOUND' ? $t('orders.shipping.receiving') : $t('orders.shipping.data')}
         </h2>
       </div>
       <div class="card-body space-y-4">
         
         {#if data.ordine.indirizzo_destinazione}
           <div>
-            <label class="form-label">Indirizzo</label>
+            <label class="form-label">{$t('orders.labels.address')}</label>
             <div class="whitespace-pre-line text-sm">{data.ordine.indirizzo_destinazione}</div>
           </div>
         {/if}
 
         {#if data.ordine.contatti_destinazione}
           <div>
-            <label class="form-label">Contatti</label>
+            <label class="form-label">{$t('orders.labels.contacts')}</label>
             <div class="text-sm">{data.ordine.contatti_destinazione}</div>
           </div>
         {/if}
 
         {#if data.ordine.note_spedizione}
           <div>
-            <label class="form-label">Note</label>
+            <label class="form-label">{$t('orders.labels.notes')}</label>
             <div class="whitespace-pre-line text-sm">{data.ordine.note_spedizione}</div>
           </div>
         {/if}
@@ -239,19 +240,19 @@
         
         <div class="stat-card text-center">
           <div class="text-2xl font-bold text-blue-600">{totaleOrdinato}</div>
-          <div class="text-sm text-neutral-600 dark:text-gray-400">Colli Ordinati</div>
+          <div class="text-sm text-neutral-600 dark:text-gray-400">{$t('orders.labels.packagesOrdered')}</div>
         </div>
 
         <div class="stat-card text-center">
           <div class="text-2xl font-bold text-green-600">{totaleEvaso}</div>
           <div class="text-sm text-neutral-600 dark:text-gray-400">
-            {data.ordine.tipo_ordine === 'INBOUND' ? 'Colli Ricevuti' : 'Colli Spediti'}
+{data.ordine.tipo_ordine === 'INBOUND' ? $t('orders.shipping.packagesReceived') : $t('orders.shipping.packagesShipped')}
           </div>
         </div>
 
         <div class="stat-card text-center">
           <div class="text-2xl font-bold text-purple-600">€ {(data.ordine.totale_valore || 0).toFixed(2)}</div>
-          <div class="text-sm text-neutral-600 dark:text-gray-400">Valore Totale</div>
+          <div class="text-sm text-neutral-600 dark:text-gray-400">{$t('orders.labels.totalValue')}</div>
         </div>
 
       </div>
@@ -262,7 +263,7 @@
   <!-- Sezione Cambio Stato -->
   <div class="card mt-6">
     <div class="card-header border-b border-gray-200 dark:border-gray-700">
-      <h2 class="text-lg font-semibold">Aggiorna Stato Ordine</h2>
+      <h2 class="text-lg font-semibold">{$t('orders.labels.updateOrderStatus')}</h2>
     </div>
     <div class="card-body">
       
@@ -322,7 +323,7 @@
 
         <div class="flex justify-end mt-4">
           <button type="submit" class="btn btn-primary" disabled={statusSubmitting || selectedStatus === data.ordine.stato}>
-            {statusSubmitting ? 'Aggiornamento...' : 'Aggiorna Stato'}
+{statusSubmitting ? $t('orders.actions.updating') : $t('orders.actions.updateStatus')}
           </button>
         </div>
 
@@ -334,7 +335,7 @@
   <!-- Sezione Righe Ordine -->
   <div class="card mt-6">
     <div class="card-header border-b border-gray-200 dark:border-gray-700">
-      <h2 class="text-lg font-semibold">Righe Ordine ({data.righe.length})</h2>
+      <h2 class="text-lg font-semibold">{$t('orders.labels.orderLines')} ({data.righe.length})</h2>
     </div>
     <div class="card-body">
       

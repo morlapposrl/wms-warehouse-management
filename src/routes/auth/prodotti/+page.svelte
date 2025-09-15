@@ -1,6 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { realtimeData, realtimeManager } from '$lib/stores/realtime.js';
+  import { t } from '$lib/i18n';
   
   let prodotti = [];
   let prodottiOriginali = []; // Lista completa per filtri lato client
@@ -39,12 +40,37 @@
   // Real-time data subscription
   $: rtData = $realtimeData;
   
+  // Form modal state
+  let showForm = false;
+  let editingId = null;
+  let formData = {
+    codice: '',
+    descrizione: '',
+    categoria_id: '',
+    unita_misura_id: '',
+    prezzo_vendita: '',
+    scorta_minima: '',
+    scorta_massima: '',
+    committente_id: ''
+  };
+  let formErrors = {};
+  let formLoading = false;
+  let unitaMisura = [];
+  
   onMount(async () => {
     try {
       // Carica committenti per filtro
       const commitResponse = await fetch('/api/committenti');
       if (commitResponse.ok) {
-        committenti = await commitResponse.json();
+        const commitData = await commitResponse.json();
+        if (commitData.success && commitData.data) {
+          committenti = commitData.data;
+          console.log('Committenti caricati:', committenti.length);
+        } else {
+          console.error('Errore formato risposta committenti:', commitData);
+        }
+      } else {
+        console.error('Errore fetch committenti:', commitResponse.status);
       }
       
       // Carica categorie per filtro
@@ -58,6 +84,18 @@
           console.log('Categorie caricate:', categorieComplete.length);
         } else {
           console.error('Errore formato risposta categorie:', catData);
+        }
+      }
+      
+      // Carica unità di misura per form
+      const umResponse = await fetch('/api/unita-misura/global');
+      if (umResponse.ok) {
+        const umData = await umResponse.json();
+        if (umData.success && umData.data) {
+          unitaMisura = umData.data;
+          console.log('Unità di misura caricate:', unitaMisura.length);
+        } else {
+          console.error('Errore formato risposta unità misura:', umData);
         }
       } else {
         console.error('Errore fetch categorie:', catResponse.status);
@@ -176,7 +214,7 @@
         if (columnFilters[column].length > 0) {
           let value = prodotto[column] || '-';
           if (column === 'attivo') {
-            value = value ? 'Attivo' : 'Inattivo';
+            value = value ? $t('globalProducts.active') : $t('globalProducts.inactive');
           }
           if (!columnFilters[column].includes(value)) {
             return false;
@@ -247,7 +285,7 @@
     const values = prodottiOriginali.map(p => {
       let value = p[column] || '-';
       if (column === 'attivo') {
-        value = value ? 'Attivo' : 'Inattivo';
+        value = value ? $t('globalProducts.active') : $t('globalProducts.inactive');
       }
       return value;
     });
@@ -330,6 +368,133 @@
     }
     window.location.href = `/auth/giacenze?${params.toString()}`;
   }
+  
+  // Form modal functions
+  function openForm(prodotto = null) {
+    editingId = prodotto ? prodotto.id : null;
+    if (prodotto) {
+      formData = {
+        codice: prodotto.codice || '',
+        descrizione: prodotto.descrizione || '',
+        categoria_id: prodotto.categoria_id || '',
+        unita_misura_id: prodotto.unita_misura_id || '',
+        prezzo_vendita: prodotto.prezzo_vendita || '',
+        scorta_minima: prodotto.scorta_minima || '',
+        scorta_massima: prodotto.scorta_massima || '',
+        committente_id: prodotto.committente_id || ''
+      };
+    } else {
+      formData = {
+        codice: '',
+        descrizione: '',
+        categoria_id: '',
+        unita_misura_id: '',
+        prezzo_vendita: '',
+        scorta_minima: '',
+        scorta_massima: '',
+        committente_id: ''
+      };
+    }
+    formErrors = {};
+    showForm = true;
+  }
+  
+  function resetForm() {
+    showForm = false;
+    editingId = null;
+    formData = {
+      codice: '',
+      descrizione: '',
+      categoria_id: '',
+      unita_misura_id: '',
+      prezzo_vendita: '',
+      scorta_minima: '',
+      scorta_massima: '',
+      committente_id: ''
+    };
+    formErrors = {};
+    formLoading = false;
+  }
+  
+  async function handleSubmit() {
+    formErrors = {};
+    
+    // Validazione base
+    if (!formData.codice.trim()) {
+      formErrors.codice = [$t('validation.required')];
+    }
+    if (!formData.descrizione.trim()) {
+      formErrors.descrizione = [$t('validation.required')];
+    }
+    if (!formData.committente_id) {
+      formErrors.committente_id = [$t('validation.required')];
+    }
+    if (!formData.categoria_id) {
+      formErrors.categoria_id = [$t('validation.required')];
+    }
+    if (!formData.unita_misura_id) {
+      formErrors.unita_misura_id = [$t('validation.required')];
+    }
+    
+    if (Object.keys(formErrors).length > 0) {
+      return;
+    }
+    
+    formLoading = true;
+    
+    try {
+      const url = editingId ? `/api/prodotti/${editingId}` : '/api/prodotti';
+      const method = editingId ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+      
+      if (response.ok) {
+        resetForm();
+        await loadProdotti();
+        // Success feedback could be added here
+      } else {
+        const errorData = await response.json();
+        if (errorData.errors) {
+          formErrors = errorData.errors;
+        } else {
+          formErrors.general = [errorData.error || $t('errors.saveError')];
+        }
+      }
+    } catch (error) {
+      console.error('Errore salvataggio prodotto:', error);
+      formErrors.general = [$t('errors.connectionError')];
+    } finally {
+      formLoading = false;
+    }
+  }
+  
+  async function deleteProdotto(prodotto) {
+    if (!confirm($t('globalProducts.form.deleteConfirm', { descrizione: prodotto.descrizione }))) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/prodotti/${prodotto.id}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        await loadProdotti();
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || $t('errors.deleteError'));
+      }
+    } catch (error) {
+      console.error('Errore eliminazione prodotto:', error);
+      alert($t('errors.connectionError'));
+    }
+  }
 </script>
 
 <style>
@@ -349,6 +514,19 @@
   .sortable-header .absolute {
     z-index: 1000;
   }
+  
+  /* Modal styles */
+  .modal-backdrop {
+    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+  }
+  
+  .modal-content {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 max-h-screen overflow-y-auto;
+  }
+  
+  .modal-header {
+    @apply flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700;
+  }
 </style>
 
 <div class="w-full">
@@ -357,21 +535,29 @@
     <div>
       <div class="flex items-center gap-3 mb-2">
         <h1 class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
-          🎯 Prodotti Globali - Vista Multicommittente
+          🎯 {$t('globalProducts.title')}
         </h1>
       </div>
       <p class="text-neutral-600 dark:text-gray-400">
-        Gestione prodotti aggregata di tutti i committenti
+        {$t('globalProducts.subtitle')}
       </p>
     </div>
     
     <!-- Controlli -->
     <div class="flex items-center gap-4">
+      <!-- Nuovo Prodotto -->
+      <button 
+        on:click={() => openForm()}
+        class="btn btn-sm btn-primary"
+      >
+        {$t('globalProducts.actions.addProduct')}
+      </button>
+      
       <!-- Refresh manuale -->
       <button 
         on:click={loadProdotti}
         class="btn btn-sm btn-secondary"
-        title="Ricarica prodotti"
+        title="{$t('globalProducts.refresh')}"
       >
         🔄
       </button>
@@ -381,7 +567,7 @@
   {#if loading}
     <div class="flex justify-center items-center py-12">
       <div class="spinner w-8 h-8"></div>
-      <span class="ml-3 text-neutral-600 dark:text-gray-400">Caricamento prodotti...</span>
+      <span class="ml-3 text-neutral-600 dark:text-gray-400">{$t('globalProducts.loading')}</span>
     </div>
   {:else}
     <!-- Filtri -->
@@ -389,7 +575,7 @@
       <div class="card-body py-4">
         <div class="flex items-center gap-2 mb-3">
           <span class="text-lg">🔍</span>
-          <span class="text-md font-semibold text-neutral-900 dark:text-gray-100">Filtri</span>
+          <span class="text-md font-semibold text-neutral-900 dark:text-gray-100">{$t('globalProducts.filters')}</span>
         </div>
         <div class="flex items-end gap-2 flex-nowrap">
           
@@ -399,7 +585,7 @@
               type="text" 
               bind:value={searchTerm}
               on:input={applyClientFilters}
-              placeholder="Cerca prodotto..."
+              placeholder="{$t('globalProducts.search')}"
               class="form-input text-sm"
             >
           </div>
@@ -411,7 +597,7 @@
               on:change={onCommittenteChange}
               class="form-input text-sm"
             >
-              <option value="">Tutti committenti</option>
+              <option value="">{$t('globalProducts.allClients')}</option>
               {#each committenti as committente}
                 <option value={committente.id}>
                   {committente.ragione_sociale}
@@ -427,7 +613,7 @@
               on:change={applyClientFilters}
               class="form-input text-sm"
             >
-              <option value="">Tutte categorie</option>
+              <option value="">{$t('globalProducts.allCategories')}</option>
               {#each categorieFiltrate as categoria}
                 <option value={categoria.id}>
                   {categoria.descrizione}
@@ -446,9 +632,9 @@
               on:change={applyClientFilters}
               class="form-input text-sm"
             >
-              <option value="">Tutti stati</option>
-              <option value="1">✅ Attivo</option>
-              <option value="0">❌ Non attivo</option>
+              <option value="">{$t('globalProducts.allStates')}</option>
+              <option value="1">✅ {$t('globalProducts.active')}</option>
+              <option value="0">❌ {$t('globalProducts.inactive')}</option>
             </select>
           </div>
           
@@ -457,14 +643,14 @@
             <button
               class="btn btn-secondary btn-sm px-2"
               on:click={clearAllFilters}
-              title="Reset filtri"
+              title="{$t('globalProducts.resetFilters')}"
             >
               ↻
             </button>
           </div>
           
           <div class="text-sm text-neutral-600 dark:text-gray-400">
-            {prodotti.length} prodotti
+            {prodotti.length} {$t('globalProducts.productsCount')}
           </div>
         </div>
       </div>
@@ -478,7 +664,7 @@
             <span class="text-blue-600 text-xl">📦</span>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Prodotti Totali</p>
+            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('globalProducts.statistics.totalProducts')}</p>
             <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">{prodotti.length}</p>
           </div>
         </div>
@@ -490,7 +676,7 @@
             <span class="text-green-600 text-xl">✅</span>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Attivi</p>
+            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('globalProducts.statistics.active')}</p>
             <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
               {prodotti.filter(p => p.attivo).length}
             </p>
@@ -504,7 +690,7 @@
             <span class="text-blue-600 text-xl">🏢</span>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Committenti</p>
+            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('globalProducts.statistics.clients')}</p>
             <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
               {selectedCommittente ? 1 : committenti.length}
             </p>
@@ -518,7 +704,7 @@
             <span class="text-yellow-600 text-xl">⚠️</span>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Scorta Bassa</p>
+            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('globalProducts.statistics.lowStock')}</p>
             <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
               {prodotti.filter(p => p.giacenza_attuale <= p.scorta_minima).length}
             </p>
@@ -532,7 +718,7 @@
       <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div class="card-header border-b border-gray-200 dark:border-gray-700">
           <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">
-            Lista Prodotti {selectedCommittente ? `- ${committenti.find(c => c.id == selectedCommittente)?.ragione_sociale}` : '(Tutti)'}
+            {$t('globalProducts.table.title')} {selectedCommittente ? `${$t('globalProducts.table.titleWithClient')} ${committenti.find(c => c.id == selectedCommittente)?.ragione_sociale}` : $t('globalProducts.table.titleAll')}
           </h3>
         </div>
         
@@ -547,7 +733,7 @@
                       class="flex items-center gap-1 hover:text-blue-600"
                       on:click={() => sortBy('committente_nome')}
                     >
-                      Committente
+                      {$t('globalProducts.table.headers.client')}
                       {#if sortColumn === 'committente_nome'}
                         <span class="text-xs">{sortDirection === 'asc' ? '▲' : '▼'}</span>
                       {/if}
@@ -555,7 +741,7 @@
                     <button 
                       class="ml-1 text-xs hover:text-blue-600" 
                       on:click={() => toggleColumnFilter('committente_nome')}
-                      title="Filtra committente"
+                      title="{$t('globalProducts.table.filters.filterClient')}"
                     >
                       🔽
                     </button>
@@ -568,14 +754,14 @@
                           class="text-xs text-blue-600 hover:underline"
                           on:click={() => clearColumnFilter('committente_nome')}
                         >
-                          Cancella filtro
+                          {$t('globalProducts.table.filters.clearFilter')}
                         </button>
                       </div>
                       {#each getUniqueValues('committente_nome') as value}
-                        <label class="flex items-center p-2 hover:bg-gray-50 cursor-pointer text-sm">
+                        <label class="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer text-sm">
                           <input 
                             type="checkbox" 
-                            class="mr-2"
+                            class="mr-2 rounded border-neutral-300 dark:border-gray-600 dark:bg-gray-700 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2"
                             checked={columnFilters.committente_nome.includes(value)}
                             on:change={() => toggleFilterValue('committente_nome', value)}
                           />
@@ -593,7 +779,7 @@
                       class="flex items-center gap-1 hover:text-blue-600"
                       on:click={() => sortBy('codice')}
                     >
-                      Codice
+                      {$t('globalProducts.table.headers.code')}
                       {#if sortColumn === 'codice'}
                         <span class="text-xs">{sortDirection === 'asc' ? '▲' : '▼'}</span>
                       {/if}
@@ -601,7 +787,7 @@
                     <button 
                       class="ml-1 text-xs hover:text-blue-600" 
                       on:click={() => toggleColumnFilter('codice')}
-                      title="Filtra codice"
+                      title="{$t('globalProducts.table.filters.filterCode')}"
                     >
                       🔽
                     </button>
@@ -614,14 +800,14 @@
                           class="text-xs text-blue-600 hover:underline"
                           on:click={() => clearColumnFilter('codice')}
                         >
-                          Cancella filtro
+                          {$t('globalProducts.table.filters.clearFilter')}
                         </button>
                       </div>
                       {#each getUniqueValues('codice') as value}
-                        <label class="flex items-center p-2 hover:bg-gray-50 cursor-pointer text-sm">
+                        <label class="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer text-sm">
                           <input 
                             type="checkbox" 
-                            class="mr-2"
+                            class="mr-2 rounded border-neutral-300 dark:border-gray-600 dark:bg-gray-700 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2"
                             checked={columnFilters.codice.includes(value)}
                             on:change={() => toggleFilterValue('codice', value)}
                           />
@@ -639,7 +825,7 @@
                       class="flex items-center gap-1 hover:text-blue-600"
                       on:click={() => sortBy('descrizione')}
                     >
-                      Descrizione
+                      {$t('globalProducts.table.headers.description')}
                       {#if sortColumn === 'descrizione'}
                         <span class="text-xs">{sortDirection === 'asc' ? '▲' : '▼'}</span>
                       {/if}
@@ -647,7 +833,7 @@
                     <button 
                       class="ml-1 text-xs hover:text-blue-600" 
                       on:click={() => toggleColumnFilter('descrizione')}
-                      title="Filtra descrizione"
+                      title="{$t('globalProducts.table.filters.filterDescription')}"
                     >
                       🔽
                     </button>
@@ -660,14 +846,14 @@
                           class="text-xs text-blue-600 hover:underline"
                           on:click={() => clearColumnFilter('descrizione')}
                         >
-                          Cancella filtro
+                          {$t('globalProducts.table.filters.clearFilter')}
                         </button>
                       </div>
                       {#each getUniqueValues('descrizione') as value}
-                        <label class="flex items-center p-2 hover:bg-gray-50 cursor-pointer text-sm">
+                        <label class="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer text-sm">
                           <input 
                             type="checkbox" 
-                            class="mr-2"
+                            class="mr-2 rounded border-neutral-300 dark:border-gray-600 dark:bg-gray-700 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2"
                             checked={columnFilters.descrizione.includes(value)}
                             on:change={() => toggleFilterValue('descrizione', value)}
                           />
@@ -685,7 +871,7 @@
                       class="flex items-center gap-1 hover:text-blue-600"
                       on:click={() => sortBy('categoria_descrizione')}
                     >
-                      Categoria
+                      {$t('globalProducts.table.headers.category')}
                       {#if sortColumn === 'categoria_descrizione'}
                         <span class="text-xs">{sortDirection === 'asc' ? '▲' : '▼'}</span>
                       {/if}
@@ -693,7 +879,7 @@
                     <button 
                       class="ml-1 text-xs hover:text-blue-600" 
                       on:click={() => toggleColumnFilter('categoria_descrizione')}
-                      title="Filtra categoria"
+                      title="{$t('globalProducts.table.filters.filterCategory')}"
                     >
                       🔽
                     </button>
@@ -706,14 +892,14 @@
                           class="text-xs text-blue-600 hover:underline"
                           on:click={() => clearColumnFilter('categoria_descrizione')}
                         >
-                          Cancella filtro
+                          {$t('globalProducts.table.filters.clearFilter')}
                         </button>
                       </div>
                       {#each getUniqueValues('categoria_descrizione') as value}
-                        <label class="flex items-center p-2 hover:bg-gray-50 cursor-pointer text-sm">
+                        <label class="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer text-sm">
                           <input 
                             type="checkbox" 
-                            class="mr-2"
+                            class="mr-2 rounded border-neutral-300 dark:border-gray-600 dark:bg-gray-700 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2"
                             checked={columnFilters.categoria_descrizione.includes(value)}
                             on:change={() => toggleFilterValue('categoria_descrizione', value)}
                           />
@@ -730,7 +916,7 @@
                     class="flex items-center gap-1 hover:text-blue-600"
                     on:click={() => sortBy('giacenza_attuale')}
                   >
-                    Giacenza
+                    {$t('globalProducts.table.headers.currentStock')}
                     {#if sortColumn === 'giacenza_attuale'}
                       <span class="text-xs">{sortDirection === 'asc' ? '▲' : '▼'}</span>
                     {/if}
@@ -743,7 +929,7 @@
                     class="flex items-center gap-1 hover:text-blue-600"
                     on:click={() => sortBy('scorta_minima')}
                   >
-                    Scorta Min
+                    {$t('globalProducts.table.headers.minStock')}
                     {#if sortColumn === 'scorta_minima'}
                       <span class="text-xs">{sortDirection === 'asc' ? '▲' : '▼'}</span>
                     {/if}
@@ -756,7 +942,7 @@
                     class="flex items-center gap-1 hover:text-blue-600"
                     on:click={() => sortBy('valore_giacenza')}
                   >
-                    Valore €
+                    {$t('globalProducts.table.headers.value')}
                     {#if sortColumn === 'valore_giacenza'}
                       <span class="text-xs">{sortDirection === 'asc' ? '▲' : '▼'}</span>
                     {/if}
@@ -770,7 +956,7 @@
                       class="flex items-center gap-1 hover:text-blue-600"
                       on:click={() => sortBy('attivo')}
                     >
-                      Stato
+                      {$t('globalProducts.table.headers.status')}
                       {#if sortColumn === 'attivo'}
                         <span class="text-xs">{sortDirection === 'asc' ? '▲' : '▼'}</span>
                       {/if}
@@ -778,7 +964,7 @@
                     <button 
                       class="ml-1 text-xs hover:text-blue-600" 
                       on:click={() => toggleColumnFilter('attivo')}
-                      title="Filtra stato"
+                      title="{$t('globalProducts.table.filters.filterStatus')}"
                     >
                       🔽
                     </button>
@@ -791,14 +977,14 @@
                           class="text-xs text-blue-600 hover:underline"
                           on:click={() => clearColumnFilter('attivo')}
                         >
-                          Cancella filtro
+                          {$t('globalProducts.table.filters.clearFilter')}
                         </button>
                       </div>
                       {#each getUniqueValues('attivo') as value}
-                        <label class="flex items-center p-2 hover:bg-gray-50 cursor-pointer text-sm">
+                        <label class="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer text-sm">
                           <input 
                             type="checkbox" 
-                            class="mr-2"
+                            class="mr-2 rounded border-neutral-300 dark:border-gray-600 dark:bg-gray-700 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2"
                             checked={columnFilters.attivo.includes(value)}
                             on:change={() => toggleFilterValue('attivo', value)}
                           />
@@ -809,15 +995,15 @@
                   {/if}
                 </th>
                 
-                <th>Azioni</th>
+                <th>{$t('globalProducts.table.headers.actions')}</th>
               </tr>
             </thead>
             <tbody>
               {#each prodotti as prodotto}
                 <tr 
-                  class="cursor-pointer hover:bg-neutral-50 transition-colors"
+                  class="cursor-pointer hover:bg-neutral-50 dark:hover:bg-gray-700 transition-colors"
                   on:click={() => viewGiacenze(prodotto)}
-                  title="Clicca per vedere giacenze di {prodotto.descrizione}"
+                  title="{$t('globalProducts.table.actions.viewStock')} - {prodotto.descrizione}"
                 >
                   <td>
                     <div class="flex items-center">
@@ -843,20 +1029,26 @@
                   <td>
                     <div class="flex gap-2">
                       <button 
+                        class="btn btn-success btn-sm"
+                        on:click|stopPropagation={() => openForm(prodotto)}
+                        title="{$t('common.edit')}"
+                      >
+                        ✏️
+                      </button>
+                      <button 
+                        class="btn btn-danger btn-sm"
+                        on:click|stopPropagation={() => deleteProdotto(prodotto)}
+                        title="{$t('common.delete')}"
+                      >
+                        🗑️
+                      </button>
+                      <button 
                         class="btn btn-primary btn-sm"
                         on:click|stopPropagation={() => viewGiacenze(prodotto)}
-                        title="Vedi giacenze di {prodotto.descrizione}"
+                        title="{$t('globalProducts.table.actions.viewStock')}"
                       >
                         📦
                       </button>
-                      <a 
-                        href="/auth/committenti/{prodotto.committente_id}/prodotti"
-                        class="btn btn-secondary btn-sm"
-                        title="Gestisci nel contesto committente"
-                        on:click|stopPropagation
-                      >
-                        🔧
-                      </a>
                     </div>
                   </td>
                 </tr>
@@ -869,12 +1061,204 @@
       <div class="text-center py-12">
         <div class="text-6xl mb-4">📦</div>
         <h3 class="text-xl font-semibold text-neutral-700 mb-2">
-          Nessun prodotto trovato
+          {$t('globalProducts.emptyState.title')}
         </h3>
         <p class="text-neutral-600 dark:text-gray-400">
-          {selectedCommittente ? 'Il committente selezionato non ha prodotti' : 'Non ci sono prodotti nel sistema'}
+          {$t('globalProducts.emptyState.description')}
         </p>
       </div>
     {/if}
   {/if}
 </div>
+
+<!-- Modal Form Prodotti -->
+{#if showForm}
+  <div class="modal-backdrop" on:click={resetForm}>
+    <div class="modal-content" on:click|stopPropagation>
+      <div class="modal-header bg-white dark:bg-gray-800">
+        <h2 class="text-xl font-semibold text-neutral-900 dark:text-gray-100">
+          {editingId ? $t('globalProducts.form.edit') : $t('globalProducts.form.add')}
+        </h2>
+        <button on:click={resetForm} class="text-neutral-400 hover:text-neutral-600 dark:text-gray-400 dark:hover:text-gray-200">
+          ✖️
+        </button>
+      </div>
+      
+      <form on:submit|preventDefault={handleSubmit} class="p-6 space-y-4 bg-white dark:bg-gray-800">
+        
+        <!-- Committente -->
+        <div>
+          <label class="form-label">{$t('globalProducts.form.client')} *</label>
+          <select
+            bind:value={formData.committente_id}
+            class="form-input"
+            class:border-red-500={formErrors.committente_id}
+            class:bg-gray-100={editingId}
+            class:dark:bg-gray-600={editingId}
+            disabled={editingId}
+            required
+          >
+            <option value="">{$t('globalProducts.form.selectClient')}</option>
+            {#each committenti as committente}
+              <option value={committente.id}>{committente.ragione_sociale}</option>
+            {/each}
+          </select>
+          {#if editingId}
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {$t('globalProducts.form.clientReadOnly')}
+            </p>
+          {/if}
+          {#if formErrors.committente_id}
+            <p class="form-error">{formErrors.committente_id.join(', ')}</p>
+          {/if}
+        </div>
+
+        <!-- Codice -->
+        <div>
+          <label class="form-label">{$t('globalProducts.form.code')} *</label>
+          <input
+            type="text"
+            bind:value={formData.codice}
+            class="form-input"
+            class:border-red-500={formErrors.codice}
+            class:bg-gray-100={editingId}
+            class:dark:bg-gray-600={editingId}
+            placeholder="{$t('globalProducts.form.codePlaceholder')}"
+            readonly={editingId}
+            required
+          />
+          {#if editingId}
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {$t('globalProducts.form.codeReadOnly')}
+            </p>
+          {/if}
+          {#if formErrors.codice}
+            <p class="form-error">{formErrors.codice.join(', ')}</p>
+          {/if}
+        </div>
+
+        <!-- Descrizione -->
+        <div>
+          <label class="form-label">{$t('globalProducts.form.description')} *</label>
+          <input
+            type="text"
+            bind:value={formData.descrizione}
+            class="form-input"
+            class:border-red-500={formErrors.descrizione}
+            placeholder="{$t('globalProducts.form.descriptionPlaceholder')}"
+            required
+          />
+          {#if formErrors.descrizione}
+            <p class="form-error">{formErrors.descrizione.join(', ')}</p>
+          {/if}
+        </div>
+
+        <!-- Categoria -->
+        <div>
+          <label class="form-label">{$t('globalProducts.form.category')} *</label>
+          <select
+            bind:value={formData.categoria_id}
+            class="form-input"
+            class:border-red-500={formErrors.categoria_id}
+            required
+          >
+            <option value="">{$t('globalProducts.form.selectCategory')}</option>
+            {#each categorieComplete.filter(c => !formData.committente_id || c.committente_id == formData.committente_id) as categoria}
+              <option value={categoria.id}>{categoria.descrizione}</option>
+            {/each}
+          </select>
+          {#if formErrors.categoria_id}
+            <p class="form-error">{formErrors.categoria_id.join(', ')}</p>
+          {/if}
+        </div>
+
+        <!-- Unità di Misura -->
+        <div>
+          <label class="form-label">{$t('globalProducts.form.unitOfMeasure')} *</label>
+          <select
+            bind:value={formData.unita_misura_id}
+            class="form-input"
+            class:border-red-500={formErrors.unita_misura_id}
+            required
+          >
+            <option value="">{$t('globalProducts.form.selectUnit')}</option>
+            {#each unitaMisura as um}
+              <option value={um.id}>{um.codice} - {um.descrizione}</option>
+            {/each}
+          </select>
+          {#if formErrors.unita_misura_id}
+            <p class="form-error">{formErrors.unita_misura_id.join(', ')}</p>
+          {/if}
+        </div>
+
+        <!-- Prezzo Vendita -->
+        <div>
+          <label class="form-label">{$t('globalProducts.form.salePrice')}</label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            bind:value={formData.prezzo_vendita}
+            class="form-input"
+            class:border-red-500={formErrors.prezzo_vendita}
+            placeholder="{$t('globalProducts.form.salePricePlaceholder')}"
+          />
+          {#if formErrors.prezzo_vendita}
+            <p class="form-error">{formErrors.prezzo_vendita.join(', ')}</p>
+          {/if}
+        </div>
+
+        <!-- Scorte -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="form-label">{$t('globalProducts.form.minStock')}</label>
+            <input
+              type="number"
+              min="0"
+              bind:value={formData.scorta_minima}
+              class="form-input"
+              class:border-red-500={formErrors.scorta_minima}
+              placeholder="{$t('globalProducts.form.minStockPlaceholder')}"
+            />
+            {#if formErrors.scorta_minima}
+              <p class="form-error">{formErrors.scorta_minima.join(', ')}</p>
+            {/if}
+          </div>
+          
+          <div>
+            <label class="form-label">{$t('globalProducts.form.maxStock')}</label>
+            <input
+              type="number"
+              min="0"
+              bind:value={formData.scorta_massima}
+              class="form-input"
+              class:border-red-500={formErrors.scorta_massima}
+              placeholder="{$t('globalProducts.form.maxStockPlaceholder')}"
+            />
+            {#if formErrors.scorta_massima}
+              <p class="form-error">{formErrors.scorta_massima.join(', ')}</p>
+            {/if}
+          </div>
+        </div>
+
+        <!-- Errori generali -->
+        {#if formErrors.general}
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p class="text-red-600 text-sm">{formErrors.general.join(', ')}</p>
+          </div>
+        {/if}
+
+        <!-- Bottoni -->
+        <div class="flex justify-end space-x-3 pt-4">
+          <button type="button" on:click={resetForm} class="btn btn-secondary">
+            {$t('common.cancel')}
+          </button>
+          <button type="submit" disabled={formLoading} class="btn btn-primary">
+            {#if formLoading}<div class="spinner w-4 h-4 mr-2"></div>{/if}
+            {editingId ? $t('common.save') : $t('common.add')}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}

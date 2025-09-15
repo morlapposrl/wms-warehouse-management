@@ -2,6 +2,7 @@
   import type { PageData } from './$types';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+  import { t } from '$lib/i18n';
 
   export let data: PageData;
 
@@ -22,7 +23,7 @@
 
   // Funzione per formattare il tipo ordine
   function formatTipoOrdine(tipo: string): string {
-    return tipo === 'INBOUND' ? 'In Entrata' : 'In Uscita';
+    return tipo === 'INBOUND' ? $t('movements.types.inbound') : $t('movements.types.outbound');
   }
 
   // Gestione filtri
@@ -56,10 +57,10 @@
 
 <div class="flex justify-between items-center mb-6">
   <div>
-    <h1 class="h1">Gestione Ordini</h1>
+    <h1 class="h1">{$t('orders.title')}</h1>
   </div>
   <a href="/auth/ordini/nuovo?committente={data.committente_id}" class="btn btn-primary">
-    + Nuovo Ordine
+    + {$t('orders.add')}
   </a>
 </div>
 
@@ -72,7 +73,7 @@
           <span class="text-blue-600 text-xl">📋</span>
         </div>
         <div class="ml-4">
-          <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Ordini Totali</p>
+          <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('orders.total')}</p>
           <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">{data.stats.totale_ordini || 0}</p>
         </div>
       </div>
@@ -84,7 +85,7 @@
           <span class="text-yellow-600 text-xl">🆕</span>
         </div>
         <div class="ml-4">
-          <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Nuovi</p>
+          <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('common.add')}</p>
           <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">{data.stats.ordini_nuovi || 0}</p>
         </div>
       </div>
@@ -96,7 +97,7 @@
           <span class="text-orange-600 text-xl">⚙️</span>
         </div>
         <div class="ml-4">
-          <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">In Preparazione</p>
+          <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('movements.types.inbound')}</p>
           <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">{data.stats.ordini_in_preparazione || 0}</p>
         </div>
       </div>
@@ -108,7 +109,7 @@
           <span class="text-green-600 text-xl">🚚</span>
         </div>
         <div class="ml-4">
-          <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Spediti</p>
+          <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('movements.types.outbound')}</p>
           <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">{data.stats.ordini_spediti || 0}</p>
         </div>
       </div>
@@ -122,14 +123,14 @@
     <div class="flex justify-between items-center">
       <h2 class="text-md font-semibold flex items-center gap-2">
         <span class="text-lg">🔍</span>
-        <span>Filtri</span>
+        <span>{$t('common.filter')}</span>
       </h2>
       {#if hasActiveFilters}
         <button type="button" on:click={resetFilters} class="btn btn-sm btn-secondary">
           <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
-          Reset
+          {$t('common.refresh')}
         </button>
       {/if}
     </div>
@@ -139,9 +140,9 @@
       <div class="grid grid-cols-8 gap-3 items-end">
         <!-- Committente -->
         <div>
-          <label class="form-label">Committente</label>
+          <label class="form-label">{$t('categories.client')}</label>
           <select name="committente" class="form-select">
-            <option value="">Tutti i committenti</option>
+            <option value="">{$t('common.all')} {$t('categories.client').toLowerCase()}</option>
             {#each data.options?.committenti || [] as committente}
               <option value={committente.id} selected={data.filters?.committente_id === committente.id}>
                 {committente.ragione_sociale}
@@ -151,21 +152,21 @@
         </div>
         <!-- Ricerca -->
         <div>
-          <label class="form-label">Ricerca</label>
+          <label class="form-label">{$t('common.search')}</label>
           <input 
             type="text" 
             name="search" 
             class="form-input" 
-            placeholder="Numero ordine, cliente, tracking..."
+            placeholder="{$t('orders.number')}, {$t('orders.client')}, tracking..."
             value={data.filters ? data.filters.search || '' : ''}
           />
         </div>
 
         <!-- Stato -->
         <div>
-          <label class="form-label">Stato</label>
+          <label class="form-label">{$t('common.status')}</label>
           <select name="stato" class="form-input">
-            <option value="">Tutti gli stati</option>
+            <option value="">{$t('common.all')} {$t('common.status').toLowerCase()}</option>
             {#each data.options?.stati_disponibili || [] as stato}
               <option value={stato} selected={data.filters?.stato === stato}>
                 {stato}
@@ -176,9 +177,9 @@
 
         <!-- Tipo Ordine -->
         <div>
-          <label class="form-label">Tipo</label>
+          <label class="form-label">{$t('movements.filters.type')}</label>
           <select name="tipo" class="form-input">
-            <option value="">Tutti i tipi</option>
+            <option value="">{$t('common.all')} {$t('movements.filters.type').toLowerCase()}</option>
             {#each data.options?.tipi_disponibili || [] as tipo}
               <option value={tipo} selected={data.filters?.tipo_ordine === tipo}>
                 {formatTipoOrdine(tipo)}
@@ -189,7 +190,7 @@
 
         <!-- Data Da -->
         <div>
-          <label class="form-label">Data Da</label>
+          <label class="form-label">{$t('movements.filters.dateFrom')}</label>
           <input 
             type="date" 
             name="data_da" 
@@ -200,7 +201,7 @@
 
         <!-- Data A -->
         <div>
-          <label class="form-label">Data A</label>
+          <label class="form-label">{$t('movements.filters.dateTo')}</label>
           <input 
             type="date" 
             name="data_a" 
@@ -215,13 +216,13 @@
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            Filtra
+            {$t('common.filter')}
           </button>
           <button type="button" on:click={resetFilters} class="btn btn-secondary">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
-            Reset
+            {$t('common.refresh')}
           </button>
         </div>
       </div>
@@ -233,12 +234,12 @@
 <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
   <div class="card-header border-b border-gray-200 dark:border-gray-700">
     <div class="flex justify-between items-center">
-      <h2 class="text-lg font-semibold">Lista Ordini</h2>
+      <h2 class="text-lg font-semibold">{$t('orders.title')}</h2>
       <div class="text-sm text-neutral-600 dark:text-gray-400">
         {#if data.pagination?.total_count > 0}
-          Mostrando {((data.pagination.current_page - 1) * data.pagination.limit) + 1}-{Math.min(data.pagination.current_page * data.pagination.limit, data.pagination.total_count)} di {data.pagination.total_count} ordini
+          {((data.pagination.current_page - 1) * data.pagination.limit) + 1}-{Math.min(data.pagination.current_page * data.pagination.limit, data.pagination.total_count)} / {data.pagination.total_count} {$t('orders.title').toLowerCase()}
         {:else}
-          Nessun ordine trovato
+          {$t('common.noData')}
         {/if}
       </div>
     </div>
@@ -247,15 +248,15 @@
     <table class="table table-zebra">
       <thead>
         <tr>
-          <th>Numero Ordine</th>
-          <th>Tipo</th>
-          <th>Cliente/Fornitore</th>
-          <th>Stato</th>
-          <th>Data Ordine</th>
-          <th>Data Richiesta</th>
-          <th>Colli</th>
-          <th>Valore</th>
-          <th>Corriere</th>
+          <th>{$t('orders.number')}</th>
+          <th>{$t('movements.filters.type')}</th>
+          <th>{$t('orders.client')}</th>
+          <th>{$t('orders.status')}</th>
+          <th>{$t('orders.date')}</th>
+          <th>{$t('common.date')}</th>
+          <th>{$t('common.quantity')}</th>
+          <th>{$t('orders.total')}</th>
+          <th>{$t('suppliers.contact')}</th>
           <th>Tracking</th>
         </tr>
       </thead>
@@ -296,12 +297,12 @@
                 <svg class="w-12 h-12 mb-4 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <p class="font-medium">Nessun ordine trovato</p>
+                <p class="font-medium">{$t('common.noData')}</p>
                 <p class="text-sm">
                   {#if hasActiveFilters}
-                    Prova a modificare i filtri o <button type="button" on:click={resetFilters} class="text-blue-600 hover:underline">resettali</button>
+                    {$t('common.filter')} <button type="button" on:click={resetFilters} class="text-blue-600 hover:underline">{$t('common.refresh')}</button>
                   {:else}
-                    Crea il tuo primo ordine per iniziare
+                    {$t('orders.add')}
                   {/if}
                 </p>
               </div>
@@ -317,7 +318,7 @@
 {#if data.pagination?.total_pages > 1}
   <div class="flex justify-between items-center mt-6">
     <div class="text-sm text-neutral-600 dark:text-gray-400">
-      Pagina {data.pagination.current_page} di {data.pagination.total_pages}
+      {data.pagination.current_page} / {data.pagination.total_pages}
     </div>
     
     <nav class="flex items-center space-x-2">

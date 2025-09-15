@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import Icon from '$lib/components/Icon.svelte';
+  import { t } from '$lib/i18n';
   import type { PageData } from '../../routes/auth/dashboard/$types.js';
 
   export let data: PageData;
@@ -217,7 +218,7 @@
           <h1 class="text-3xl font-black text-white flex items-center gap-2">
             <span class="text-4xl animate-spin">⚡</span>
             <span class="bg-gradient-to-r from-blue-400 via-purple-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent bg-[length:300%_300%] animate-gradient-x">
-              CONTROL CENTER
+              {$t('dashboard.controlCenter')}
             </span>
           </h1>
           <div class="flex items-center gap-2">
@@ -236,7 +237,7 @@
             <div class="absolute inset-0 bg-gradient-to-br from-blue-500/30 to-blue-600/40 rounded-2xl blur-sm group-hover:blur-none transition-all duration-500"></div>
             <div class="relative text-center p-6 bg-gradient-to-br from-blue-500/20 to-blue-600/30 rounded-2xl border-2 border-blue-400/50 backdrop-blur-xl shadow-2xl shadow-blue-500/30 hover:scale-105 hover:shadow-3xl hover:shadow-blue-500/50 transition-all duration-500 hover:border-blue-300/70">
               <div class="text-5xl font-black text-blue-300 drop-shadow-2xl mb-3 group-hover:animate-bounce transform group-hover:scale-110 transition-all duration-500">{kpiSummary.ordini_oggi}</div>
-              <div class="text-lg text-blue-200 font-bold tracking-wider">ORDINI</div>
+              <div class="text-lg text-blue-200 font-bold tracking-wider">{$t('dashboard.kpi.orders').toUpperCase()}</div>
               <div class="text-sm text-blue-300/70 mt-2 font-medium">+12% oggi</div>
               <div class="absolute -top-2 -right-2 w-6 h-6 bg-blue-400 rounded-full animate-ping opacity-30"></div>
             </div>
@@ -246,8 +247,8 @@
             <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/30 to-emerald-600/40 rounded-2xl blur-sm group-hover:blur-none transition-all duration-500"></div>
             <div class="relative text-center p-6 bg-gradient-to-br from-emerald-500/20 to-emerald-600/30 rounded-2xl border-2 border-emerald-400/50 backdrop-blur-xl shadow-2xl shadow-emerald-500/30 hover:scale-105 hover:shadow-3xl hover:shadow-emerald-500/50 transition-all duration-500 hover:border-emerald-300/70">
               <div class="text-5xl font-black text-emerald-300 drop-shadow-2xl mb-3 group-hover:animate-bounce transform group-hover:scale-110 transition-all duration-500">{kpiSummary.movimenti_oggi}</div>
-              <div class="text-lg text-emerald-200 font-bold tracking-wider">MOVIMENTI</div>
-              <div class="text-sm text-emerald-300/70 mt-2 font-medium">Real-time</div>
+              <div class="text-lg text-emerald-200 font-bold tracking-wider">{$t('dashboard.kpi.movements').toUpperCase()}</div>
+              <div class="text-sm text-emerald-300/70 mt-2 font-medium">{$t('dashboard.realtime')}</div>
               <div class="absolute -top-2 -right-2 w-6 h-6 bg-emerald-400 rounded-full animate-ping opacity-30"></div>
             </div>
           </div>
@@ -256,8 +257,8 @@
             <div class="absolute inset-0 bg-gradient-to-br from-orange-500/30 to-orange-600/40 rounded-2xl blur-sm group-hover:blur-none transition-all duration-500"></div>
             <div class="relative text-center p-6 bg-gradient-to-br from-orange-500/20 to-orange-600/30 rounded-2xl border-2 border-orange-400/50 backdrop-blur-xl shadow-2xl shadow-orange-500/30 hover:scale-105 hover:shadow-3xl hover:shadow-orange-500/50 transition-all duration-500 hover:border-orange-300/70">
               <div class="text-5xl font-black text-orange-300 drop-shadow-2xl mb-3 group-hover:animate-bounce transform group-hover:scale-110 transition-all duration-500">{kpiSummary.operatori_attivi}</div>
-              <div class="text-lg text-orange-200 font-bold tracking-wider">OPERATORI</div>
-              <div class="text-sm text-orange-300/70 mt-2 font-medium">Attivi ora</div>
+              <div class="text-lg text-orange-200 font-bold tracking-wider">{$t('dashboard.kpi.operators').toUpperCase()}</div>
+              <div class="text-sm text-orange-300/70 mt-2 font-medium">{$t('dashboard.activeNow')}</div>
               <div class="absolute -top-2 -right-2 w-6 h-6 bg-orange-400 rounded-full animate-ping opacity-30"></div>
             </div>
           </div>
@@ -266,8 +267,8 @@
             <div class="absolute inset-0 bg-gradient-to-br from-purple-500/30 to-purple-600/40 rounded-2xl blur-sm group-hover:blur-none transition-all duration-500"></div>
             <div class="relative text-center p-6 bg-gradient-to-br from-purple-500/20 to-purple-600/30 rounded-2xl border-2 border-purple-400/50 backdrop-blur-xl shadow-2xl shadow-purple-500/30 hover:scale-105 hover:shadow-3xl hover:shadow-purple-500/50 transition-all duration-500 hover:border-purple-300/70">
               <div class="text-5xl font-black text-purple-300 drop-shadow-2xl mb-3 group-hover:animate-bounce transform group-hover:scale-110 transition-all duration-500">{Math.round(efficienzaOperatori)}%</div>
-              <div class="text-lg text-purple-200 font-bold tracking-wider">EFFICIENZA</div>
-              <div class="text-sm text-purple-300/70 mt-2 font-medium">Media turno</div>
+              <div class="text-lg text-purple-200 font-bold tracking-wider">{$t('dashboard.kpi.efficiency').toUpperCase()}</div>
+              <div class="text-sm text-purple-300/70 mt-2 font-medium">{$t('dashboard.shiftAverage')}</div>
               <div class="absolute -top-2 -right-2 w-6 h-6 bg-purple-400 rounded-full animate-ping opacity-30"></div>
             </div>
           </div>
@@ -287,9 +288,9 @@
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-black text-white flex items-center gap-3">
               <span class="text-2xl animate-spin">⚙️</span>
-              <span class="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">ZONE MAGAZZINO</span>
+              <span class="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">{$t('dashboard.zones.title').toUpperCase()}</span>
             </h2>
-            <div class="px-3 py-1 bg-blue-500/20 text-blue-300 text-sm rounded-full border border-blue-400/30 font-bold animate-pulse">LIVE</div>
+            <div class="px-3 py-1 bg-blue-500/20 text-blue-300 text-sm rounded-full border border-blue-400/30 font-bold animate-pulse">{$t('dashboard.live').toUpperCase()}</div>
           </div>
           
           <div class="grid grid-cols-3 gap-3 flex-1">
@@ -304,7 +305,7 @@
                   </div>
                   
                   <div class="text-center">
-                    <h3 class="font-black text-white text-lg mb-2">ZONA {zona.zona}</h3>
+                    <h3 class="font-black text-white text-lg mb-2">{$t('dashboard.zones.zone').toUpperCase()} {zona.zona}</h3>
                     <div class="text-4xl font-black drop-shadow-xl mb-3 {zona.percentuale_occupazione > 85 ? 'text-red-400 animate-pulse' : zona.percentuale_occupazione > 70 ? 'text-orange-400' : 'text-emerald-400'}">
                       {zona.percentuale_occupazione}%
                     </div>
@@ -315,7 +316,7 @@
                     </div>
                     
                     <div class="text-sm text-white/80 font-bold">
-                      {zona.prodotti_diversi} SKU diversi
+                      {zona.prodotti_diversi} {$t('dashboard.zones.skuDifferent')}
                     </div>
                   </div>
                 </div>
@@ -335,7 +336,7 @@
           <div class="mb-6">
             <h2 class="text-lg font-black text-white mb-4 flex items-center gap-2">
               <span class="text-emerald-400 animate-pulse text-xl">👥</span>
-              <span class="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">OPERATORI</span>
+              <span class="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">{$t('dashboard.kpi.operators').toUpperCase()}</span>
             </h2>
             
             <div class="space-y-2">
@@ -360,21 +361,21 @@
           <div class="flex-1">
             <h2 class="text-lg font-black text-white mb-4 flex items-center gap-2">
               <span class="text-red-400 animate-pulse text-xl">🚨</span>
-              <span class="bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">ALERTS</span>
+              <span class="bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">{$t('dashboard.alerts.title').toUpperCase()}</span>
             </h2>
             
             <div class="grid grid-cols-3 gap-3">
               <div class="text-center p-3 bg-gradient-to-br from-red-500/20 to-red-600/30 rounded-xl border-2 border-red-400/50 backdrop-blur-xl shadow-lg shadow-red-500/30">
                 <div class="text-2xl font-black text-red-300 drop-shadow-xl animate-pulse">{critici}</div>
-                <div class="text-xs text-red-200 font-bold">CRITICI</div>
+                <div class="text-xs text-red-200 font-bold">{$t('dashboard.alerts.priority.critical').toUpperCase()}</div>
               </div>
               <div class="text-center p-3 bg-gradient-to-br from-orange-500/20 to-orange-600/30 rounded-xl border-2 border-orange-400/50 backdrop-blur-xl shadow-lg shadow-orange-500/30">
                 <div class="text-2xl font-black text-orange-300 drop-shadow-xl">{alti}</div>
-                <div class="text-xs text-orange-200 font-bold">ALTI</div>
+                <div class="text-xs text-orange-200 font-bold">{$t('dashboard.alerts.priority.high').toUpperCase()}</div>
               </div>
               <div class="text-center p-3 bg-gradient-to-br from-yellow-500/20 to-yellow-600/30 rounded-xl border-2 border-yellow-400/50 backdrop-blur-xl shadow-lg shadow-yellow-500/30">
                 <div class="text-2xl font-black text-yellow-300 drop-shadow-xl">{medi}</div>
-                <div class="text-xs text-yellow-200 font-bold">MEDI</div>
+                <div class="text-xs text-yellow-200 font-bold">{$t('dashboard.alerts.priority.medium').toUpperCase()}</div>
               </div>
             </div>
           </div>
@@ -393,7 +394,7 @@
             <div class="bg-slate-800/60 rounded-xl border-2 border-red-500/40 p-3 overflow-hidden">
               <h3 class="text-sm font-black text-white mb-3 flex items-center gap-2">
                 <span class="text-red-400 animate-bounce">⚠️</span>
-                <span class="bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">GIACENZE CRITICHE</span>
+                <span class="bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">{$t('dashboard.inventory.critical').toUpperCase()}</span>
               </h3>
               
               <div class="space-y-2 max-h-80 overflow-y-auto custom-scrollbar">
@@ -405,7 +406,7 @@
                     </div>
                     <div class="text-right flex-shrink-0">
                       <div class="text-red-400 font-black text-xl animate-pulse">{giacenza.quantita}</div>
-                      <div class="text-xs text-white/60">Min: {giacenza.scorta_minima}</div>
+                      <div class="text-xs text-white/60">{$t('dashboard.inventory.min')}: {giacenza.scorta_minima}</div>
                     </div>
                   </div>
                 {/each}
@@ -416,7 +417,7 @@
             <div class="bg-slate-800/60 rounded-xl border-2 border-cyan-500/40 p-3 overflow-hidden flex-1">
               <h3 class="text-sm font-black text-white mb-3 flex items-center gap-2">
                 <span class="text-cyan-400 animate-bounce">📈</span>
-                <span class="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">MOVIMENTI LIVE</span>
+                <span class="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">{$t('dashboard.movements.live').toUpperCase()}</span>
               </h3>
               
               <div class="space-y-1 max-h-40 overflow-y-auto custom-scrollbar">

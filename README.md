@@ -1,5 +1,13 @@
 # 🏭 WMS Gestionale Magazzino - Morlappo Srl
 
+<!-- Language Selection -->
+**🌍 Read in other languages:** 
+[🇬🇧 English](README.en.md) | 
+[🇫🇷 Français](README.fr.md) | 
+[🇩🇪 Deutsch](README.de.md) | 
+[🇪🇸 Español](README.es.md) | 
+[🇨🇳 中文](README.zh.md)
+
 ## Sistema WMS (Warehouse Management System) con Intelligenza Artificiale
 
 Sistema di gestione magazzino avanzato con supporto multicommittente, UDC (Unità Di Carico) e trasferimenti intelligenti, sviluppato da **Morlappo Srl** - *Innovazione attraverso l'Intelligenza Artificiale*.

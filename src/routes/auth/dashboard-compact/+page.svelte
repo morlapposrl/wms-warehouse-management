@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import Icon from '$lib/components/Icon.svelte';
+  import { t } from '$lib/i18n';
   import type { PageData } from '../dashboard/$types.js';
 
   export let data: PageData;
@@ -92,7 +93,7 @@
 </script>
 
 <svelte:head>
-  <title>Dashboard Compatta | Gestionale Magazzino</title>
+  <title>{$t('dashboard.compact.title')} | {$t('dashboard.compact.appTitle')}</title>
 </svelte:head>
 
 <!-- Dashboard compatta ottimizzata per MacBook Pro 15" (1440x900) -->
@@ -102,17 +103,17 @@
   <div class="flex items-center justify-between mb-4">
     <div class="flex items-center gap-3">
       <Icon name="chart-bar" class="w-6 h-6 text-blue-600" />
-      <h1 class="text-xl font-bold text-gray-900">Dashboard Real-Time</h1>
+      <h1 class="text-xl font-bold text-gray-900">{$t('dashboard.compact.realtimeTitle')}</h1>
       <span class="px-2 py-1 text-xs rounded-full {isConnected ? 'bg-green-100 text-green-800 animate-pulse' : 'bg-red-100 text-red-800'}">
-        {isConnected ? 'LIVE' : 'OFFLINE'}
+        {isConnected ? $t('dashboard.compact.live') : $t('dashboard.compact.offline')}
       </span>
     </div>
     
     <div class="flex items-center gap-3 text-sm">
-      <span class="text-gray-500">Aggiornato: {lastUpdate.toLocaleTimeString('it-IT')}</span>
+      <span class="text-gray-500">{$t('dashboard.compact.updated')}: {lastUpdate.toLocaleTimeString('it-IT')}</span>
       <label class="flex items-center gap-2">
         <input type="checkbox" bind:checked={autoRefresh} class="rounded">
-        <span class="text-gray-600">Auto-refresh</span>
+        <span class="text-gray-600">{$t('dashboard.compact.autoRefresh')}</span>
       </label>
     </div>
   </div>
@@ -126,28 +127,28 @@
       <!-- KPI Cards compatte -->
       <div class="bg-white rounded-lg shadow-sm border p-4">
         <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-          📊 KPI Operativi
+          📊 {$t('dashboard.compact.operationalKpis')}
         </h3>
         
         <div class="grid grid-cols-2 gap-3">
           <div class="text-center p-3 bg-blue-50 rounded-lg">
             <div class="text-2xl font-bold text-blue-600">{data.kpiSummary.ordini_oggi || 0}</div>
-            <div class="text-xs text-blue-700">Ordini Oggi</div>
+            <div class="text-xs text-blue-700">{$t('dashboard.compact.ordersToday')}</div>
           </div>
           
           <div class="text-center p-3 bg-green-50 rounded-lg">
             <div class="text-2xl font-bold text-green-600">{data.kpiSummary.movimenti_oggi || 0}</div>
-            <div class="text-xs text-green-700">Movimenti</div>
+            <div class="text-xs text-green-700">{$t('dashboard.compact.movements')}</div>
           </div>
           
           <div class="text-center p-3 bg-orange-50 rounded-lg">
             <div class="text-2xl font-bold text-orange-600">{data.kpiSummary.operatori_attivi || 0}</div>
-            <div class="text-xs text-orange-700">Op. Attivi</div>
+            <div class="text-xs text-orange-700">{$t('dashboard.compact.activeOperators')}</div>
           </div>
           
           <div class="text-center p-3 bg-purple-50 rounded-lg">
             <div class="text-2xl font-bold text-purple-600">{Math.round(efficienzaOperatori)}</div>
-            <div class="text-xs text-purple-700">Efficienza</div>
+            <div class="text-xs text-purple-700">{$t('dashboard.compact.efficiency')}</div>
           </div>
         </div>
       </div>
@@ -155,23 +156,23 @@
       <!-- Alert Summary compatto -->
       <div class="bg-white rounded-lg shadow-sm border p-4">
         <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-          🚨 Alert Attivi
+          🚨 {$t('dashboard.compact.activeAlerts')}
         </h3>
         
         <div class="flex justify-between items-center">
           <div class="flex gap-2">
-            <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">{critici} Critici</span>
-            <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">{alti} Alti</span>
-            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">{medi} Medi</span>
+            <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">{critici} {$t('dashboard.compact.critical')}</span>
+            <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">{alti} {$t('dashboard.compact.high')}</span>
+            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">{medi} {$t('dashboard.compact.medium')}</span>
           </div>
-          <div class="text-xs text-gray-500">Tot: {critici + alti + medi}</div>
+          <div class="text-xs text-gray-500">{$t('dashboard.compact.total')}: {critici + alti + medi}</div>
         </div>
       </div>
 
       <!-- Giacenze critiche -->
       <div class="bg-white rounded-lg shadow-sm border p-4 flex-1 min-h-0">
         <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-          📦 Giacenze Critiche
+          📦 {$t('dashboard.compact.criticalStock')}
         </h3>
         
         <div class="space-y-2 overflow-y-auto max-h-48">
@@ -183,7 +184,7 @@
               </div>
               <div class="text-right flex-shrink-0">
                 <div class="text-red-600 font-bold">{giacenza.quantita}</div>
-                <div class="text-xs text-gray-500">Min: {giacenza.scorta_minima}</div>
+                <div class="text-xs text-gray-500">{$t('dashboard.compact.min')}: {giacenza.scorta_minima}</div>
               </div>
             </div>
           {/each}
@@ -197,7 +198,7 @@
       <!-- Operatori Performance -->
       <div class="bg-white rounded-lg shadow-sm border p-4 flex-1 min-h-0">
         <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-          👥 Operatori Live
+          👥 {$t('dashboard.compact.liveOperators')}
         </h3>
         
         <div class="space-y-2 overflow-y-auto">
@@ -219,7 +220,7 @@
       <!-- Zone Status -->
       <div class="bg-white rounded-lg shadow-sm border p-4">
         <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-          🏭 Zone Magazzino
+          🏭 {$t('dashboard.compact.warehouseZones')}
         </h3>
         
         <div class="grid grid-cols-2 gap-2">
@@ -235,7 +236,7 @@
                 <div class="h-2 rounded-full transition-all duration-300 {zona.percentuale_occupazione > 85 ? 'bg-red-500' : zona.percentuale_occupazione > 70 ? 'bg-orange-500' : 'bg-green-500'}" 
                      style="width: {zona.percentuale_occupazione}%"></div>
               </div>
-              <div class="text-xs text-gray-500 mt-1">{zona.prodotti_diversi || 0} SKU</div>
+              <div class="text-xs text-gray-500 mt-1">{zona.prodotti_diversi || 0} {$t('dashboard.compact.sku')}</div>
             </div>
           {/each}
         </div>
@@ -248,7 +249,7 @@
       <!-- Alert Live -->
       <div class="bg-white rounded-lg shadow-sm border p-4 flex-1 min-h-0">
         <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-          🔔 Alert Live
+          🔔 {$t('dashboard.compact.liveAlerts')}
         </h3>
         
         <div class="space-y-2 overflow-y-auto">
@@ -269,7 +270,7 @@
       <!-- Movimenti Recenti -->
       <div class="bg-white rounded-lg shadow-sm border p-4">
         <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-          📋 Movimenti Recenti
+          📋 {$t('dashboard.compact.recentMovements')}
         </h3>
         
         <div class="space-y-2 max-h-32 overflow-y-auto">

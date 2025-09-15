@@ -3,6 +3,7 @@
   import type { Committente, ApiResponse, CommittenteWithStats } from '$lib/types';
   import { STATI_COMMITTENTE, TIPI_CONTRATTO } from '$lib/types';
   import { validateCommittente } from '$lib/validations/committente';
+  import { t } from '$lib/i18n';
   
   // State management
   let committenti: CommittenteWithStats[] = [];
@@ -70,10 +71,10 @@
       if (result.success) {
         committenti = result.data || [];
       } else {
-        error = result.error || 'Errore nel caricamento';
+        error = result.error || $t('errors.generic');
       }
     } catch (e) {
-      error = 'Errore di connessione';
+      error = $t('errors.network');
     } finally {
       loading = false;
     }
@@ -117,12 +118,12 @@
         if (result.errors && typeof result.errors === 'object') {
           formErrors = result.errors;
         } else {
-          error = result.error || 'Errore nel salvataggio';
+          error = result.error || $t('errors.generic');
           formErrors = {}; // Reset errori del form
         }
       }
     } catch (e) {
-      error = 'Errore di connessione';
+      error = $t('errors.network');
     } finally {
       loading = false;
     }
@@ -146,13 +147,13 @@
       const result: ApiResponse = await response.json();
       
       if (result.success) {
-        success = hard ? 'Committente eliminato definitivamente' : 'Committente disattivato';
+        success = hard ? $t('clients.messages.deleteSuccess') : $t('clients.messages.saveSuccess');
         await loadCommittenti();
       } else {
-        error = result.error || 'Errore nell\'eliminazione';
+        error = result.error || $t('clients.messages.error');
       }
     } catch (e) {
-      error = 'Errore di connessione';
+      error = $t('errors.network');
     } finally {
       loading = false;
     }
@@ -230,95 +231,115 @@
   }
 </script>
 
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-  <div class="w-full px-4 sm:px-6 lg:px-8">
-    
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-8">
+<div class="w-full">
+  <!-- Header con azioni -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between mb-6">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">🏢 Gestione Committenti</h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-2">Amministrazione clienti/proprietari merce in deposito</p>
+        <h1 class="text-2xl font-bold text-neutral-900 mb-1">
+          🏢 {$t('clients.title')}
+        </h1>
+        <p class="text-neutral-600 dark:text-gray-400">
+          {$t('clients.subtitle')}
+        </p>
       </div>
       
-      <button
-        on:click={() => showForm = true}
-        disabled={loading}
-        class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-      >
-        + Nuovo Committente
-      </button>
+      <!-- Actions -->
+      <div class="flex gap-3">
+        <button 
+          class="btn btn-neutral"
+          on:click={() => window.location.reload()}
+          title="{$t('common.refresh')}"
+        >
+          🔄 {$t('common.refresh')}
+        </button>
+        <button
+          class="btn btn-primary"
+          on:click={() => showForm = true}
+          disabled={loading}
+          title="{$t('clients.add')}"
+        >
+          + {$t('clients.add')}
+        </button>
+      </div>
     </div>
 
-    <!-- Messaggi -->
+    <!-- Alert successo/errore -->
     {#if error}
-      <div class="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded-lg mb-6">
-        <strong>Errore:</strong> {error}
+      <div class="alert alert-error mb-6">
+        <strong>{$t('orders.labels.error')}:</strong> {error}
       </div>
     {/if}
 
     {#if success}
-      <div class="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-200 px-4 py-3 rounded-lg mb-6">
-        <strong>Successo:</strong> {success}
+      <div class="alert alert-success mb-6">
+        <strong>{$t('orders.labels.success')}:</strong> {success}
       </div>
     {/if}
 
-    <!-- Filtri -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-6 mb-6">
-      <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">🔍 Filtri</h3>
-      
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
-          <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Ricerca
-          </label>
-          <input
-            id="search"
-            type="text"
-            bind:value={searchTerm}
-            placeholder="Ragione sociale, codice, email..."
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-        
-        <div>
-          <label for="status-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Stato
-          </label>
-          <select
-            id="status-filter"
-            bind:value={statusFilter}
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">Tutti</option>
-            {#each STATI_COMMITTENTE as stato}
-              <option value={stato}>{stato}</option>
-            {/each}
-          </select>
-        </div>
-        
-        <div>
-          <label for="contract-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Tipo Contratto
-          </label>
-          <select
-            id="contract-filter"
-            bind:value={contractFilter}
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">Tutti</option>
+    <!-- Pannello Filtri -->
+    <div class="card mb-6">
+      <div class="card-header py-3">
+        <h3 class="text-md font-semibold text-neutral-900 flex items-center gap-2">
+          <span class="text-lg">🔍</span>
+          <span>{$t('common.filter')}</span>
+        </h3>
+      </div>
+      <div class="card-body py-4">
+        <div class="flex items-end gap-2 flex-nowrap">
+          <!-- Ricerca -->
+          <div class="min-w-64">
+            <input
+              id="search"
+              type="text"
+              bind:value={searchTerm}
+              placeholder="{$t('clients.searchPlaceholder')}"
+              class="form-input text-sm"
+            />
+          </div>
+          
+          <!-- Filtro Stato -->
+          <div class="min-w-32">
+            <select
+              id="status-filter"
+              bind:value={statusFilter}
+              class="form-input text-sm"
+            >
+              <option value="">{$t('common.all')} {$t('clients.filters.status').toLowerCase()}</option>
+              {#each STATI_COMMITTENTE as stato}
+                <option value={stato}>{$t(`clients.statuses.${stato === 'attivo' ? 'active' : stato === 'sospeso' ? 'suspended' : 'terminated'}`)}</option>
+              {/each}
+            </select>
+          </div>
+          
+          <!-- Filtro Tipo Contratto -->
+          <div class="min-w-32">
+            <select
+              id="contract-filter"
+              bind:value={contractFilter}
+              class="form-input text-sm"
+            >
+              <option value="">{$t('common.all')} {$t('clients.filters.contractType').toLowerCase()}</option>
             {#each TIPI_CONTRATTO as tipo}
-              <option value={tipo}>{tipo}</option>
+              <option value={tipo}>{$t(`clients.contractTypes.${tipo === 'deposito' ? 'deposit' : tipo === 'logistica' ? 'logistics' : 'mixed'}`)}</option>
             {/each}
           </select>
-        </div>
-        
-        <div class="flex items-end">
-          <button
-            on:click={() => { searchTerm = ''; statusFilter = ''; contractFilter = ''; }}
-            class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50"
-          >
-            Pulisci Filtri
-          </button>
+          </div>
+          
+          <!-- Pulsante Reset -->
+          <div>
+            <button
+              class="btn btn-secondary btn-sm px-2"
+              on:click={() => { searchTerm = ''; statusFilter = ''; contractFilter = ''; }}
+              title="{$t('common.refresh')} {$t('common.filter').toLowerCase()}"
+            >
+              ↻
+            </button>
+          </div>
+          
+          <div class="text-sm text-neutral-600 dark:text-gray-400">
+            {filteredCommittenti.length} {$t('clients.title').toLowerCase()}
+          </div>
         </div>
       </div>
     </div>
@@ -326,11 +347,11 @@
     <!-- Form Modale -->
     {#if showForm}
       <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-          <div class="sticky top-0 bg-white dark:bg-gray-800 border-b px-6 py-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-5xl max-h-[95vh] flex flex-col">
+          <div class="bg-white dark:bg-gray-800 border-b px-4 py-3 flex-shrink-0">
             <div class="flex justify-between items-center">
               <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                {editingId ? 'Modifica Committente' : 'Nuovo Committente'}
+                {editingId ? $t('clients.edit') : $t('clients.add')}
               </h2>
               <button
                 on:click={resetForm}
@@ -343,16 +364,17 @@
             </div>
           </div>
           
-          <form on:submit|preventDefault={handleSubmit} class="p-6">
+          <form on:submit|preventDefault={handleSubmit} class="flex flex-col flex-1 overflow-hidden">
+            <div class="p-4 overflow-y-auto flex-1">
             <!-- Layout principale: form + note -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <!-- Colonna principale form (2/3) -->
-              <div class="lg:col-span-2 space-y-4">
+              <div class="lg:col-span-2 space-y-3">
                 <!-- Dati principali -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label for="codice" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Codice Committente *
+                <label for="codice" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {$t('clients.form.code')} *
                 </label>
                 <input
                   id="codice"
@@ -369,8 +391,8 @@
               </div>
 
               <div>
-                <label for="ragione_sociale" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Ragione Sociale *
+                <label for="ragione_sociale" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {$t('clients.form.companyName')} *
                 </label>
                 <input
                   id="ragione_sociale"
@@ -389,8 +411,8 @@
             <!-- Dati fiscali -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label for="partita_iva" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Partita IVA
+                <label for="partita_iva" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {$t('clients.form.vatNumber')}
                 </label>
                 <input
                   id="partita_iva"
@@ -406,8 +428,8 @@
               </div>
 
               <div>
-                <label for="codice_fiscale" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Codice Fiscale
+                <label for="codice_fiscale" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {$t('clients.form.fiscalCode')}
                 </label>
                 <input
                   id="codice_fiscale"
@@ -426,8 +448,8 @@
             <!-- Indirizzi -->
             <div class="space-y-4">
               <div>
-                <label for="indirizzo_sede" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Indirizzo Sede
+                <label for="indirizzo_sede" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {$t('clients.form.address')}
                 </label>
                 <input
                   id="indirizzo_sede"
@@ -442,14 +464,14 @@
               </div>
 
               <div>
-                <label for="indirizzo_fatturazione" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Indirizzo Fatturazione
+                <label for="indirizzo_fatturazione" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {$t('clients.form.billingAddress')}
                 </label>
                 <input
                   id="indirizzo_fatturazione"
                   type="text"
                   bind:value={formData.indirizzo_fatturazione}
-                  placeholder="Se diverso dalla sede"
+                  placeholder="{$t('clients.form.billingAddress')}"
                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   class:border-red-500={formErrors.indirizzo_fatturazione}
                 />
@@ -462,8 +484,8 @@
             <!-- Località -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <label for="cap" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  CAP
+                <label for="cap" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {$t('clients.form.zipCode')}
                 </label>
                 <input
                   id="cap"
@@ -479,8 +501,8 @@
               </div>
 
               <div>
-                <label for="citta" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Città
+                <label for="citta" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {$t('clients.form.city')}
                 </label>
                 <input
                   id="citta"
@@ -495,8 +517,8 @@
               </div>
 
               <div>
-                <label for="provincia" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Provincia
+                <label for="provincia" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {$t('clients.form.province')}
                 </label>
                 <input
                   id="provincia"
@@ -516,8 +538,8 @@
             <!-- Contatti -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <label for="telefono" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Telefono
+                <label for="telefono" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {$t('clients.form.phone')}
                 </label>
                 <input
                   id="telefono"
@@ -532,8 +554,8 @@
               </div>
 
               <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Email
+                <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {$t('clients.form.email')}
                 </label>
                 <input
                   id="email"
@@ -548,8 +570,8 @@
               </div>
 
               <div>
-                <label for="pec" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  PEC
+                <label for="pec" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {$t('clients.form.pec')}
                 </label>
                 <input
                   id="pec"
@@ -567,8 +589,8 @@
             <!-- Referente e contratto -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label for="referente_principale" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Referente Principale
+                <label for="referente_principale" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {$t('clients.form.mainContact')}
                 </label>
                 <input
                   id="referente_principale"
@@ -583,8 +605,8 @@
               </div>
 
               <div>
-                <label for="tipo_contratto" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Tipo Contratto
+                <label for="tipo_contratto" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {$t('clients.form.contractType')}
                 </label>
                 <select
                   id="tipo_contratto"
@@ -593,7 +615,7 @@
                   class:border-red-500={formErrors.tipo_contratto}
                 >
                   {#each TIPI_CONTRATTO as tipo}
-                    <option value={tipo}>{tipo}</option>
+                    <option value={tipo}>{$t(`clients.contractTypes.${tipo === 'deposito' ? 'deposit' : tipo === 'logistica' ? 'logistics' : 'mixed'}`)}</option>
                   {/each}
                 </select>
                 {#if formErrors.tipo_contratto}
@@ -605,8 +627,8 @@
             <!-- Date e stato -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <label for="data_inizio_rapporto" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Data Inizio Rapporto
+                <label for="data_inizio_rapporto" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {$t('clients.form.startDate')}
                 </label>
                 <input
                   id="data_inizio_rapporto"
@@ -621,8 +643,8 @@
               </div>
 
               <div>
-                <label for="data_fine_rapporto" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Data Fine Rapporto
+                <label for="data_fine_rapporto" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {$t('clients.form.endDate')}
                 </label>
                 <input
                   id="data_fine_rapporto"
@@ -637,8 +659,8 @@
               </div>
 
               <div>
-                <label for="stato" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Stato
+                <label for="stato" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {$t('clients.form.status')}
                 </label>
                 <select
                   id="stato"
@@ -647,7 +669,7 @@
                   class:border-red-500={formErrors.stato}
                 >
                   {#each STATI_COMMITTENTE as stato}
-                    <option value={stato}>{stato}</option>
+                    <option value={stato}>{$t(`clients.statuses.${stato === 'attivo' ? 'active' : stato === 'sospeso' ? 'suspended' : 'terminated'}`)}</option>
                   {/each}
                 </select>
                 {#if formErrors.stato}
@@ -660,16 +682,16 @@
           <!-- Colonna Note (1/3) -->
           <div class="lg:col-span-1">
             <div class="sticky top-4">
-              <label for="note" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                📝 Note
+              <label for="note" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                📝 {$t('clients.form.notes')}
               </label>
               <textarea
                 id="note"
                 bind:value={formData.note}
-                rows="10"
+                rows="6"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500 resize-none"
                 class:border-red-500={formErrors.note}
-                placeholder="Note aggiuntive...&#10;&#10;• Condizioni particolari&#10;• Requisiti speciali&#10;• Comunicazioni&#10;• Promemoria"
+                placeholder="{$t('clients.form.notes')}"
               ></textarea>
               {#if formErrors.note}
                 <p class="text-red-600 text-sm mt-1">{formErrors.note.join(', ')}</p>
@@ -677,31 +699,35 @@
             </div>
           </div>
         </div>
+            </div>
 
-            <!-- Errori generali -->
-            {#if Object.keys(formErrors).length > 0 && !Object.keys(formErrors).some(key => formErrors[key]?.length)}
-              <div class="text-red-600 text-sm">
-                <p>Correggere gli errori evidenziati prima di procedere.</p>
+            <!-- Footer fisso con bottoni -->
+            <div class="border-t px-4 py-3 flex-shrink-0 bg-white dark:bg-gray-800">
+              <!-- Errori generali -->
+              {#if Object.keys(formErrors).length > 0 && !Object.keys(formErrors).some(key => formErrors[key]?.length)}
+                <div class="text-red-600 text-sm mb-3">
+                  <p>{$t('validation.required')}</p>
+                </div>
+              {/if}
+
+              <!-- Bottoni -->
+              <div class="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  on:click={resetForm}
+                  disabled={loading}
+                  class="px-6 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                >
+                  {$t('common.cancel')}
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {loading ? $t('common.loading') : editingId ? $t('common.edit') : $t('common.add')}
+                </button>
               </div>
-            {/if}
-
-            <!-- Bottoni -->
-            <div class="flex justify-end space-x-3 pt-6 border-t">
-              <button
-                type="button"
-                on:click={resetForm}
-                disabled={loading}
-                class="px-6 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
-              >
-                Annulla
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-              >
-                {loading ? 'Salvataggio...' : editingId ? 'Aggiorna' : 'Crea'}
-              </button>
             </div>
           </form>
         </div>
@@ -709,67 +735,68 @@
     {/if}
 
     <!-- Tabella -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-          Committenti ({filteredCommittenti.length})
+    <div class="card">
+      <div class="card-header">
+        <h3 class="text-lg font-semibold text-neutral-900 flex items-center gap-2">
+          <span class="text-lg">🏢</span>
+          <span>{$t('clients.title')} ({filteredCommittenti.length})</span>
         </h3>
       </div>
       
       {#if loading}
         <div class="p-8 text-center">
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p class="text-gray-600 dark:text-gray-400 mt-2">Caricamento...</p>
+          <p class="text-neutral-600 dark:text-gray-400 mt-2">{$t('common.loading')}</p>
         </div>
       {:else if filteredCommittenti.length === 0}
-        <div class="p-8 text-center text-gray-600 dark:text-gray-400">
-          <p>Nessun committente trovato.</p>
+        <div class="p-8 text-center text-neutral-600 dark:text-gray-400">
+          <p>{$t('common.noData')}</p>
         </div>
       {:else}
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-700">
+          <table class="table table-zebra">
+            <thead>
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Committente
+                <th class="sortable-header">
+                  {$t('clients.form.companyName')}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Contatti
+                <th class="sortable-header">
+                  {$t('orders.labels.contacts')}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Contratto
+                <th class="sortable-header">
+                  {$t('clients.form.contractType')}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Stato
+                <th class="sortable-header">
+                  {$t('clients.form.status')}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Statistiche
+                <th class="sortable-header">
+                  {$t('clients.stats.totalProducts')}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Azioni
+                <th class="sortable-header">
+                  {$t('common.actions')}
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody>
               {#each filteredCommittenti as committente}
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td class="px-6 py-4 whitespace-nowrap">
+                <tr>
+                  <td>
                     <div>
-                      <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      <div class="font-medium">
                         {committente.ragione_sociale}
                       </div>
-                      <div class="text-sm text-gray-500 dark:text-gray-400">
+                      <div class="text-sm opacity-60">
                         {committente.codice}
                       </div>
                       {#if committente.partita_iva}
-                        <div class="text-xs text-gray-400">
-                          P.IVA: {committente.partita_iva}
+                        <div class="text-xs opacity-50">
+                          {$t('clients.form.vatNumber')}: {committente.partita_iva}
                         </div>
                       {/if}
                     </div>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900 dark:text-gray-100">
+                  <td>
+                    <div class="text-sm">
                       {#if committente.email}
                         <div>📧 {committente.email}</div>
                       {/if}
@@ -777,53 +804,60 @@
                         <div>📞 {committente.telefono}</div>
                       {/if}
                       {#if committente.referente_principale}
-                        <div class="text-xs text-gray-500">
-                          Ref: {committente.referente_principale}
+                        <div class="text-xs opacity-60">
+                          {$t('clients.form.mainContact')}: {committente.referente_principale}
                         </div>
                       {/if}
                     </div>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {getContractBadgeClass(committente.tipo_contratto)}">
-                      {committente.tipo_contratto}
-                    </span>
+                  <td>
+                    <div class="badge {getContractBadgeClass(committente.tipo_contratto)}">
+                      {$t(`clients.contractTypes.${committente.tipo_contratto === 'deposito' ? 'deposit' : committente.tipo_contratto === 'logistica' ? 'logistics' : 'mixed'}`)}
+                    </div>
                     {#if committente.data_inizio_rapporto}
-                      <div class="text-xs text-gray-500 mt-1">
-                        Dal: {new Date(committente.data_inizio_rapporto).toLocaleDateString()}
+                      <div class="text-xs opacity-60 mt-1">
+                        {$t('clients.form.startDate')}: {new Date(committente.data_inizio_rapporto).toLocaleDateString()}
                       </div>
                     {/if}
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {getStatusBadgeClass(committente.stato)}">
-                      {committente.stato}
-                    </span>
+                  <td>
+                    <div class="badge {getStatusBadgeClass(committente.stato)}">
+                      {$t(`clients.statuses.${committente.stato === 'attivo' ? 'active' : committente.stato === 'sospeso' ? 'suspended' : 'terminated'}`)}
+                    </div>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    <div>🏷️ Prodotti: {committente.num_prodotti || 0}</div>
-                    <div>📦 Movimenti: {committente.num_movimenti_mese || 0}/mese</div>
-                    <div>💰 Valore: €{(committente.valore_giacenza || 0).toFixed(2)}</div>
+                  <td>
+                    <div class="text-sm space-y-1">
+                      <div>🏷️ {$t('products.title')}: {committente.num_prodotti || 0}</div>
+                      <div>📦 {$t('movements.title')}: {committente.num_movimenti_mese || 0}/mese</div>
+                      <div>💰 {$t('clients.stats.totalValue')}: €{(committente.valore_giacenza || 0).toFixed(2)}</div>
+                    </div>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <button
-                      on:click={() => handleEdit(committente)}
-                      class="text-indigo-600 hover:text-indigo-900"
-                    >
-                      Modifica
-                    </button>
-                    <button
-                      on:click={() => handleDelete(committente.id, committente.ragione_sociale)}
-                      class="text-yellow-600 hover:text-yellow-900"
-                    >
-                      Disattiva
-                    </button>
-                    {#if committente.stato === 'cessato'}
+                  <td>
+                    <div class="flex gap-2">
                       <button
-                        on:click={() => handleDelete(committente.id, committente.ragione_sociale, true)}
-                        class="text-red-600 hover:text-red-900"
+                        on:click={() => handleEdit(committente)}
+                        class="btn btn-sm btn-ghost"
+                        title="{$t('clients.actions.edit')}"
                       >
-                        Elimina
+                        ✏️
                       </button>
-                    {/if}
+                      <button
+                        on:click={() => handleDelete(committente.id, committente.ragione_sociale)}
+                        class="btn btn-sm btn-warning"
+                        title="{$t('clients.actions.delete')}"
+                      >
+                        ⏸️
+                      </button>
+                      {#if committente.stato === 'cessato'}
+                        <button
+                          on:click={() => handleDelete(committente.id, committente.ragione_sociale, true)}
+                          class="btn btn-sm btn-error"
+                          title="{$t('clients.actions.delete')}"
+                        >
+                          🗑️
+                        </button>
+                      {/if}
+                    </div>
                   </td>
                 </tr>
               {/each}
@@ -834,3 +868,22 @@
     </div>
   </div>
 </div>
+
+<style>
+  .sortable-header {
+    @apply relative;
+  }
+  
+  .sortable-header button {
+    @apply text-sm font-medium cursor-pointer transition-colors;
+  }
+  
+  .sortable-header button:hover {
+    @apply text-blue-600;
+  }
+  
+  /* Filter dropdown styles */
+  .sortable-header .absolute {
+    z-index: 1000;
+  }
+</style>

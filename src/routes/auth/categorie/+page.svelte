@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { t } from '$lib/i18n';
   
   // State management
   let categorie = [];
@@ -38,7 +39,7 @@
       await loadCategorie();
     } catch (err) {
       console.error('Errore caricamento:', err);
-      error = 'Errore nel caricamento dei dati';
+      error = $t('errors.network');
     }
   });
   
@@ -52,10 +53,10 @@
           categorieOriginali = result.data;
           applyClientFilters();
         } else {
-          error = result.error || 'Errore nel caricamento';
+          error = result.error || $t('errors.network');
         }
       } else {
-        error = 'Errore di connessione';
+        error = $t('errors.network');
       }
     } catch (err) {
       console.error('Errore categorie:', err);
@@ -97,17 +98,17 @@
   
   async function handleSubmit() {
     if (!formData.committente_id) {
-      formErrors.committente_id = ['Seleziona un committente'];
+      formErrors.committente_id = [$t('validation.required')];
       return;
     }
     
     if (!formData.descrizione.trim()) {
-      formErrors.descrizione = ['Inserisci una descrizione'];
+      formErrors.descrizione = [$t('validation.required')];
       return;
     }
     
     if (!formData.codice.trim()) {
-      formErrors.codice = ['Inserisci un codice'];
+      formErrors.codice = [$t('validation.required')];
       return;
     }
     
@@ -128,11 +129,11 @@
       const result = await response.json();
 
       if (result.success) {
-        success = editingId ? 'Categoria aggiornata con successo' : 'Categoria creata con successo';
+        success = editingId ? $t('categories.edit') + ' ' + $t('common.confirm') : $t('categories.add') + ' ' + $t('common.confirm');
         await loadCategorie();
         resetForm();
       } else {
-        error = result.error || 'Errore nel salvataggio';
+        error = result.error || $t('errors.generic');
         if (result.errors) {
           formErrors = result.errors;
         }
@@ -145,7 +146,7 @@
   }
 
   async function handleDelete(id, descrizione) {
-    if (!confirm(`Sei sicuro di voler eliminare la categoria "${descrizione}"?`)) return;
+    if (!confirm(`${$t('categories.delete')} "${descrizione}"?`)) return;
     
     loading = true;
     try {
@@ -156,10 +157,10 @@
       const result = await response.json();
       
       if (result.success) {
-        success = 'Categoria eliminata con successo';
+        success = $t('categories.delete') + ' ' + $t('common.confirm');
         await loadCategorie();
       } else {
-        error = result.error || 'Errore nell\'eliminazione';
+        error = result.error || $t('errors.generic');
       }
     } catch (e) {
       error = 'Errore di connessione';
@@ -213,20 +214,20 @@
 </script>
 
 <svelte:head>
-  <title>Gestione Categorie - WMS Morlappo</title>
+  <title>{$t('categories.title')} - WMS Morlappo</title>
 </svelte:head>
 
-<div class="w-full">
+<div class="w-full bg-transparent">
   <!-- Header -->
   <div class="flex items-center justify-between mb-8">
     <div>
       <div class="flex items-center gap-3 mb-2">
         <h1 class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
-          🏷️ Gestione Categorie - Vista Multicommittente
+          🏷️ {$t('categories.title')}
         </h1>
       </div>
       <p class="text-neutral-600 dark:text-gray-400">
-        Gestione categorie prodotti per tutti i committenti
+        {$t('layout.categoriesDesc')}
       </p>
     </div>
     
@@ -236,7 +237,7 @@
       <button 
         on:click={loadCategorie}
         class="btn btn-sm btn-secondary"
-        title="Ricarica categorie"
+        title="{$t('common.refresh')}"
         disabled={loading}
       >
         🔄
@@ -248,7 +249,7 @@
         class="btn btn-primary"
         disabled={loading}
       >
-        ➕ Nuova Categoria
+        ➕ {$t('categories.add')}
       </button>
     </div>
   </div>
@@ -259,7 +260,7 @@
       <div class="flex items-center space-x-3">
         <span class="text-lg">❌</span>
         <div>
-          <p class="font-semibold">Errore</p>
+          <p class="font-semibold">{$t('errors.generic')}</p>
           <p class="text-sm mt-1">{error}</p>
         </div>
       </div>
@@ -271,7 +272,7 @@
       <div class="flex items-center space-x-3">
         <span class="text-lg">✅</span>
         <div>
-          <p class="font-semibold">Successo</p>
+          <p class="font-semibold">{$t('common.confirm')}</p>
           <p class="text-sm mt-1">{success}</p>
         </div>
       </div>
@@ -281,7 +282,7 @@
   {#if loading}
     <div class="flex justify-center items-center py-12">
       <div class="spinner w-8 h-8"></div>
-      <span class="ml-3 text-neutral-600 dark:text-gray-400">Caricamento categorie...</span>
+      <span class="ml-3 text-neutral-600 dark:text-gray-400">{$t('common.loading')}</span>
     </div>
   {:else}
     <!-- Filtri -->
@@ -289,7 +290,7 @@
       <div class="card-body py-4">
         <div class="flex items-center gap-2 mb-3">
           <span class="text-lg">🔍</span>
-          <span class="text-md font-semibold text-neutral-900 dark:text-gray-100">Filtri</span>
+          <span class="text-md font-semibold text-neutral-900 dark:text-gray-100">{$t('common.filter')}</span>
         </div>
         <div class="flex items-end gap-2 flex-nowrap">
           
@@ -299,7 +300,7 @@
               type="text" 
               bind:value={searchTerm}
               on:input={applyClientFilters}
-              placeholder="Cerca categoria..."
+              placeholder="{$t('common.search')} {$t('categories.title').toLowerCase()}..."
               class="form-input text-sm"
             >
           </div>
@@ -311,7 +312,7 @@
               on:change={applyClientFilters}
               class="form-input text-sm"
             >
-              <option value="">Tutti committenti</option>
+              <option value="">{$t('common.all')} {$t('layout.clientManagement').toLowerCase()}</option>
               {#each committenti as committente}
                 <option value={committente.id}>
                   {committente.ragione_sociale}
@@ -327,9 +328,9 @@
               on:change={applyClientFilters}
               class="form-input text-sm"
             >
-              <option value="">Tutti stati</option>
-              <option value="1">✅ Attiva</option>
-              <option value="0">❌ Non attiva</option>
+              <option value="">{$t('common.all')} {$t('common.status').toLowerCase()}</option>
+              <option value="1">✅ {$t('products.status.active')}</option>
+              <option value="0">❌ {$t('products.status.inactive')}</option>
             </select>
           </div>
           
@@ -338,14 +339,14 @@
             <button
               class="btn btn-secondary btn-sm px-2"
               on:click={clearAllFilters}
-              title="Reset filtri"
+              title="{$t('common.refresh')} {$t('common.filter').toLowerCase()}"
             >
               ↻
             </button>
           </div>
           
           <div class="text-sm text-neutral-600 dark:text-gray-400">
-            {categorie.length} categorie
+            {categorie.length} {$t('categories.title').toLowerCase()}
           </div>
         </div>
       </div>
@@ -359,7 +360,7 @@
             <span class="text-blue-600 text-xl">🏷️</span>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Categorie Totali</p>
+            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('categories.title')}</p>
             <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">{categorie.length}</p>
           </div>
         </div>
@@ -371,7 +372,7 @@
             <span class="text-green-600 text-xl">✅</span>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Attive</p>
+            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('products.status.active')}</p>
             <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
               {categorie.filter(c => c.attiva).length}
             </p>
@@ -385,7 +386,7 @@
             <span class="text-red-600 text-xl">❌</span>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Inattive</p>
+            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('products.status.inactive')}</p>
             <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
               {categorie.filter(c => !c.attiva).length}
             </p>
@@ -399,7 +400,7 @@
             <span class="text-blue-600 text-xl">🏢</span>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Committenti</p>
+            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('layout.clientManagement')}</p>
             <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
               {selectedCommittente ? 1 : committenti.length}
             </p>
@@ -413,7 +414,7 @@
       <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div class="card-header border-b border-gray-200 dark:border-gray-700">
           <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">
-            Lista Categorie {selectedCommittente ? `- ${committenti.find(c => c.id == selectedCommittente)?.ragione_sociale}` : '(Tutte)'}
+            {$t('categories.title')} {selectedCommittente ? `- ${committenti.find(c => c.id == selectedCommittente)?.ragione_sociale}` : `(${$t('common.all')})`}
           </h3>
         </div>
         
@@ -421,12 +422,12 @@
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th>Committente</th>
-                <th>Codice</th>
-                <th>Descrizione</th>
-                <th>Stato</th>
-                <th>Data Creazione</th>
-                <th>Azioni</th>
+                <th>{$t('categories.client')}</th>
+                <th>{$t('categories.code')}</th>
+                <th>{$t('categories.description')}</th>
+                <th>{$t('common.status')}</th>
+                <th>{$t('common.date')}</th>
+                <th>{$t('common.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -444,7 +445,7 @@
                   <td>{categoria.descrizione}</td>
                   <td>
                     <span class="badge {categoria.attiva ? 'badge-success' : 'badge-danger'}">
-                      {categoria.attiva ? 'Attiva' : 'Inattiva'}
+                      {categoria.attiva ? $t('products.status.active') : $t('products.status.inactive')}
                     </span>
                   </td>
                   <td>{new Date(categoria.created_at).toLocaleDateString('it-IT')}</td>
@@ -453,14 +454,14 @@
                       <button 
                         class="btn btn-primary btn-sm"
                         on:click={() => handleEdit(categoria)}
-                        title="Modifica categoria"
+                        title="{$t('categories.edit')}"
                       >
                         ✏️
                       </button>
                       <button 
                         class="btn btn-danger btn-sm"
                         on:click={() => handleDelete(categoria.id, categoria.descrizione)}
-                        title="Elimina categoria"
+                        title="{$t('categories.delete')}"
                       >
                         🗑️
                       </button>
@@ -476,10 +477,10 @@
       <div class="text-center py-12">
         <div class="text-6xl mb-4">🏷️</div>
         <h3 class="text-xl font-semibold text-neutral-700 mb-2">
-          Nessuna categoria trovata
+          {$t('common.noData')}
         </h3>
         <p class="text-neutral-600 dark:text-gray-400">
-          {selectedCommittente ? 'Il committente selezionato non ha categorie' : 'Non ci sono categorie nel sistema'}
+          {selectedCommittente ? $t('common.noData') : $t('common.noData')}
         </p>
       </div>
     {/if}
@@ -490,27 +491,27 @@
 {#if showForm}
   <div class="modal-backdrop" on:click={resetForm}>
     <div class="modal-content" on:click|stopPropagation>
-      <div class="modal-header">
-        <h2 class="text-xl font-semibold">
-          {editingId ? 'Modifica Categoria' : 'Nuova Categoria'}
+      <div class="modal-header bg-white dark:bg-gray-800">
+        <h2 class="text-xl font-semibold text-neutral-900 dark:text-gray-100">
+          {editingId ? $t('categories.edit') : $t('categories.add')}
         </h2>
-        <button on:click={resetForm} class="text-neutral-400 hover:text-neutral-600 dark:text-gray-400">
+        <button on:click={resetForm} class="text-neutral-400 hover:text-neutral-600 dark:text-gray-400 dark:hover:text-gray-200">
           ✖️
         </button>
       </div>
       
-      <form on:submit|preventDefault={handleSubmit} class="p-6 space-y-4">
+      <form on:submit|preventDefault={handleSubmit} class="p-6 space-y-4 bg-white dark:bg-gray-800">
         
         <!-- Committente -->
         <div>
-          <label class="form-label">Committente *</label>
+          <label class="form-label">{$t('categories.client')} *</label>
           <select
             bind:value={formData.committente_id}
             class="form-input"
             class:border-red-500={formErrors.committente_id}
             required
           >
-            <option value={0}>Seleziona committente...</option>
+            <option value={0}>{$t('common.select')} {$t('categories.client').toLowerCase()}...</option>
             {#each committenti as committente}
               <option value={committente.id}>{committente.ragione_sociale}</option>
             {/each}
@@ -522,7 +523,7 @@
 
         <!-- Descrizione -->
         <div>
-          <label class="form-label">Descrizione *</label>
+          <label class="form-label">{$t('categories.description')} *</label>
           <input
             type="text"
             bind:value={formData.descrizione}
@@ -540,7 +541,7 @@
 
         <!-- Codice -->
         <div>
-          <label class="form-label">Codice *</label>
+          <label class="form-label">{$t('categories.code')} *</label>
           <input
             type="text"
             bind:value={formData.codice}
@@ -561,10 +562,10 @@
             type="checkbox"
             id="attiva"
             bind:checked={formData.attiva}
-            class="rounded border-neutral-300"
+            class="rounded border-neutral-300 dark:border-gray-600 dark:bg-gray-700 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2"
           />
           <label for="attiva" class="text-sm font-medium text-neutral-700 dark:text-gray-300">
-            Categoria attiva e visibile nel sistema
+            {$t('categories.title')} {$t('products.status.active').toLowerCase()}
           </label>
         </div>
 
@@ -575,7 +576,7 @@
             on:click={resetForm}
             class="btn btn-secondary"
           >
-            Annulla
+            {$t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -585,7 +586,7 @@
             {#if loading}
               <div class="spinner w-4 h-4 mr-2"></div>
             {/if}
-            {editingId ? 'Aggiorna' : 'Crea'}
+            {editingId ? $t('common.save') : $t('common.add')}
           </button>
         </div>
       </form>
@@ -603,6 +604,6 @@
   }
   
   .modal-header {
-    @apply flex justify-between items-center p-6 border-b;
+    @apply flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700;
   }
 </style>

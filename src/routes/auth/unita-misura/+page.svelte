@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { t } from '$lib/i18n';
   
   // State management
   let unitaMisura = [];
@@ -39,7 +40,7 @@
       await loadUnitaMisura();
     } catch (err) {
       console.error('Errore caricamento:', err);
-      error = 'Errore nel caricamento dei dati';
+      error = $t('units.messages.loadingError');
     }
   });
   
@@ -53,10 +54,10 @@
           unitaMisuraOriginali = result.data;
           applyClientFilters();
         } else {
-          error = result.error || 'Errore nel caricamento';
+          error = result.error || $t('units.messages.loadingError');
         }
       } else {
-        error = 'Errore di connessione';
+        error = $t('units.messages.connectionError');
       }
     } catch (err) {
       console.error('Errore unità di misura:', err);
@@ -97,12 +98,12 @@
   
   async function handleSubmit() {
     if (!formData.descrizione.trim()) {
-      formErrors.descrizione = ['Inserisci una descrizione'];
+      formErrors.descrizione = [$t('units.validation.descriptionRequired')];
       return;
     }
     
     if (!formData.codice.trim()) {
-      formErrors.codice = ['Inserisci un codice'];
+      formErrors.codice = [$t('units.validation.codeRequired')];
       return;
     }
     
@@ -123,11 +124,11 @@
       const result = await response.json();
 
       if (result.success) {
-        success = editingId ? 'Unità di misura aggiornata con successo' : 'Unità di misura creata con successo';
+        success = editingId ? $t('units.messages.updateSuccess') : $t('units.messages.createSuccess');
         await loadUnitaMisura();
         resetForm();
       } else {
-        error = result.error || 'Errore nel salvataggio';
+        error = result.error || $t('units.messages.saveError');
         if (result.errors) {
           formErrors = result.errors;
         }
@@ -140,7 +141,7 @@
   }
 
   async function handleDelete(id, descrizione) {
-    if (!confirm(`Sei sicuro di voler eliminare l'unità di misura "${descrizione}"?`)) return;
+    if (!confirm($t('units.messages.deleteConfirm', { description: descrizione }))) return;
     
     loading = true;
     try {
@@ -151,7 +152,7 @@
       const result = await response.json();
       
       if (result.success) {
-        success = 'Unità di misura eliminata con successo';
+        success = $t('units.messages.deleteSuccess');
         await loadUnitaMisura();
       } else {
         error = result.error || 'Errore nell\'eliminazione';
@@ -210,7 +211,7 @@
 </script>
 
 <svelte:head>
-  <title>Gestione Unità di Misura - WMS Morlappo</title>
+  <title>{$t('units.pageTitle')}</title>
 </svelte:head>
 
 <div class="w-full">
@@ -219,11 +220,11 @@
     <div>
       <div class="flex items-center gap-3 mb-2">
         <h1 class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
-          📏 Gestione Unità di Misura - Vista Multicommittente
+          📏 {$t('units.title')}
         </h1>
       </div>
       <p class="text-neutral-600 dark:text-gray-400">
-        Gestione unità di misura globali e personalizzate per committenti
+        {$t('units.subtitle')}
       </p>
     </div>
     
@@ -233,7 +234,7 @@
       <button 
         on:click={loadUnitaMisura}
         class="btn btn-sm btn-secondary"
-        title="Ricarica unità di misura"
+        title="{$t('units.actions.refresh')}"
         disabled={loading}
       >
         🔄
@@ -245,7 +246,7 @@
         class="btn btn-primary"
         disabled={loading}
       >
-        ➕ Nuova Unità di Misura
+        ➕ {$t('units.actions.new')}
       </button>
     </div>
   </div>
@@ -256,7 +257,7 @@
       <div class="flex items-center space-x-3">
         <span class="text-lg">❌</span>
         <div>
-          <p class="font-semibold">Errore</p>
+          <p class="font-semibold">{$t('units.messages.errorTitle')}</p>
           <p class="text-sm mt-1">{error}</p>
         </div>
       </div>
@@ -268,7 +269,7 @@
       <div class="flex items-center space-x-3">
         <span class="text-lg">✅</span>
         <div>
-          <p class="font-semibold">Successo</p>
+          <p class="font-semibold">{$t('units.messages.successTitle')}</p>
           <p class="text-sm mt-1">{success}</p>
         </div>
       </div>
@@ -278,7 +279,7 @@
   {#if loading}
     <div class="flex justify-center items-center py-12">
       <div class="spinner w-8 h-8"></div>
-      <span class="ml-3 text-neutral-600 dark:text-gray-400">Caricamento unità di misura...</span>
+      <span class="ml-3 text-neutral-600 dark:text-gray-400">{$t('units.messages.loading')}</span>
     </div>
   {:else}
     <!-- Filtri -->
@@ -286,7 +287,7 @@
       <div class="card-body py-4">
         <div class="flex items-center gap-2 mb-3">
           <span class="text-lg">🔍</span>
-          <span class="text-md font-semibold text-neutral-900 dark:text-gray-100">Filtri</span>
+          <span class="text-md font-semibold text-neutral-900 dark:text-gray-100">{$t('units.filters.title')}</span>
         </div>
         <div class="flex items-end gap-2 flex-nowrap">
           
@@ -296,7 +297,7 @@
               type="text" 
               bind:value={searchTerm}
               on:input={applyClientFilters}
-              placeholder="Cerca unità..."
+              placeholder="{$t('units.filters.search')}"
               class="form-input text-sm"
             >
           </div>
@@ -308,8 +309,8 @@
               on:change={applyClientFilters}
               class="form-input text-sm"
             >
-              <option value="">Tutti committenti</option>
-              <option value="null">🌍 Globali</option>
+              <option value="">{$t('units.filters.allClients')}</option>
+              <option value="null">🌍 {$t('common.global')}</option>
               {#each committenti as committente}
                 <option value={committente.id}>
                   {committente.ragione_sociale}
@@ -325,9 +326,9 @@
               on:change={applyClientFilters}
               class="form-input text-sm"
             >
-              <option value="">Tutti tipi</option>
-              <option value="sistema">🔧 Sistema</option>
-              <option value="personalizzata">👤 Personalizzata</option>
+              <option value="">{$t('units.filters.allTypes')}</option>
+              <option value="sistema">🔧 {$t('units.types.sistema')}</option>
+              <option value="personalizzata">👤 {$t('units.types.personalizzata')}</option>
             </select>
           </div>
           
@@ -336,14 +337,14 @@
             <button
               class="btn btn-secondary btn-sm px-2"
               on:click={clearAllFilters}
-              title="Reset filtri"
+              title="Reset {$t('units.filters.title')}"
             >
               ↻
             </button>
           </div>
           
           <div class="text-sm text-neutral-600 dark:text-gray-400">
-            {unitaMisura.length} unità
+            {unitaMisura.length} {$t('units.stats.units')}
           </div>
         </div>
       </div>
@@ -357,7 +358,7 @@
             <span class="text-blue-600 text-xl">📏</span>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Unità Totali</p>
+            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('units.stats.totalUnits')}</p>
             <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">{unitaMisura.length}</p>
           </div>
         </div>
@@ -369,7 +370,7 @@
             <span class="text-blue-600 text-xl">🔧</span>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Di Sistema</p>
+            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('units.stats.systemUnits')}</p>
             <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
               {unitaMisura.filter(u => u.tipo === 'sistema').length}
             </p>
@@ -383,7 +384,7 @@
             <span class="text-green-600 text-xl">👤</span>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Personalizzate</p>
+            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('units.stats.customUnits')}</p>
             <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
               {unitaMisura.filter(u => u.tipo === 'personalizzata').length}
             </p>
@@ -397,7 +398,7 @@
             <span class="text-orange-600 text-xl">🌍</span>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Globali</p>
+            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('units.stats.globalUnits')}</p>
             <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
               {unitaMisura.filter(u => !u.committente_id).length}
             </p>
@@ -411,7 +412,7 @@
       <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div class="card-header border-b border-gray-200 dark:border-gray-700">
           <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">
-            Lista Unità di Misura {selectedCommittente && selectedCommittente !== 'null' ? `- ${committenti.find(c => c.id == selectedCommittente)?.ragione_sociale}` : selectedCommittente === 'null' ? '- Globali' : '(Tutte)'}
+            {$t('units.stats.listTitle')} {selectedCommittente && selectedCommittente !== 'null' ? `- ${committenti.find(c => c.id == selectedCommittente)?.ragione_sociale}` : selectedCommittente === 'null' ? $t('units.stats.globalFilter') : $t('units.stats.all')}
           </h3>
         </div>
         
@@ -419,12 +420,12 @@
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th>Codice</th>
-                <th>Descrizione</th>
-                <th>Tipo</th>
-                <th>Ambito</th>
-                <th>Stato</th>
-                <th>Azioni</th>
+                <th>{$t('units.table.code')}</th>
+                <th>{$t('units.table.description')}</th>
+                <th>{$t('units.table.type')}</th>
+                <th>{$t('units.table.client')}</th>
+                <th>{$t('units.table.status')}</th>
+                <th>{$t('units.table.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -434,7 +435,7 @@
                   <td>{unita.descrizione}</td>
                   <td>
                     <span class="badge {unita.tipo === 'sistema' ? 'badge-primary' : 'badge-secondary'}">
-                      {unita.tipo === 'sistema' ? '🔧 Sistema' : '👤 Personalizzata'}
+                      {unita.tipo === 'sistema' ? `🔧 ${$t('units.types.sistema')}` : `👤 ${$t('units.types.personalizzata')}`}
                     </span>
                   </td>
                   <td>
@@ -447,7 +448,7 @@
                       {:else}
                         <span class="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
                         <span class="text-sm font-medium text-orange-700">
-                          🌍 Globale
+                          🌍 {$t('common.global')}
                         </span>
                       {/if}
                     </div>
@@ -462,14 +463,14 @@
                       <button 
                         class="btn btn-primary btn-sm"
                         on:click={() => handleEdit(unita)}
-                        title="Modifica unità di misura"
+                        title="{$t('units.actions.edit')}"
                       >
                         ✏️
                       </button>
                       <button 
                         class="btn btn-danger btn-sm"
                         on:click={() => handleDelete(unita.id, unita.descrizione)}
-                        title="Elimina unità di misura"
+                        title="{$t('units.actions.delete')}"
                         disabled={unita.tipo === 'sistema'}
                       >
                         🗑️
@@ -486,10 +487,10 @@
       <div class="text-center py-12">
         <div class="text-6xl mb-4">📏</div>
         <h3 class="text-xl font-semibold text-neutral-700 mb-2">
-          Nessuna unità di misura trovata
+          {$t('units.messages.noResults')}
         </h3>
         <p class="text-neutral-600 dark:text-gray-400">
-          {selectedCommittente ? 'Il committente selezionato non ha unità di misura' : 'Non ci sono unità di misura nel sistema'}
+          {selectedCommittente ? $t('units.messages.noResultsClient') : $t('units.messages.noResultsSystem')}
         </p>
       </div>
     {/if}
@@ -500,25 +501,25 @@
 {#if showForm}
   <div class="modal-backdrop" on:click={resetForm}>
     <div class="modal-content" on:click|stopPropagation>
-      <div class="modal-header">
-        <h2 class="text-xl font-semibold">
-          {editingId ? 'Modifica Unità di Misura' : 'Nuova Unità di Misura'}
+      <div class="modal-header bg-white dark:bg-gray-800">
+        <h2 class="text-xl font-semibold text-neutral-900 dark:text-gray-100">
+          {editingId ? $t('units.form.editTitle') : $t('units.form.title')}
         </h2>
-        <button on:click={resetForm} class="text-neutral-400 hover:text-neutral-600 dark:text-gray-400">
+        <button on:click={resetForm} class="text-neutral-400 hover:text-neutral-600 dark:text-gray-400 dark:hover:text-gray-200">
           ✖️
         </button>
       </div>
       
-      <form on:submit|preventDefault={handleSubmit} class="p-6 space-y-4">
+      <form on:submit|preventDefault={handleSubmit} class="p-6 space-y-4 bg-white dark:bg-gray-800">
         
         <!-- Ambito -->
         <div>
-          <label class="form-label">Ambito</label>
+          <label class="form-label">{$t('units.table.client')}</label>
           <select
             bind:value={formData.committente_id}
             class="form-input"
           >
-            <option value={null}>🌍 Globale (tutti i committenti)</option>
+            <option value={null}>{$t('units.form.globalUnit')}</option>
             {#each committenti as committente}
               <option value={committente.id}>{committente.ragione_sociale}</option>
             {/each}
@@ -527,49 +528,49 @@
 
         <!-- Tipo -->
         <div>
-          <label class="form-label">Tipo *</label>
+          <label class="form-label">{$t('units.form.type')} *</label>
           <select
             bind:value={formData.tipo}
             class="form-input"
             required
           >
-            <option value="personalizzata">👤 Personalizzata</option>
-            <option value="sistema">🔧 Sistema</option>
+            <option value="personalizzata">{$t('units.types.personalizzata')}</option>
+            <option value="sistema">{$t('units.types.sistema')}</option>
           </select>
         </div>
 
         <!-- Descrizione -->
         <div>
-          <label class="form-label">Descrizione *</label>
+          <label class="form-label">{$t('units.form.description')} *</label>
           <input
             type="text"
             bind:value={formData.descrizione}
             on:input={generateCode}
             class="form-input"
             class:border-red-500={formErrors.descrizione}
-            placeholder="Es: Pezzo, Chilogrammi, Litri, Metri..."
+            placeholder="{$t('units.form.descriptionPlaceholder')}"
             required
             maxlength="100"
           />
           {#if formErrors.descrizione}
-            <p class="form-error">{formErrors.descrizione.join(', ')}</p>
+            <p class="form-error mt-1">{formErrors.descrizione.join(', ')}</p>
           {/if}
         </div>
 
         <!-- Codice -->
         <div>
-          <label class="form-label">Codice *</label>
+          <label class="form-label">{$t('units.form.code')} *</label>
           <input
             type="text"
             bind:value={formData.codice}
             class="form-input"
             class:border-red-500={formErrors.codice}
-            placeholder="Es: PZ, KG, LT, MT"
+            placeholder="{$t('units.form.codePlaceholder')}"
             required
             maxlength="10"
           />
           {#if formErrors.codice}
-            <p class="form-error">{formErrors.codice.join(', ')}</p>
+            <p class="form-error mt-1">{formErrors.codice.join(', ')}</p>
           {/if}
         </div>
 
@@ -582,7 +583,7 @@
             class="rounded border-neutral-300"
           />
           <label for="attiva" class="text-sm font-medium text-neutral-700 dark:text-gray-300">
-            Unità di misura attiva e visibile nel sistema
+            {$t('units.form.active')}
           </label>
         </div>
 
@@ -593,7 +594,7 @@
             on:click={resetForm}
             class="btn btn-secondary"
           >
-            Annulla
+            {$t('units.form.cancel')}
           </button>
           <button
             type="submit"
@@ -603,7 +604,7 @@
             {#if loading}
               <div class="spinner w-4 h-4 mr-2"></div>
             {/if}
-            {editingId ? 'Aggiorna' : 'Crea'}
+            {$t('units.form.save')}
           </button>
         </div>
       </form>
@@ -621,6 +622,6 @@
   }
   
   .modal-header {
-    @apply flex justify-between items-center p-6 border-b;
+    @apply flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700;
   }
 </style>

@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { t } from '$lib/i18n';
   
   let causali = [];
   let causaliOriginali = [];
@@ -19,11 +20,12 @@
   let error = '';
   let success = '';
   
-  const tipiCausali = [
-    { value: 'INTERNO', label: 'Trasferimento Interno' },
-    { value: 'ESTERNO', label: 'Trasferimento Esterno' },
-    { value: 'CORREZIONE', label: 'Correzione Inventario' },
-    { value: 'OTTIMIZZAZIONE', label: 'Ottimizzazione Layout' }
+  // Reactive statement per le traduzioni dei tipi causali
+  $: tipiCausali = [
+    { value: 'INTERNO', label: $t('transferCauses.types.internal') },
+    { value: 'ESTERNO', label: $t('transferCauses.types.external') },
+    { value: 'CORREZIONE', label: $t('transferCauses.types.correction') },
+    { value: 'OTTIMIZZAZIONE', label: $t('transferCauses.types.optimization') }
   ];
   
   onMount(async () => {
@@ -40,14 +42,14 @@
           causaliOriginali = result.data;
           applyClientFilters();
         } else {
-          error = result.error || 'Errore nel caricamento';
+          error = result.error || $t('errors.loadingError');
         }
       } else {
-        error = 'Errore di connessione';
+        error = $t('errors.connectionError');
       }
     } catch (err) {
       console.error('Errore causali:', err);
-      error = 'Errore di connessione';
+      error = $t('errors.connectionError');
     } finally {
       loading = false;
     }
@@ -72,17 +74,17 @@
   
   async function handleSubmit() {
     if (!formData.descrizione.trim()) {
-      formErrors.descrizione = ['Inserisci una descrizione'];
+      formErrors.descrizione = [$t('validation.enterDescription')];
       return;
     }
     
     if (!formData.codice.trim()) {
-      formErrors.codice = ['Inserisci un codice'];
+      formErrors.codice = [$t('validation.enterCode')];
       return;
     }
     
     if (!formData.tipo) {
-      formErrors.tipo = ['Seleziona un tipo'];
+      formErrors.tipo = [$t('transferCauses.selectType')];
       return;
     }
     
@@ -103,24 +105,24 @@
       const result = await response.json();
 
       if (result.success) {
-        success = editingId ? 'Causale aggiornata con successo' : 'Causale creata con successo';
+        success = editingId ? $t('transferCauses.updateSuccess') : $t('transferCauses.createSuccess');
         await loadCausali();
         resetForm();
       } else {
-        error = result.error || 'Errore nel salvataggio';
+        error = result.error || $t('errors.saveError');
         if (result.errors) {
           formErrors = result.errors;
         }
       }
     } catch (e) {
-      error = 'Errore di connessione';
+      error = $t('errors.connectionError');
     } finally {
       loading = false;
     }
   }
 
   async function handleDelete(id, descrizione) {
-    if (!confirm(`Sei sicuro di voler eliminare la causale "${descrizione}"?`)) return;
+    if (!confirm($t('transferCauses.deleteConfirm', { descrizione }))) return;
     
     loading = true;
     try {
@@ -131,13 +133,13 @@
       const result = await response.json();
       
       if (result.success) {
-        success = 'Causale eliminata con successo';
+        success = $t('transferCauses.deleteSuccess');
         await loadCausali();
       } else {
-        error = result.error || 'Errore nell\'eliminazione';
+        error = result.error || $t('errors.deleteError');
       }
     } catch (e) {
-      error = 'Errore di connessione';
+      error = $t('errors.connectionError');
     } finally {
       loading = false;
     }
@@ -210,17 +212,17 @@
     <div>
       <div class="flex items-center gap-3 mb-2">
         <h1 class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
-          📝 Gestione Causali Trasferimento
+          📝 {$t('transferCauses.title')}
         </h1>
       </div>
-      <p class="text-neutral-600 dark:text-gray-400">Causali per movimentazioni e trasferimenti</p>
+      <p class="text-neutral-600 dark:text-gray-400">{$t('layout.transferCausesDesc')}</p>
     </div>
     
     <div class="flex items-center gap-4">
       <button 
         on:click={loadCausali}
         class="btn btn-sm btn-secondary"
-        title="Ricarica causali"
+        title="{$t('common.refresh')}"
         disabled={loading}
       >
         🔄
@@ -231,7 +233,7 @@
         class="btn btn-primary"
         disabled={loading}
       >
-        ➕ Nuova Causale
+        ➕ {$t('transferCauses.add')}
       </button>
     </div>
   </div>
@@ -241,7 +243,7 @@
       <div class="flex items-center space-x-3">
         <span class="text-lg">❌</span>
         <div>
-          <p class="font-semibold">Errore</p>
+          <p class="font-semibold">{$t('errors.generic')}</p>
           <p class="text-sm mt-1">{error}</p>
         </div>
       </div>
@@ -253,7 +255,7 @@
       <div class="flex items-center space-x-3">
         <span class="text-lg">✅</span>
         <div>
-          <p class="font-semibold">Successo</p>
+          <p class="font-semibold">{$t('common.success')}</p>
           <p class="text-sm mt-1">{success}</p>
         </div>
       </div>
@@ -263,14 +265,14 @@
   {#if loading}
     <div class="flex justify-center items-center py-12">
       <div class="spinner w-8 h-8"></div>
-      <span class="ml-3 text-neutral-600 dark:text-gray-400">Caricamento causali...</span>
+      <span class="ml-3 text-neutral-600 dark:text-gray-400">{$t('transferCauses.loading')}</span>
     </div>
   {:else}
     <div class="card mb-6">
       <div class="card-body py-4">
         <div class="flex items-center gap-2 mb-3">
           <span class="text-lg">🔍</span>
-          <span class="text-md font-semibold text-neutral-900 dark:text-gray-100">Filtri</span>
+          <span class="text-md font-semibold text-neutral-900 dark:text-gray-100">{$t('common.filters')}</span>
         </div>
         <div class="flex items-end gap-2 flex-nowrap">
           <div class="min-w-28">
@@ -278,7 +280,7 @@
               type="text" 
               bind:value={searchTerm}
               on:input={applyClientFilters}
-              placeholder="Cerca causale..."
+              placeholder="{$t('common.search')} {$t('transferCauses.causeName').toLowerCase()}..."
               class="form-input text-sm"
             >
           </div>
@@ -287,14 +289,14 @@
             <button
               class="btn btn-secondary btn-sm px-2"
               on:click={clearAllFilters}
-              title="Reset filtri"
+              title="{$t('common.resetFilters')}"
             >
               ↻
             </button>
           </div>
           
           <div class="text-sm text-neutral-600 dark:text-gray-400">
-            {causali.length} causali
+            {causali.length} {$t('transferCauses.causesCount')}
           </div>
         </div>
       </div>
@@ -322,7 +324,7 @@
       <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div class="card-header border-b border-gray-200 dark:border-gray-700">
           <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">
-            Lista Causali Trasferimento
+            {$t('transferCauses.causesList')}
           </h3>
         </div>
         
@@ -330,12 +332,12 @@
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th>Codice</th>
-                <th>Descrizione</th>
-                <th>Tipo</th>
-                <th>Autorizzazione</th>
-                <th>Stato</th>
-                <th>Azioni</th>
+                <th>{$t('transferCauses.code')}</th>
+                <th>{$t('transferCauses.description')}</th>
+                <th>{$t('transferCauses.type')}</th>
+                <th>{$t('transferCauses.authorization')}</th>
+                <th>{$t('transferCauses.status')}</th>
+                <th>{$t('common.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -350,14 +352,14 @@
                   </td>
                   <td class="text-center">
                     {#if causale.richiede_autorizzazione}
-                      <span class="text-amber-600">🔒 Richiesta</span>
+                      <span class="text-amber-600">🔒 {$t('transferCauses.required')}</span>
                     {:else}
                       <span class="text-neutral-400">-</span>
                     {/if}
                   </td>
                   <td>
                     <span class="badge {causale.attiva ? 'badge-success' : 'badge-danger'}">
-                      {causale.attiva ? 'Attiva' : 'Inattiva'}
+                      {causale.attiva ? $t('transferCauses.active') : $t('transferCauses.inactive')}
                     </span>
                   </td>
                   <td>
@@ -365,14 +367,14 @@
                       <button 
                         class="btn btn-primary btn-sm"
                         on:click={() => handleEdit(causale)}
-                        title="Modifica causale"
+                        title="{$t('transferCauses.edit')}"
                       >
                         ✏️
                       </button>
                       <button 
                         class="btn btn-danger btn-sm"
                         on:click={() => handleDelete(causale.id, causale.descrizione)}
-                        title="Elimina causale"
+                        title="{$t('transferCauses.delete')}"
                       >
                         🗑️
                       </button>
@@ -388,9 +390,9 @@
       <div class="text-center py-12">
         <div class="text-6xl mb-4">📝</div>
         <h3 class="text-xl font-semibold text-neutral-700 mb-2">
-          Nessuna causale trovata
+          {$t('transferCauses.noCauses')}
         </h3>
-        <p class="text-neutral-600 dark:text-gray-400">Non ci sono causali nel sistema</p>
+        <p class="text-neutral-600 dark:text-gray-400">{$t('transferCauses.noCausesDesc')}</p>
       </div>
     {/if}
   {/if}
@@ -399,24 +401,24 @@
 {#if showForm}
   <div class="modal-backdrop" on:click={resetForm}>
     <div class="modal-content" on:click|stopPropagation>
-      <div class="modal-header">
-        <h2 class="text-xl font-semibold">
-          {editingId ? 'Modifica Causale' : 'Nuova Causale'}
+      <div class="modal-header bg-white dark:bg-gray-800">
+        <h2 class="text-xl font-semibold text-neutral-900 dark:text-gray-100">
+          {editingId ? $t('transferCauses.edit') : $t('transferCauses.add')}
         </h2>
-        <button on:click={resetForm} class="text-neutral-400 hover:text-neutral-600 dark:text-gray-400">✖️</button>
+        <button on:click={resetForm} class="text-neutral-400 hover:text-neutral-600 dark:text-gray-400 dark:hover:text-gray-200">✖️</button>
       </div>
       
-      <form on:submit|preventDefault={handleSubmit} class="p-6 space-y-4">
+      <form on:submit|preventDefault={handleSubmit} class="p-6 space-y-4 bg-white dark:bg-gray-800">
         
         <div>
-          <label class="form-label">Descrizione *</label>
+          <label class="form-label">{$t('transferCauses.description')} *</label>
           <input
             type="text"
             bind:value={formData.descrizione}
             on:input={generateCode}
             class="form-input"
             class:border-red-500={formErrors.descrizione}
-            placeholder="Es: Trasferimento tra zone"
+            placeholder="{$t('transferCauses.descriptionPlaceholder')}"
             required
           />
           {#if formErrors.descrizione}
@@ -425,13 +427,13 @@
         </div>
 
         <div>
-          <label class="form-label">Codice *</label>
+          <label class="form-label">{$t('transferCauses.code')} *</label>
           <input
             type="text"
             bind:value={formData.codice}
             class="form-input"
             class:border-red-500={formErrors.codice}
-            placeholder="Es: TRASF_ZONE"
+            placeholder="{$t('transferCauses.codePlaceholder')}"
             required
           />
           {#if formErrors.codice}
@@ -440,14 +442,14 @@
         </div>
 
         <div>
-          <label class="form-label">Tipo *</label>
+          <label class="form-label">{$t('transferCauses.type')} *</label>
           <select
             bind:value={formData.tipo}
             class="form-input"
             class:border-red-500={formErrors.tipo}
             required
           >
-            <option value="">Seleziona tipo</option>
+            <option value="">{$t('common.select')} {$t('transferCauses.type').toLowerCase()}</option>
             {#each tipiCausali as tipo}
               <option value={tipo.value}>{tipo.label}</option>
             {/each}
@@ -462,26 +464,26 @@
             <input
               type="checkbox"
               bind:checked={formData.richiede_autorizzazione}
-              class="checkbox"
+              class="rounded border-neutral-300 dark:border-gray-600 dark:bg-gray-700 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2"
             />
-            <span class="text-sm">Richiede autorizzazione</span>
+            <span class="text-sm text-neutral-700 dark:text-gray-300">{$t('transferCauses.requiresAuthorization')}</span>
           </label>
           
           <label class="flex items-center space-x-2">
             <input
               type="checkbox"
               bind:checked={formData.attiva}
-              class="checkbox"
+              class="rounded border-neutral-300 dark:border-gray-600 dark:bg-gray-700 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2"
             />
-            <span class="text-sm">Causale attiva</span>
+            <span class="text-sm text-neutral-700 dark:text-gray-300">{$t('transferCauses.isActive')}</span>
           </label>
         </div>
 
         <div class="flex justify-end space-x-3 pt-4">
-          <button type="button" on:click={resetForm} class="btn btn-secondary">Annulla</button>
+          <button type="button" on:click={resetForm} class="btn btn-secondary">{$t('common.cancel')}</button>
           <button type="submit" disabled={loading} class="btn btn-primary">
             {#if loading}<div class="spinner w-4 h-4 mr-2"></div>{/if}
-            {editingId ? 'Aggiorna' : 'Crea'}
+            {editingId ? $t('common.save') : $t('common.add')}
           </button>
         </div>
       </form>
@@ -499,6 +501,6 @@
   }
   
   .modal-header {
-    @apply flex justify-between items-center p-6 border-b;
+    @apply flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700;
   }
 </style>

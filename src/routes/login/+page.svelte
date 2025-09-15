@@ -1,6 +1,8 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import { page } from '$app/stores';
+  import { t } from '$lib/i18n';
+  import LanguageSelector from '$lib/components/LanguageSelector.svelte';
   
   export let data;
   export let form;
@@ -32,6 +34,7 @@
   </div>
   
   <div class="max-w-md w-full space-y-8 relative">
+    
     <!-- Logo e Header -->
     <div class="text-center">
       <div class="mx-auto h-20 w-20 bg-gray-900 rounded-xl flex items-center justify-center mb-6 p-2">
@@ -39,10 +42,10 @@
       </div>
       
       <h2 class="text-3xl font-bold text-white mb-2">
-        Gestionale Magazzino
+        {$t('login.title')}
       </h2>
       <p class="text-sm text-gray-300 mb-6">
-        Sistema WMS Multicommittente
+        {$t('login.subtitle')}
       </p>
     </div>
 
@@ -54,7 +57,7 @@
             <span class="text-red-400 text-xl">⚠️</span>
           </div>
           <div class="ml-3">
-            <h3 class="text-sm font-medium text-red-800">Errore di Accesso</h3>
+            <h3 class="text-sm font-medium text-red-800">{$t('login.error')}</h3>
             <div class="mt-2 text-sm text-red-700">{errorMessage}</div>
           </div>
         </div>
@@ -87,7 +90,7 @@
           <!-- Email Field -->
           <div>
             <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              📧 Email
+              📧 {$t('login.username')}
             </label>
             <input 
               id="email" 
@@ -97,7 +100,7 @@
               required
               value={emailValue}
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              placeholder="utente@esempio.com"
+              placeholder="{$t('login.username')}"
               class:border-red-300={form?.error}
               disabled={isLoading}
             >
@@ -106,7 +109,7 @@
           <!-- Password Field -->
           <div>
             <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              🔒 Password
+              🔒 {$t('login.password')}
             </label>
             <div class="relative">
               <input 
@@ -116,7 +119,7 @@
                 autocomplete="current-password" 
                 required
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-12"
-                placeholder="La tua password"
+                placeholder="{$t('login.password')}"
                 class:border-red-300={form?.error}
                 disabled={isLoading}
               >
@@ -133,6 +136,14 @@
             </div>
           </div>
 
+          <!-- Language Selector -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              🌐 {$t('login.language')}
+            </label>
+            <LanguageSelector />
+          </div>
+
           <!-- Remember Me -->
           <div class="flex items-center justify-between">
             <div class="flex items-center">
@@ -144,13 +155,13 @@
                 disabled={isLoading}
               >
               <label for="remember" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                Ricordami per 30 giorni
+                {$t('common.remember', { default: 'Ricordami' })}
               </label>
             </div>
 
             <div class="text-sm">
               <a href="#" class="font-medium text-blue-600 hover:text-blue-500 transition-colors">
-                Password dimenticata?
+                {$t('common.forgotPassword', { default: 'Password dimenticata?' })}
               </a>
             </div>
           </div>
@@ -165,12 +176,12 @@
               <span class="absolute left-0 inset-y-0 flex items-center pl-3">
                 <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
               </span>
-              Accesso in corso...
+              {$t('login.loggingIn')}
             {:else}
               <span class="absolute left-0 inset-y-0 flex items-center pl-3">
                 🔓
               </span>
-              Accedi al Sistema
+              {$t('login.loginButton')}
             {/if}
           </button>
         </div>
@@ -182,7 +193,7 @@
     <div class="text-center">
       <div class="bg-gray-900/50 backdrop-blur-sm rounded-lg p-4 mb-4">
         <p class="text-xs text-gray-300 mb-2">
-          <strong class="text-white">MORLAPPO Srl</strong><br>
+          <strong class="text-white">{$t('login.company')}</strong><br>
           <span class="text-gray-400">Sede legale:</span> L.go Alvaro De Mendoza 4, 64027 Sant'Omero (TE)<br>
           <span class="text-gray-400">Sede operativa:</span> Via Braida, 16, 35010 Villa Del Conte (PD)<br>
           <span class="text-gray-400">P.IVA:</span> <span class="text-blue-300">02174570677</span><br>
@@ -191,7 +202,7 @@
         
         <div class="border-t border-gray-600 pt-3 mt-3">
           <p class="text-xs text-gray-400">
-            © 2025 Morlappo - Tutti i diritti riservati
+            {$t('login.copyright')}
           </p>
           <p class="text-xs text-gray-500 mt-1">
             <a href="https://morlappo.com" target="_blank" class="text-blue-300 hover:text-blue-200 transition-colors">www.morlappo.com</a>

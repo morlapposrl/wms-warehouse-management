@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { t } from '$lib/i18n';
   
   let tipi = [];
   let tipiOriginali = [];
@@ -29,12 +30,12 @@
   let error = '';
   let success = '';
   
-  const categorie = [
-    { value: 'PALLET', label: 'Pallet', icon: '🪚' },
-    { value: 'CONTAINER', label: 'Container', icon: '📦' },
-    { value: 'BOX', label: 'Box/Contenitori', icon: '🗂️' },
-    { value: 'ROLL', label: 'Roll Container', icon: '🛒' },
-    { value: 'CUSTOM', label: 'Personalizzati', icon: '⚙️' }
+  $: categorie = [
+    { value: 'PALLET', label: $t('udcTypes.categories.PALLET'), icon: '🪚' },
+    { value: 'CONTAINER', label: $t('udcTypes.categories.CONTAINER'), icon: '📦' },
+    { value: 'BOX', label: $t('udcTypes.categories.BOX'), icon: '🗂️' },
+    { value: 'ROLL', label: $t('udcTypes.categories.ROLL'), icon: '🛒' },
+    { value: 'CUSTOM', label: $t('udcTypes.categories.CUSTOM'), icon: '⚙️' }
   ];
   
   onMount(async () => {
@@ -51,14 +52,14 @@
           tipiOriginali = result.data;
           applyClientFilters();
         } else {
-          error = result.error || 'Errore nel caricamento';
+          error = result.error || $t('errors.loadingError');
         }
       } else {
-        error = 'Errore di connessione';
+        error = $t('errors.connectionError');
       }
     } catch (err) {
       console.error('Errore tipi UDC:', err);
-      error = 'Errore di connessione';
+      error = $t('errors.connectionError');
     } finally {
       loading = false;
     }
@@ -122,24 +123,24 @@
       const result = await response.json();
 
       if (result.success) {
-        success = editingId ? 'Tipo UDC aggiornato con successo' : 'Tipo UDC creato con successo';
+        success = editingId ? $t('common.updateSuccess') : $t('common.createSuccess');
         await loadTipi();
         resetForm();
       } else {
-        error = result.error || 'Errore nel salvataggio';
+        error = result.error || $t('errors.saveError');
         if (result.errors) {
           formErrors = result.errors;
         }
       }
     } catch (e) {
-      error = 'Errore di connessione';
+      error = $t('errors.connectionError');
     } finally {
       loading = false;
     }
   }
 
   async function handleDelete(id, nome) {
-    if (!confirm(`Sei sicuro di voler eliminare il tipo UDC "${nome}"?`)) return;
+    if (!confirm($t('udcTypes.deleteConfirm', { nome }))) return;
     
     loading = true;
     try {
@@ -150,13 +151,13 @@
       const result = await response.json();
       
       if (result.success) {
-        success = 'Tipo UDC eliminato con successo';
+        success = $t('common.deleteSuccess');
         await loadTipi();
       } else {
-        error = result.error || 'Errore nell\'eliminazione';
+        error = result.error || $t('errors.deleteError');
       }
     } catch (e) {
-      error = 'Errore di connessione';
+      error = $t('errors.connectionError');
     } finally {
       loading = false;
     }
@@ -235,7 +236,7 @@
 </script>
 
 <svelte:head>
-  <title>Gestione Tipi UDC - WMS Morlappo</title>
+  <title>{$t('udcTypes.title')} - WMS Morlappo</title>
 </svelte:head>
 
 <div class="w-full">
@@ -243,17 +244,17 @@
     <div>
       <div class="flex items-center gap-3 mb-2">
         <h1 class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
-          📦 Gestione Tipi UDC
+          📦 {$t('udcTypes.title')}
         </h1>
       </div>
-      <p class="text-neutral-600 dark:text-gray-400">Tipi di Unità Di Carico (pallet, container, box, ecc.)</p>
+      <p class="text-neutral-600 dark:text-gray-400">{$t('layout.udcTypesDesc')}</p>
     </div>
     
     <div class="flex items-center gap-4">
       <button 
         on:click={loadTipi}
         class="btn btn-sm btn-secondary"
-        title="Ricarica tipi UDC"
+        title="{$t('common.refresh')}"
         disabled={loading}
       >
         🔄
@@ -264,7 +265,7 @@
         class="btn btn-primary"
         disabled={loading}
       >
-        ➕ Nuovo Tipo UDC
+        ➕ {$t('udcTypes.add')}
       </button>
     </div>
   </div>
@@ -274,7 +275,7 @@
       <div class="flex items-center space-x-3">
         <span class="text-lg">❌</span>
         <div>
-          <p class="font-semibold">Errore</p>
+          <p class="font-semibold">{$t('errors.generic')}</p>
           <p class="text-sm mt-1">{error}</p>
         </div>
       </div>
@@ -286,7 +287,7 @@
       <div class="flex items-center space-x-3">
         <span class="text-lg">✅</span>
         <div>
-          <p class="font-semibold">Successo</p>
+          <p class="font-semibold">{$t('common.success')}</p>
           <p class="text-sm mt-1">{success}</p>
         </div>
       </div>
@@ -296,14 +297,14 @@
   {#if loading}
     <div class="flex justify-center items-center py-12">
       <div class="spinner w-8 h-8"></div>
-      <span class="ml-3 text-neutral-600 dark:text-gray-400">Caricamento tipi UDC...</span>
+      <span class="ml-3 text-neutral-600 dark:text-gray-400">{$t('common.loading')}...</span>
     </div>
   {:else}
     <div class="card mb-6">
       <div class="card-body py-4">
         <div class="flex items-center gap-2 mb-3">
           <span class="text-lg">🔍</span>
-          <span class="text-md font-semibold text-neutral-900 dark:text-gray-100">Filtri</span>
+          <span class="text-md font-semibold text-neutral-900 dark:text-gray-100">{$t('common.filters')}</span>
         </div>
         <div class="flex items-end gap-2 flex-wrap">
           <div class="min-w-32">
@@ -311,7 +312,7 @@
               type="text" 
               bind:value={searchTerm}
               on:input={applyClientFilters}
-              placeholder="Cerca tipo..."
+              placeholder="{$t('common.search')} {$t('udcTypes.name').toLowerCase()}..."
               class="form-input text-sm"
             >
           </div>
@@ -322,7 +323,7 @@
               on:change={applyClientFilters}
               class="form-input text-sm"
             >
-              <option value="">Tutte le categorie</option>
+              <option value="">{$t('common.all')} {$t('udcTypes.allCategories')}</option>
               {#each categorie as cat}
                 <option value={cat.value}>{cat.icon} {cat.label}</option>
               {/each}
@@ -333,14 +334,14 @@
             <button
               class="btn btn-secondary btn-sm px-2"
               on:click={clearAllFilters}
-              title="Reset filtri"
+              title="{$t('common.reset')} {$t('common.filters').toLowerCase()}"
             >
               ↻
             </button>
           </div>
           
           <div class="text-sm text-neutral-600 dark:text-gray-400">
-            {tipi.length} tipi
+            {tipi.length} {$t('udcTypes.totalTypes').toLowerCase()}
           </div>
         </div>
       </div>
@@ -368,7 +369,7 @@
       <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div class="card-header border-b border-gray-200 dark:border-gray-700">
           <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">
-            Lista Tipi UDC
+            {$t('udcTypes.typesList')}
           </h3>
         </div>
         
@@ -376,14 +377,14 @@
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th>Codice</th>
-                <th>Nome</th>
-                <th>Categoria</th>
-                <th>Dimensioni</th>
-                <th>Proprietà</th>
-                <th>Costi</th>
-                <th>Stato</th>
-                <th>Azioni</th>
+                <th>{$t('udcTypes.code')}</th>
+                <th>{$t('udcTypes.name')}</th>
+                <th>{$t('udcTypes.category')}</th>
+                <th>{$t('udcTypes.dimensions')}</th>
+                <th>{$t('udcTypes.properties')}</th>
+                <th>{$t('udcTypes.costs')}</th>
+                <th>{$t('udcTypes.status')}</th>
+                <th>{$t('common.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -414,7 +415,7 @@
                       <div class="text-green-600">📚 Stack: {tipo.max_stack}</div>
                     {/if}
                     {#if tipo.riutilizzabile}
-                      <div class="text-blue-600">♻️ Riutilizzabile</div>
+                      <div class="text-blue-600">♻️ {$t('udcTypes.reusable')}</div>
                     {:else}
                       <div class="text-amber-600">🗑️ Monouso</div>
                     {/if}
@@ -432,7 +433,7 @@
                   </td>
                   <td>
                     <span class="badge {tipo.attivo ? 'badge-success' : 'badge-danger'}">
-                      {tipo.attivo ? 'Attivo' : 'Inattivo'}
+                      {tipo.attivo ? $t('udcTypes.active') : $t('udcTypes.inactive')}
                     </span>
                   </td>
                   <td>
@@ -440,14 +441,14 @@
                       <button 
                         class="btn btn-primary btn-sm"
                         on:click={() => handleEdit(tipo)}
-                        title="Modifica tipo UDC"
+                        title="{$t('common.edit')}"
                       >
                         ✏️
                       </button>
                       <button 
                         class="btn btn-danger btn-sm"
                         on:click={() => handleDelete(tipo.id, tipo.nome)}
-                        title="Elimina tipo UDC"
+                        title="{$t('common.delete')}"
                       >
                         🗑️
                       </button>
@@ -463,9 +464,9 @@
       <div class="text-center py-12">
         <div class="text-6xl mb-4">📦</div>
         <h3 class="text-xl font-semibold text-neutral-700 mb-2">
-          Nessun tipo UDC trovato
+          {$t('udcTypes.noTypes')}
         </h3>
-        <p class="text-neutral-600 dark:text-gray-400">Non ci sono tipi UDC nel sistema</p>
+        <p class="text-neutral-600 dark:text-gray-400">{$t('udcTypes.noTypesDesc')}</p>
       </div>
     {/if}
   {/if}
@@ -474,25 +475,25 @@
 {#if showForm}
   <div class="modal-backdrop" on:click={resetForm}>
     <div class="modal-content large" on:click|stopPropagation>
-      <div class="modal-header">
-        <h2 class="text-xl font-semibold">
-          {editingId ? 'Modifica Tipo UDC' : 'Nuovo Tipo UDC'}
+      <div class="modal-header bg-white dark:bg-gray-800">
+        <h2 class="text-xl font-semibold text-neutral-900 dark:text-gray-100">
+          {editingId ? $t('udcTypes.edit') : $t('udcTypes.add')}
         </h2>
-        <button on:click={resetForm} class="text-neutral-400 hover:text-neutral-600 dark:text-gray-400">✖️</button>
+        <button on:click={resetForm} class="text-neutral-400 hover:text-neutral-600 dark:text-gray-400 dark:hover:text-gray-200">✖️</button>
       </div>
       
-      <form on:submit|preventDefault={handleSubmit} class="p-6 space-y-4">
+      <form on:submit|preventDefault={handleSubmit} class="p-6 space-y-4 bg-white dark:bg-gray-800">
         
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="form-label">Nome *</label>
+            <label class="form-label">{$t('udcTypes.name')} *</label>
             <input
               type="text"
               bind:value={formData.nome}
               on:input={generateCode}
               class="form-input"
               class:border-red-500={formErrors.nome}
-              placeholder="Es: Pallet EPAL Standard"
+              placeholder="{$t('udcTypes.namePlaceholder')}"
               required
             />
             {#if formErrors.nome}
@@ -501,13 +502,13 @@
           </div>
 
           <div>
-            <label class="form-label">Codice *</label>
+            <label class="form-label">{$t('udcTypes.code')} *</label>
             <input
               type="text"
               bind:value={formData.codice}
               class="form-input"
               class:border-red-500={formErrors.codice}
-              placeholder="Es: PALLET_EPAL"
+              placeholder="{$t('udcTypes.codePlaceholder')}"
               required
             />
             {#if formErrors.codice}
@@ -517,24 +518,24 @@
         </div>
 
         <div>
-          <label class="form-label">Descrizione</label>
+          <label class="form-label">{$t('udcTypes.description')}</label>
           <textarea
             bind:value={formData.descrizione}
             class="form-input"
             rows="2"
-            placeholder="Descrizione dettagliata del tipo UDC"
+            placeholder="{$t('udcTypes.descriptionPlaceholder')}"
           ></textarea>
         </div>
 
         <div>
-          <label class="form-label">Categoria *</label>
+          <label class="form-label">{$t('udcTypes.category')} *</label>
           <select
             bind:value={formData.categoria}
             class="form-input"
             class:border-red-500={formErrors.categoria}
             required
           >
-            <option value="">Seleziona categoria</option>
+            <option value="">{$t('common.select')} {$t('udcTypes.category').toLowerCase()}</option>
             {#each categorie as cat}
               <option value={cat.value}>{cat.icon} {cat.label}</option>
             {/each}
@@ -546,7 +547,7 @@
 
         <div class="grid grid-cols-4 gap-4">
           <div>
-            <label class="form-label">Lunghezza (cm) *</label>
+            <label class="form-label">{$t('udcTypes.length')} (cm) *</label>
             <input
               type="number"
               bind:value={formData.lunghezza_cm}
@@ -561,7 +562,7 @@
             {/if}
           </div>
           <div>
-            <label class="form-label">Larghezza (cm) *</label>
+            <label class="form-label">{$t('udcTypes.width')} (cm) *</label>
             <input
               type="number"
               bind:value={formData.larghezza_cm}
@@ -576,7 +577,7 @@
             {/if}
           </div>
           <div>
-            <label class="form-label">Altezza Max (cm) *</label>
+            <label class="form-label">{$t('udcTypes.maxHeight')} (cm) *</label>
             <input
               type="number"
               bind:value={formData.altezza_max_cm}
@@ -591,7 +592,7 @@
             {/if}
           </div>
           <div>
-            <label class="form-label">Peso Max (kg) *</label>
+            <label class="form-label">{$t('udcTypes.maxWeight')} (kg) *</label>
             <input
               type="number"
               bind:value={formData.peso_max_kg}
@@ -610,7 +611,7 @@
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="form-label">Max Impilabili</label>
+            <label class="form-label">{$t('udcTypes.maxStack')}</label>
             <input
               type="number"
               bind:value={formData.max_stack}
@@ -620,7 +621,7 @@
             />
           </div>
           <div>
-            <label class="form-label">Costo Acquisto (€)</label>
+            <label class="form-label">{$t('udcTypes.purchaseCost')} (€)</label>
             <input
               type="number"
               bind:value={formData.costo_acquisto}
@@ -633,7 +634,7 @@
         </div>
 
         <div>
-          <label class="form-label">Costo Noleggio/Giorno (€)</label>
+          <label class="form-label">{$t('udcTypes.dailyRentalCost')} (€)</label>
           <input
             type="number"
             bind:value={formData.costo_noleggio_giorno}
@@ -651,7 +652,7 @@
               bind:checked={formData.impilabile}
               class="checkbox"
             />
-            <span class="text-sm">Impilabile</span>
+            <span class="text-sm">{$t('udcTypes.stackable')}</span>
           </label>
           
           <label class="flex items-center space-x-2">
@@ -660,7 +661,7 @@
               bind:checked={formData.riutilizzabile}
               class="checkbox"
             />
-            <span class="text-sm">Riutilizzabile</span>
+            <span class="text-sm">{$t('udcTypes.reusable')}</span>
           </label>
           
           <label class="flex items-center space-x-2">
@@ -669,15 +670,15 @@
               bind:checked={formData.attivo}
               class="checkbox"
             />
-            <span class="text-sm">Attivo</span>
+            <span class="text-sm">{$t('udcTypes.active')}</span>
           </label>
         </div>
 
         <div class="flex justify-end space-x-3 pt-4">
-          <button type="button" on:click={resetForm} class="btn btn-secondary">Annulla</button>
+          <button type="button" on:click={resetForm} class="btn btn-secondary">{$t('common.cancel')}</button>
           <button type="submit" disabled={loading} class="btn btn-primary">
             {#if loading}<div class="spinner w-4 h-4 mr-2"></div>{/if}
-            {editingId ? 'Aggiorna' : 'Crea'}
+            {editingId ? $t('common.save') : $t('common.add')}
           </button>
         </div>
       </form>
@@ -699,6 +700,6 @@
   }
   
   .modal-header {
-    @apply flex justify-between items-center p-6 border-b;
+    @apply flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700;
   }
 </style>

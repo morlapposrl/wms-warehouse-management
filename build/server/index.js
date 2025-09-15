@@ -1,10 +1,9 @@
-import { r as render, s as set, L as LEGACY_PROPS, g as get, f as flushSync, d as define_property, m as mutable_source, i as init_operations, a as get_first_child, C as COMMENT_NODE, H as HYDRATION_START, b as get_next_sibling, c as HYDRATION_ERROR, e as HYDRATION_END, h as hydration_failed, j as clear_text_content, k as array_from, l as component_root, n as set_active_reaction, o as set_active_effect, p as is_array, q as active_effect, t as active_reaction, u as create_text, v as branch, w as push, x as setContext, y as pop, z as push$1, A as component_context, B as pop$1, D as DEV } from './chunks/index2-CWTzzg45.js';
+import { r as render, s as set, L as LEGACY_PROPS, g as get, f as flushSync, d as define_property, m as mutable_source, i as init_operations, a as get_first_child, C as COMMENT_NODE, H as HYDRATION_START, b as get_next_sibling, c as HYDRATION_ERROR, e as HYDRATION_END, h as hydration_failed, j as clear_text_content, k as array_from, l as component_root, n as set_active_reaction, o as set_active_effect, p as is_array, q as active_effect, t as active_reaction, u as create_text, v as branch, w as push, x as setContext, y as pop, z as push$1, A as component_context, B as pop$1, D as DEV } from './chunks/index2-NHso6rEv.js';
 import { json, text, error } from '@sveltejs/kit';
 import { Redirect, SvelteKitError, HttpError, ActionFailure } from '@sveltejs/kit/internal';
 import { with_request_store, merge_tracing } from '@sveltejs/kit/internal/server';
 import { t as text_decoder, b as base64_decode, d as decode_pathname, a as decode_params, n as normalize_path, c as disable_search, v as validate_layout_server_exports, e as validate_layout_exports, f as validate_page_server_exports, g as validate_page_exports, h as text_encoder, r as resolve, m as make_trackable, i as get_relative_path, j as base64_encode } from './chunks/utils-Bg2Rux6K.js';
-import { r as readable, w as writable } from './chunks/index-DGJNBFyx.js';
-import './chunks/escaping-CqgfEcN3.js';
+import { r as readable, w as writable } from './chunks/index-036Gary3.js';
 
 let base = "";
 let assets = base;
@@ -1479,8 +1478,7 @@ function Root($$payload, $$props) {
     form,
     data_0 = null,
     data_1 = null,
-    data_2 = null,
-    data_3 = null
+    data_2 = null
   } = $$props;
   {
     setContext("__svelte__", stores);
@@ -1488,7 +1486,7 @@ function Root($$payload, $$props) {
   {
     stores.page.set(page);
   }
-  const Pyramid_3 = constructors[3];
+  const Pyramid_2 = constructors[2];
   if (constructors[1]) {
     $$payload.out.push("<!--[-->");
     const Pyramid_0 = constructors[0];
@@ -1507,30 +1505,9 @@ function Root($$payload, $$props) {
             form,
             params: page.params,
             children: ($$payload3) => {
-              if (constructors[3]) {
-                $$payload3.out.push("<!--[-->");
-                const Pyramid_2 = constructors[2];
-                $$payload3.out.push(`<!---->`);
-                Pyramid_2($$payload3, {
-                  data: data_2,
-                  form,
-                  params: page.params,
-                  children: ($$payload4) => {
-                    $$payload4.out.push(`<!---->`);
-                    Pyramid_3($$payload4, { data: data_3, form, params: page.params });
-                    $$payload4.out.push(`<!---->`);
-                  },
-                  $$slots: { default: true }
-                });
-                $$payload3.out.push(`<!---->`);
-              } else {
-                $$payload3.out.push("<!--[!-->");
-                const Pyramid_2 = constructors[2];
-                $$payload3.out.push(`<!---->`);
-                Pyramid_2($$payload3, { data: data_2, form, params: page.params });
-                $$payload3.out.push(`<!---->`);
-              }
-              $$payload3.out.push(`<!--]-->`);
+              $$payload3.out.push(`<!---->`);
+              Pyramid_2($$payload3, { data: data_2, form, params: page.params });
+              $$payload3.out.push(`<!---->`);
             },
             $$slots: { default: true }
           });
@@ -1578,7 +1555,7 @@ const options = {
   service_worker: false,
   service_worker_options: void 0,
   templates: {
-    app: ({ head, body, assets, nonce, env }) => '<!DOCTYPE html>\n<html lang="it">\n	<head>\n		<meta charset="utf-8" />\n		<link rel="icon" href="' + assets + '/favicon.ico" />\n		<link rel="apple-touch-icon" href="' + assets + `/morlappo-logo.png" />
+    app: ({ head, body, assets, nonce, env }) => '<!DOCTYPE html>\n<html lang="%lang%">\n	<head>\n		<meta charset="utf-8" />\n		<link rel="icon" href="' + assets + '/favicon.ico" />\n		<link rel="apple-touch-icon" href="' + assets + `/morlappo-logo.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content="WMS - Sistema di gestione magazzino multicommittente con AI. Sviluppato da Morlappo Srl." />
 		<meta name="author" content="Morlappo Srl - Innovazione attraverso l'Intelligenza Artificiale" />
@@ -1658,7 +1635,7 @@ const options = {
 		<div class="error">
 			<span class="status">` + status + '</span>\n			<div class="message">\n				<h1>' + message + "</h1>\n			</div>\n		</div>\n	</body>\n</html>\n"
   },
-  version_hash: "1hrt2vp"
+  version_hash: "15p9r0d"
 };
 async function get_hooks() {
   let handle;

@@ -4,6 +4,7 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import TransferModal from '$lib/components/TransferModal.svelte';
+  import { t } from '$lib/i18n';
   
   export let data: PageData;
 
@@ -106,6 +107,11 @@
       case 'ALTA': return 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200';
       default: return 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200';
     }
+  }
+
+  // Traduzione stato scorta
+  function translateStockStatus(stato: string): string {
+    return $t(`inventory.stockStatus.${stato}`);
   }
 
   // Gestione filtri lato client
@@ -268,7 +274,7 @@
 </script>
 
 <svelte:head>
-  <title>Giacenze Globali - Gestionale Magazzino</title>
+  <title>{$t('inventory.title')} - Gestionale Magazzino</title>
 </svelte:head>
 
 <div class="w-full px-4 py-6">
@@ -277,9 +283,9 @@
     <div>
       {#if isFromProdotti}
         <div class="flex items-center gap-3 mb-2">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Giacenze Globali</h1>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">{$t('inventory.title')}</h1>
           <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-sm font-medium">
-            📦 Vista da Prodotto: {prodottoProvenienza}
+            📦 {$t('inventory.product')}: {prodottoProvenienza}
           </span>
         </div>
         <div class="flex items-center gap-2 mb-3">
@@ -287,18 +293,18 @@
             on:click={tornaAiProdotti}
             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
           >
-            ← Torna ai Prodotti Globali
+            ← {$t('products.title')}
           </button>
         </div>
         <p class="text-gray-600 dark:text-gray-400">
-          Visualizzazione giacenze per il prodotto <strong>{prodottoProvenienza}</strong>
+          {$t('inventory.title')} {$t('inventory.product')} <strong>{prodottoProvenienza}</strong>
           {#if committenteProvenienza}
             del committente selezionato
           {/if}
         </p>
       {:else}
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Giacenze Globali</h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-1">Vista completa di tutti i committenti con sistema UDC</p>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">{$t('inventory.title')}</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-1">{$t('layout.globalInventoryDesc')}</p>
       {/if}
     </div>
     
@@ -307,13 +313,13 @@
         on:click={expandAll}
         class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
       >
-        📋 Espandi Tutto
+        📋 {$t('common.all')}
       </button>
       <button 
         on:click={collapseAll}
         class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
       >
-        📋 Comprimi Tutto
+        📋 {$t('common.close')}
       </button>
     </div>
   </div>
@@ -322,15 +328,15 @@
   <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
     <div class="stat-card">
       <div class="text-2xl font-bold text-blue-600">{data.statistiche.totale_giacenze || 0}</div>
-      <div class="text-sm text-gray-600 dark:text-gray-400">Giacenze Totali</div>
+      <div class="text-sm text-gray-600 dark:text-gray-400">{$t('inventory.title')}</div>
     </div>
     <div class="stat-card">
       <div class="text-2xl font-bold text-purple-600">{data.statistiche.totale_committenti || 0}</div>
-      <div class="text-sm text-gray-600 dark:text-gray-400">Committenti</div>
+      <div class="text-sm text-gray-600 dark:text-gray-400">{$t('categories.client')}</div>
     </div>
     <div class="stat-card">
       <div class="text-2xl font-bold text-green-600">{data.statistiche.totale_prodotti || 0}</div>
-      <div class="text-sm text-gray-600 dark:text-gray-400">Prodotti</div>
+      <div class="text-sm text-gray-600 dark:text-gray-400">{$t('products.title')}</div>
     </div>
     <div class="stat-card">
       <div class="text-2xl font-bold text-yellow-600">{data.statistiche.totale_udc || 0}</div>
@@ -342,7 +348,7 @@
     </div>
     <div class="stat-card">
       <div class="text-2xl font-bold text-indigo-600">{formatCurrency(data.statistiche.valore_totale_magazzino || 0)}</div>
-      <div class="text-sm text-gray-600 dark:text-gray-400">Valore Totale</div>
+      <div class="text-sm text-gray-600 dark:text-gray-400">{$t('orders.total')}</div>
     </div>
   </div>
 
@@ -352,10 +358,10 @@
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-md font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
           <span class="text-lg">🔍</span>
-          <span>Filtri</span>
+          <span>{$t('common.filter')}</span>
           {#if isFromProdotti}
             <span class="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs font-normal">
-              🔒 Filtri limitati - Vista prodotto specifico
+              🔒 {$t('common.filter')} - {$t('inventory.product')}
             </span>
           {/if}
         </h3>
@@ -369,7 +375,7 @@
           type="text" 
           bind:value={searchTerm}
           on:input={applyClientFilters}
-          placeholder="Codice..."
+          placeholder="{$t('suppliers.code')}..."
           class="form-input text-sm"
           disabled={isFromProdotti}
         >
@@ -378,7 +384,7 @@
       <!-- Committente -->
       <div class="min-w-36">
         <select name="committente" class="form-input text-sm" bind:value={selectedCommittente} on:change={onCommittenteChange} disabled={isFromProdotti}>
-          <option value="">Tutti committenti</option>
+          <option value="">{$t('common.all')} {$t('categories.client').toLowerCase()}</option>
           {#each data.committenti as committente}
             <option value={committente.id.toString()}>
               {committente.ragione_sociale}
@@ -390,7 +396,7 @@
       <!-- Categoria -->
       <div class="min-w-32">
         <select name="categoria" class="form-input text-sm" bind:value={selectedCategoria} on:change={applyClientFilters} disabled={isFromProdotti}>
-          <option value="">Tutte categorie</option>
+          <option value="">{$t('common.all')} {$t('categories.title').toLowerCase()}</option>
           {#each categorieFiltrate as categoria}
             <option value={categoria.id.toString()}>
               {categoria.descrizione}
@@ -411,7 +417,7 @@
           class="mr-1"
           disabled={isFromProdotti}
         >
-        <label class="text-xs text-neutral-600 dark:text-gray-400 whitespace-nowrap">Scorte basse</label>
+        <label class="text-xs text-neutral-600 dark:text-gray-400 whitespace-nowrap">{$t('common.lowStock')}</label>
       </div>
 
       <!-- Azioni -->
@@ -451,19 +457,19 @@
       <thead class="bg-gray-50 dark:bg-gray-800">
         <tr>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            Committente & Prodotto
+            {$t('inventory.table.clientProduct')}
           </th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            Quantità & Stato
+            {$t('inventory.table.quantityStatus')}
           </th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            Valore
+            {$t('inventory.table.value')}
           </th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            UDC/Ubicazioni
+            {$t('inventory.table.udcLocations')}
           </th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            Azioni
+            {$t('inventory.table.actions')}
           </th>
         </tr>
       </thead>
@@ -501,7 +507,7 @@
                 {giacenza.totale.quantita} {giacenza.prodotto.unita_misura}
               </div>
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {getStatoScortaColor(giacenza.totale.stato_scorta)}">
-                {giacenza.totale.stato_scorta}
+                {translateStockStatus(giacenza.totale.stato_scorta)}
               </span>
             </td>
             
@@ -510,23 +516,23 @@
                 {formatCurrency(giacenza.totale.valore_totale)}
               </div>
               <div class="text-xs text-gray-500 dark:text-gray-400">
-                Medio: {formatCurrency(giacenza.totale.valore_medio)}
+                {$t('inventory.details.average')}: {formatCurrency(giacenza.totale.valore_medio)}
               </div>
             </td>
             
             <td class="px-6 py-4">
               <div class="flex flex-wrap gap-1">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {getUdcBadgeColor(giacenza.udc_count)}">
-                  🏗️ {giacenza.udc_count} UDC
+                  🏗️ {giacenza.udc_count} {$t('inventory.details.udc')}
                 </span>
                 {#if giacenza.ubicazioni_count > 0}
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200">
-                    📍 {giacenza.ubicazioni_count} Ubic.
+                    📍 {giacenza.ubicazioni_count} {$t('inventory.details.locations')}
                   </span>
                 {/if}
                 {#if giacenza.is_distributed}
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
-                    🔀 Distribuito
+                    🔀 {$t('inventory.details.distributed')}
                   </span>
                 {/if}
               </div>
@@ -539,18 +545,18 @@
                     on:click={() => toggleExpansion(key)}
                     class="text-blue-600 hover:text-blue-900 text-sm font-medium text-left"
                   >
-                    {expanded[key] ? 'Nascondi' : 'Dettagli'} UDC
+                    {expanded[key] ? $t('inventory.details.hide') : $t('inventory.details.details')} {$t('inventory.details.udc')}
                   </button>
                 {:else}
-                  <span class="text-gray-400 dark:text-gray-500 text-sm">Nessun UDC</span>
+                  <span class="text-gray-400 dark:text-gray-500 text-sm">{$t('inventory.details.noUdc')}</span>
                 {/if}
                 
                 <button 
                   class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors"
                   on:click={() => openTransferModal(giacenza)}
-                  title="Trasferisci prodotto (per quantità)"
+                  title="{$t('inventory.details.transferProduct')}"
                 >
-                  🔄 Trasferimento
+                  🔄 {$t('inventory.details.transfer')}
                 </button>
               </div>
             </td>
@@ -568,7 +574,7 @@
                         🏗️ {dettaglio.udc_barcode}
                       </div>
                       <div class="text-xs text-gray-500">
-                        {dettaglio.tipo_udc} • Stato: {dettaglio.stato} • Pos: {dettaglio.posizione}
+                        {dettaglio.tipo_udc} • {$t('inventory.details.status')}: {dettaglio.stato} • {$t('inventory.details.position')}: {dettaglio.posizione}
                       </div>
                     </div>
                   </div>
@@ -578,12 +584,12 @@
                     {dettaglio.quantita} {giacenza.prodotto.unita_misura}
                   </div>
                   <div class="text-xs text-gray-500 dark:text-gray-400 space-y-1">
-                    <div>🏷️ Lotto: {dettaglio.lotto || '-'}</div>
-                    <div>📅 Scadenza: {dettaglio.scadenza ? new Date(dettaglio.scadenza).toLocaleDateString('it-IT') : '-'}</div>
-                    <div>⚖️ Peso: 
+                    <div>🏷️ {$t('inventory.details.lot')}: {dettaglio.lotto || '-'}</div>
+                    <div>📅 {$t('inventory.details.expiry')}: {dettaglio.scadenza ? new Date(dettaglio.scadenza).toLocaleDateString('it-IT') : '-'}</div>
+                    <div>⚖️ {$t('inventory.details.weight')}: 
                       {#if dettaglio.peso_lordo > 0 || dettaglio.peso_kg > 0}
-                        <span class="text-blue-600">L:{dettaglio.peso_lordo || 0}kg</span>
-                        <span class="text-green-600 ml-1">N:{dettaglio.peso_kg || 0}kg</span>
+                        <span class="text-blue-600">{$t('inventory.details.gross')}:{dettaglio.peso_lordo || 0}kg</span>
+                        <span class="text-green-600 ml-1">{$t('inventory.details.net')}:{dettaglio.peso_kg || 0}kg</span>
                       {:else}
                         -
                       {/if}
@@ -600,7 +606,7 @@
                     {#if dettaglio.ubicazione}
                       📍 {dettaglio.ubicazione} ({dettaglio.zona})
                     {:else}
-                      📍 Non assegnato
+                      📍 {$t('inventory.details.unassigned')}
                     {/if}
                   </div>
                   <div class="text-xs text-gray-400 dark:text-gray-500">
@@ -611,9 +617,9 @@
                   <button 
                     class="bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded text-xs font-medium transition-colors"
                     on:click={() => openTransferModalUdc(giacenza, dettaglio)}
-                    title="Trasferisci questo UDC intero"
+                    title="{$t('inventory.details.transferUdc')}"
                   >
-                    🔄 UDC
+                    🔄 {$t('inventory.details.transferUdcShort')}
                   </button>
                 </td>
               </tr>
@@ -627,12 +633,12 @@
 
   {#if data.giacenze.length === 0}
     <div class="text-center py-12">
-      <div class="text-gray-500 dark:text-gray-400 text-lg mb-4">Nessuna giacenza trovata</div>
+      <div class="text-gray-500 dark:text-gray-400 text-lg mb-4">{$t('inventory.details.noInventoryFound')}</div>
       <button
         on:click={resetFilters}
         class="text-blue-600 hover:text-blue-900 font-medium"
       >
-        Rimuovi filtri
+        {$t('inventory.details.removeFilters')}
       </button>
     </div>
   {/if}

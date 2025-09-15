@@ -34,7 +34,8 @@ export const nodes = [
 	() => import('./nodes/30'),
 	() => import('./nodes/31'),
 	() => import('./nodes/32'),
-	() => import('./nodes/33')
+	() => import('./nodes/33'),
+	() => import('./nodes/34')
 ];
 
 export const server_loads = [0];
@@ -62,15 +63,16 @@ export const dictionary = {
 		"/auth/prodotti": [22,[2]],
 		"/auth/sistema": [23,[2]],
 		"/auth/tipi-udc": [~24,[2]],
-		"/auth/udc": [~25,[2]],
-		"/auth/udc/[id]": [~26,[2]],
-		"/auth/unita-misura": [27,[2]],
-		"/auth/utenti": [~28,[2]],
-		"/auth/wave-planning": [~29,[2]],
-		"/auth/wave-planning/[id]": [~30,[2]],
-		"/login": [~31],
-		"/logs": [32],
-		"/test-css": [33]
+		"/auth/transfer": [25,[2]],
+		"/auth/udc": [~26,[2]],
+		"/auth/udc/[id]": [~27,[2]],
+		"/auth/unita-misura": [28,[2]],
+		"/auth/utenti": [~29,[2]],
+		"/auth/wave-planning": [~30,[2]],
+		"/auth/wave-planning/[id]": [~31,[2]],
+		"/login": [~32],
+		"/logs": [33],
+		"/test-css": [34]
 	};
 
 export const hooks = {

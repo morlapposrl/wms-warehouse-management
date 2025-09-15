@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { t } from '$lib/i18n';
   
   let magazzini = [];
   let magazziniOriginali = [];
@@ -39,14 +40,14 @@
           magazziniOriginali = result.data;
           applyClientFilters();
         } else {
-          error = result.error || 'Errore nel caricamento';
+          error = result.error || $t('errors.loadingError');
         }
       } else {
-        error = 'Errore di connessione';
+        error = $t('errors.connectionError');
       }
     } catch (err) {
       console.error('Errore magazzini:', err);
-      error = 'Errore di connessione';
+      error = $t('errors.connectionError');
     } finally {
       loading = false;
     }
@@ -71,19 +72,19 @@
   
   async function handleSubmit() {
     if (!formData.nome.trim()) {
-      formErrors.nome = ['Inserisci un nome'];
+      formErrors.nome = [$t('validation.enterName')];
       return;
     }
     
     if (!formData.codice.trim()) {
-      formErrors.codice = ['Inserisci un codice'];
+      formErrors.codice = [$t('validation.enterCode')];
       return;
     }
     
     if (!formData.larghezza_metri || !formData.lunghezza_metri || !formData.altezza_metri) {
-      formErrors.larghezza_metri = !formData.larghezza_metri ? ['Inserisci la larghezza'] : [];
-      formErrors.lunghezza_metri = !formData.lunghezza_metri ? ['Inserisci la lunghezza'] : [];
-      formErrors.altezza_metri = !formData.altezza_metri ? ['Inserisci l\'altezza'] : [];
+      formErrors.larghezza_metri = !formData.larghezza_metri ? [$t('validation.enterWidth')] : [];
+      formErrors.lunghezza_metri = !formData.lunghezza_metri ? [$t('validation.enterLength')] : [];
+      formErrors.altezza_metri = !formData.altezza_metri ? [$t('validation.enterHeight')] : [];
       return;
     }
     
@@ -104,24 +105,24 @@
       const result = await response.json();
 
       if (result.success) {
-        success = editingId ? 'Magazzino aggiornato con successo' : 'Magazzino creato con successo';
+        success = editingId ? $t('warehouses.updateSuccess') : $t('warehouses.createSuccess');
         await loadMagazzini();
         resetForm();
       } else {
-        error = result.error || 'Errore nel salvataggio';
+        error = result.error || $t('errors.saveError');
         if (result.errors) {
           formErrors = result.errors;
         }
       }
     } catch (e) {
-      error = 'Errore di connessione';
+      error = $t('errors.connectionError');
     } finally {
       loading = false;
     }
   }
 
   async function handleDelete(id, nome) {
-    if (!confirm(`Sei sicuro di voler eliminare il magazzino "${nome}"?`)) return;
+    if (!confirm($t('warehouses.deleteConfirm', { nome }))) return;
     
     loading = true;
     try {
@@ -132,13 +133,13 @@
       const result = await response.json();
       
       if (result.success) {
-        success = 'Magazzino eliminato con successo';
+        success = $t('warehouses.deleteSuccess');
         await loadMagazzini();
       } else {
-        error = result.error || 'Errore nell\'eliminazione';
+        error = result.error || $t('errors.deleteError');
       }
     } catch (e) {
-      error = 'Errore di connessione';
+      error = $t('errors.connectionError');
     } finally {
       loading = false;
     }
@@ -208,17 +209,17 @@
     <div>
       <div class="flex items-center gap-3 mb-2">
         <h1 class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
-          🏢 Gestione Magazzini
+          🏢 {$t('warehouses.title')}
         </h1>
       </div>
-      <p class="text-neutral-600 dark:text-gray-400">Configurazione magazzini fisici</p>
+      <p class="text-neutral-600 dark:text-gray-400">{$t('layout.warehousesDesc')}</p>
     </div>
     
     <div class="flex items-center gap-4">
       <button 
         on:click={loadMagazzini}
         class="btn btn-sm btn-secondary"
-        title="Ricarica magazzini"
+        title="{$t('common.refresh')}"
         disabled={loading}
       >
         🔄
@@ -229,30 +230,30 @@
         class="btn btn-primary"
         disabled={loading}
       >
-        ➕ Nuovo Magazzino
+        ➕ {$t('warehouses.add')}
       </button>
     </div>
   </div>
 
   {#if error}
-    <div class="alert alert-error mb-6">
-      <div class="flex items-center space-x-3">
-        <span class="text-lg">❌</span>
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
+      <div class="flex items-center gap-3">
+        <span class="text-red-600 dark:text-red-400 text-lg">❌</span>
         <div>
-          <p class="font-semibold">Errore</p>
-          <p class="text-sm mt-1">{error}</p>
+          <p class="font-semibold text-red-800 dark:text-red-200">{$t('errors.generic')}</p>
+          <p class="text-sm text-red-700 dark:text-red-300 mt-1">{error}</p>
         </div>
       </div>
     </div>
   {/if}
 
   {#if success}
-    <div class="alert alert-success mb-6">
-      <div class="flex items-center space-x-3">
-        <span class="text-lg">✅</span>
+    <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-6">
+      <div class="flex items-center gap-3">
+        <span class="text-green-600 dark:text-green-400 text-lg">✅</span>
         <div>
-          <p class="font-semibold">Successo</p>
-          <p class="text-sm mt-1">{success}</p>
+          <p class="font-semibold text-green-800 dark:text-green-200">{$t('common.success')}</p>
+          <p class="text-sm text-green-700 dark:text-green-300 mt-1">{success}</p>
         </div>
       </div>
     </div>
@@ -260,79 +261,78 @@
 
   {#if loading}
     <div class="flex justify-center items-center py-12">
-      <div class="spinner w-8 h-8"></div>
-      <span class="ml-3 text-neutral-600 dark:text-gray-400">Caricamento magazzini...</span>
+      <div class="w-8 h-8 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+      <span class="ml-3 text-gray-600 dark:text-gray-400">{$t('warehouses.loading')}</span>
     </div>
   {:else}
-    <div class="card mb-6">
-      <div class="card-body py-4">
-        <div class="flex items-center gap-2 mb-3">
-          <span class="text-lg">🔍</span>
-          <span class="text-md font-semibold text-neutral-900 dark:text-gray-100">Filtri</span>
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-lg">🔍</span>
+        <span class="text-md font-semibold text-gray-900 dark:text-gray-100">{$t('common.filters')}</span>
+      </div>
+      <div class="flex items-end gap-2 flex-nowrap">
+        <div class="min-w-28">
+          <input 
+            type="text" 
+            bind:value={searchTerm}
+            on:input={applyClientFilters}
+            placeholder="{$t('common.search')} {$t('warehouses.name').toLowerCase()}..."
+            class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-sm"
+          >
         </div>
-        <div class="flex items-end gap-2 flex-nowrap">
-          <div class="min-w-28">
-            <input 
-              type="text" 
-              bind:value={searchTerm}
-              on:input={applyClientFilters}
-              placeholder="Cerca magazzino..."
-              class="form-input text-sm"
-            >
-          </div>
-          
-          <div>
-            <button
-              class="btn btn-secondary btn-sm px-2"
-              on:click={clearAllFilters}
-              title="Reset filtri"
-            >
-              ↻
-            </button>
-          </div>
-          
-          <div class="text-sm text-neutral-600 dark:text-gray-400">
-            {magazzini.length} magazzini
-          </div>
+        
+        <div>
+          <button
+            class="p-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-100 transition-colors"
+            on:click={clearAllFilters}
+            title="{$t('common.resetFilters')}"
+          >
+            ↻
+          </button>
+        </div>
+        
+        <div class="text-sm text-gray-600 dark:text-gray-400">
+          {magazzini.length} {$t('warehouses.warehousesCount')}
         </div>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="stat-card">
+    <!-- KPI Cards moderne -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
         <div class="flex items-center">
-          <div class="stat-icon bg-blue-100">
-            <span class="text-blue-600 text-xl">🏢</span>
+          <div class="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+            <span class="text-blue-600 dark:text-blue-400 text-xl">🏢</span>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Magazzini Totali</p>
-            <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">{magazzini.length}</p>
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{$t('warehouses.totalWarehouses')}</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{magazzini.length}</p>
           </div>
         </div>
       </div>
       
-      <div class="stat-card">
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
         <div class="flex items-center">
-          <div class="stat-icon bg-green-100">
-            <span class="text-green-600 text-xl">📏</span>
+          <div class="p-3 bg-green-100 dark:bg-green-900/20 rounded-lg">
+            <span class="text-green-600 dark:text-green-400 text-xl">📏</span>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Superficie Totale</p>
-            <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{$t('warehouses.totalSurface')}</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">
               {magazzini.reduce((sum, m) => sum + (m.superficie_mq || 0), 0).toFixed(0)} m²
             </p>
           </div>
         </div>
       </div>
       
-      <div class="stat-card">
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
         <div class="flex items-center">
-          <div class="stat-icon bg-blue-100">
-            <span class="text-blue-600 text-xl">📦</span>
+          <div class="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
+            <span class="text-purple-600 dark:text-purple-400 text-xl">📦</span>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Volume Totale</p>
-            <p class="text-2xl font-bold text-neutral-900 dark:text-gray-100">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{$t('warehouses.totalVolume')}</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">
               {magazzini.reduce((sum, m) => sum + (m.volume_mc || 0), 0).toFixed(0)} m³
             </p>
           </div>
@@ -344,7 +344,7 @@
       <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div class="card-header border-b border-gray-200 dark:border-gray-700">
           <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">
-            Lista Magazzini
+            {$t('warehouses.warehouseList')}
           </h3>
         </div>
         
@@ -352,13 +352,13 @@
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th>Codice</th>
-                <th>Nome</th>
-                <th>Ubicazione</th>
-                <th>Dimensioni</th>
-                <th>Controlli Ambientali</th>
-                <th>Stato</th>
-                <th>Azioni</th>
+                <th>{$t('warehouses.code')}</th>
+                <th>{$t('warehouses.name')}</th>
+                <th>{$t('warehouses.location')}</th>
+                <th>{$t('warehouses.dimensions')}</th>
+                <th>{$t('warehouses.environmentalControls')}</th>
+                <th>{$t('warehouses.status')}</th>
+                <th>{$t('common.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -392,22 +392,22 @@
                   </td>
                   <td>
                     <span class="badge {magazzino.attivo ? 'badge-success' : 'badge-danger'}">
-                      {magazzino.attivo ? 'Attivo' : 'Inattivo'}
+                      {magazzino.attivo ? $t('warehouses.active') : $t('warehouses.inactive')}
                     </span>
                   </td>
                   <td>
-                    <div class="flex gap-2">
+                    <div class="flex gap-1">
                       <button 
-                        class="btn btn-primary btn-sm"
+                        class="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                         on:click={() => handleEdit(magazzino)}
-                        title="Modifica magazzino"
+                        title="{$t('common.edit')}"
                       >
                         ✏️
                       </button>
                       <button 
-                        class="btn btn-danger btn-sm"
+                        class="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
                         on:click={() => handleDelete(magazzino.id, magazzino.nome)}
-                        title="Elimina magazzino"
+                        title="{$t('common.delete')}"
                       >
                         🗑️
                       </button>
@@ -421,166 +421,187 @@
       </div>
     {:else}
       <div class="text-center py-12">
-        <div class="text-6xl mb-4">🏢</div>
-        <h3 class="text-xl font-semibold text-neutral-700 mb-2">
-          Nessun magazzino trovato
+        <div class="w-20 h-20 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+          <span class="text-3xl">🏢</span>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          {$t('warehouses.noWarehouses')}
         </h3>
-        <p class="text-neutral-600 dark:text-gray-400">Non ci sono magazzini nel sistema</p>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">{$t('warehouses.noWarehousesDesc')}</p>
+        <button
+          on:click={() => showForm = true}
+          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+        >
+          ➕ {$t('warehouses.add')}
+        </button>
       </div>
     {/if}
   {/if}
 </div>
 
 {#if showForm}
-  <div class="modal-backdrop" on:click={resetForm}>
-    <div class="modal-content" on:click|stopPropagation>
-      <div class="modal-header">
-        <h2 class="text-xl font-semibold">
-          {editingId ? 'Modifica Magazzino' : 'Nuovo Magazzino'}
-        </h2>
-        <button on:click={resetForm} class="text-neutral-400 hover:text-neutral-600 dark:text-gray-400">✖️</button>
+  <div class="fixed inset-0 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70 flex items-center justify-center z-50">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-3xl mx-4 max-h-[90vh] overflow-hidden">
+      
+      <!-- Header semplice -->
+      <div class="bg-blue-600 px-4 py-3 flex justify-between items-center">
+        <h2 class="text-white font-semibold">🏢 {editingId ? $t('warehouses.edit') : $t('warehouses.add')}</h2>
+        <button 
+          on:click={resetForm}
+          class="text-white hover:text-gray-200 text-xl"
+        >
+          ×
+        </button>
       </div>
       
-      <form on:submit|preventDefault={handleSubmit} class="p-6 space-y-4">
+      <!-- Content scrollabile -->
+      <div class="overflow-y-auto max-h-[calc(90vh-120px)]">
+        <form on:submit|preventDefault={handleSubmit} class="p-4 space-y-4">
         
-        <div>
-          <label class="form-label">Nome *</label>
-          <input
-            type="text"
-            bind:value={formData.nome}
-            on:input={generateCode}
-            class="form-input"
-            class:border-red-500={formErrors.nome}
-            placeholder="Es: Magazzino Centrale Milano"
-            required
-          />
-          {#if formErrors.nome}
-            <p class="form-error">{formErrors.nome.join(', ')}</p>
-          {/if}
+        <!-- Riga 1: Nome e Codice -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">{$t('warehouses.name')} *</label>
+            <input
+              type="text"
+              bind:value={formData.nome}
+              on:input={generateCode}
+              class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700"
+              class:border-red-500={formErrors.nome}
+              placeholder="{$t('warehouses.namePlaceholder')}"
+              required
+            />
+            {#if formErrors.nome}
+              <p class="text-red-500 text-xs mt-1">{formErrors.nome.join(', ')}</p>
+            {/if}
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">{$t('warehouses.code')} *</label>
+            <input
+              type="text"
+              bind:value={formData.codice}
+              class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700"
+              class:border-red-500={formErrors.codice}
+              placeholder="{$t('warehouses.codePlaceholder')}"
+              required
+            />
+            {#if formErrors.codice}
+              <p class="text-red-500 text-xs mt-1">{formErrors.codice.join(', ')}</p>
+            {/if}
+          </div>
         </div>
 
+        <!-- Riga 2: Indirizzo completo -->
         <div>
-          <label class="form-label">Codice *</label>
-          <input
-            type="text"
-            bind:value={formData.codice}
-            class="form-input"
-            class:border-red-500={formErrors.codice}
-            placeholder="Es: MAG_MILANO01"
-            required
-          />
-          {#if formErrors.codice}
-            <p class="form-error">{formErrors.codice.join(', ')}</p>
-          {/if}
-        </div>
-
-        <div>
-          <label class="form-label">Indirizzo</label>
+          <label class="block text-sm font-medium mb-1">{$t('warehouses.address')}</label>
           <input
             type="text"
             bind:value={formData.indirizzo}
-            class="form-input"
-            placeholder="Via, numero"
+            class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700"
+            placeholder="{$t('warehouses.addressPlaceholder')}"
           />
         </div>
 
+        <!-- Riga 3: Città e CAP -->
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="form-label">Città</label>
+            <label class="block text-sm font-medium mb-1">{$t('warehouses.city')}</label>
             <input
               type="text"
               bind:value={formData.citta}
-              class="form-input"
-              placeholder="Milano"
+              class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700"
+              placeholder="{$t('warehouses.cityPlaceholder')}"
             />
           </div>
           <div>
-            <label class="form-label">CAP</label>
+            <label class="block text-sm font-medium mb-1">{$t('warehouses.postalCode')}</label>
             <input
               type="text"
               bind:value={formData.cap}
-              class="form-input"
+              class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700"
               placeholder="20100"
               maxlength="5"
             />
           </div>
         </div>
 
+        <!-- Riga 4: Dimensioni -->
         <div class="grid grid-cols-3 gap-4">
           <div>
-            <label class="form-label">Larghezza (m) *</label>
+            <label class="block text-sm font-medium mb-1">{$t('warehouses.width')} (m) *</label>
             <input
               type="number"
               bind:value={formData.larghezza_metri}
-              class="form-input"
+              class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700"
               class:border-red-500={formErrors.larghezza_metri}
               placeholder="60"
               step="0.1"
               required
             />
             {#if formErrors.larghezza_metri}
-              <p class="form-error">{formErrors.larghezza_metri.join(', ')}</p>
+              <p class="text-red-500 text-xs mt-1">{formErrors.larghezza_metri.join(', ')}</p>
             {/if}
           </div>
           <div>
-            <label class="form-label">Lunghezza (m) *</label>
+            <label class="block text-sm font-medium mb-1">{$t('warehouses.length')} (m) *</label>
             <input
               type="number"
               bind:value={formData.lunghezza_metri}
-              class="form-input"
+              class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700"
               class:border-red-500={formErrors.lunghezza_metri}
               placeholder="40"
               step="0.1"
               required
             />
             {#if formErrors.lunghezza_metri}
-              <p class="form-error">{formErrors.lunghezza_metri.join(', ')}</p>
+              <p class="text-red-500 text-xs mt-1">{formErrors.lunghezza_metri.join(', ')}</p>
             {/if}
           </div>
           <div>
-            <label class="form-label">Altezza (m) *</label>
+            <label class="block text-sm font-medium mb-1">{$t('warehouses.height')} (m) *</label>
             <input
               type="number"
               bind:value={formData.altezza_metri}
-              class="form-input"
+              class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700"
               class:border-red-500={formErrors.altezza_metri}
               placeholder="8"
               step="0.1"
               required
             />
             {#if formErrors.altezza_metri}
-              <p class="form-error">{formErrors.altezza_metri.join(', ')}</p>
+              <p class="text-red-500 text-xs mt-1">{formErrors.altezza_metri.join(', ')}</p>
             {/if}
           </div>
         </div>
 
+        <!-- Riga 5: Controlli ambientali -->
         <div class="grid grid-cols-3 gap-4">
           <div>
-            <label class="form-label">Temp. Min (°C)</label>
+            <label class="block text-sm font-medium mb-1">{$t('warehouses.tempMin')} (°C)</label>
             <input
               type="number"
               bind:value={formData.temperatura_min}
-              class="form-input"
+              class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700"
               placeholder="5"
               step="0.1"
             />
           </div>
           <div>
-            <label class="form-label">Temp. Max (°C)</label>
+            <label class="block text-sm font-medium mb-1">{$t('warehouses.tempMax')} (°C)</label>
             <input
               type="number"
               bind:value={formData.temperatura_max}
-              class="form-input"
+              class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700"
               placeholder="35"
               step="0.1"
             />
           </div>
           <div>
-            <label class="form-label">Umidità Max (%)</label>
+            <label class="block text-sm font-medium mb-1">{$t('warehouses.humidityMax')} (%)</label>
             <input
               type="number"
               bind:value={formData.umidita_max}
-              class="form-input"
+              class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700"
               placeholder="80"
               step="0.1"
               min="0"
@@ -589,28 +610,29 @@
           </div>
         </div>
 
-        <div class="flex justify-end space-x-3 pt-4">
-          <button type="button" on:click={resetForm} class="btn btn-secondary">Annulla</button>
-          <button type="submit" disabled={loading} class="btn btn-primary">
-            {#if loading}<div class="spinner w-4 h-4 mr-2"></div>{/if}
-            {editingId ? 'Aggiorna' : 'Crea'}
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
+
+      <!-- Footer semplice -->
+      <div class="border-t bg-gray-50 dark:bg-gray-800 px-4 py-3 flex justify-end gap-3">
+        <button 
+          type="button" 
+          on:click={resetForm} 
+          class="px-4 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-100"
+        >
+          {$t('common.cancel')}
+        </button>
+        
+        <button 
+          type="button"
+          on:click={handleSubmit} 
+          disabled={loading} 
+          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded flex items-center gap-2"
+        >
+          {#if loading}<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>{/if}
+          {editingId ? $t('common.save') : $t('common.add')}
+        </button>
+      </div>
     </div>
   </div>
 {/if}
-
-<style>
-  .modal-backdrop {
-    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
-  }
-  
-  .modal-content {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-screen overflow-y-auto;
-  }
-  
-  .modal-header {
-    @apply flex justify-between items-center p-6 border-b;
-  }
-</style>

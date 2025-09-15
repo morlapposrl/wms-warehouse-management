@@ -4,6 +4,7 @@
   import Icon from '$lib/components/Icon.svelte';
   import ErrorNotifications from '$lib/components/ErrorNotifications.svelte';
   import ThemeSelector from '$lib/components/ThemeSelector.svelte';
+  import { t } from '$lib/i18n';
   import '../../app.css';
   
   let showUserMenu = false;
@@ -12,109 +13,109 @@
   const mainMenu = [
     {
       href: '/auth/dashboard',
-      label: 'Dashboard Globale',
+      labelKey: 'layout.globalDashboard',
       icon: 'chart-bar',
-      description: 'Vista aggregata di tutti i committenti'
+      descriptionKey: 'layout.globalDashboardDesc'
     },
     {
       href: '/auth/admin/committenti',
-      label: 'Gestione Committenti',
+      labelKey: 'layout.clientManagement',
       icon: 'building-office',
-      description: 'CRUD completo committenti',
+      descriptionKey: 'layout.clientManagementDesc',
       adminOnly: true
     },
     {
       type: 'dropdown',
-      label: 'Anagrafiche',
+      labelKey: 'layout.masterData',
       icon: 'cog-6-tooth',
-      description: 'Configurazione sistema e anagrafiche base',
+      descriptionKey: 'layout.masterDataDesc',
       items: [
         {
           href: '/auth/categorie',
-          label: 'Categorie',
+          labelKey: 'layout.categories',
           icon: 'tag',
-          description: 'Categorie prodotti per committente'
+          descriptionKey: 'layout.categoriesDesc'
         },
         {
           href: '/auth/unita-misura',
-          label: 'Unità di Misura',
+          labelKey: 'layout.units',
           icon: 'scale',
-          description: 'Unità di misura globali e personalizzate'
+          descriptionKey: 'layout.unitsDesc'
         },
         {
           href: '/auth/fornitori',
-          label: 'Clienti/Fornitori',
+          labelKey: 'layout.suppliers',
           icon: 'truck',
-          description: 'Anagrafica clienti e fornitori per committenti'
+          descriptionKey: 'layout.suppliersDesc'
         },
         {
           href: '/auth/magazzini',
-          label: 'Magazzini',
+          labelKey: 'layout.warehouses',
           icon: 'building-office-2',
-          description: 'Configurazione magazzini fisici'
+          descriptionKey: 'layout.warehousesDesc'
         },
         {
           href: '/auth/tipi-udc',
-          label: 'Tipi UDC',
+          labelKey: 'layout.udcTypes',
           icon: 'cube-transparent',
-          description: 'Tipi Unità Di Carico (pallet, container, box)'
+          descriptionKey: 'layout.udcTypesDesc'
         },
         { type: 'separator' },
         {
           href: '/auth/causali',
-          label: 'Causali Trasferimento',
+          labelKey: 'layout.transferCauses',
           icon: 'document-text',
-          description: 'Causali per movimentazioni'
+          descriptionKey: 'layout.transferCausesDesc'
         }
       ]
     },
     {
       href: '/auth/prodotti',
-      label: 'Prodotti Globali',
+      labelKey: 'layout.globalProducts',
       icon: 'cube',
-      description: 'Tutti i prodotti di tutti i committenti'
+      descriptionKey: 'layout.globalProductsDesc'
     },
     {
       href: '/auth/giacenze',
-      label: 'Giacenze Globali',
+      labelKey: 'layout.globalInventory',
       icon: 'archive-box',
-      description: 'Inventario aggregato di tutto il magazzino'
+      descriptionKey: 'layout.globalInventoryDesc'
     },
     {
       href: '/auth/udc',
-      label: 'UDC Globali',
+      labelKey: 'layout.globalUdc',
       icon: 'cube-transparent',
-      description: 'Gestione completa di tutte le UDC con filtri avanzati'
+      descriptionKey: 'layout.globalUdcDesc'
     },
     {
       href: '/auth/movimenti',
-      label: 'Movimenti Globali',
+      labelKey: 'layout.globalMovements',
       icon: 'arrows-right-left',
-      description: 'Tutte le movimentazioni magazzino'
+      descriptionKey: 'layout.globalMovementsDesc'
     },
     {
       href: '/auth/magazzino',
-      label: 'Layout Magazzino',
+      labelKey: 'layout.warehouseLayout',
       icon: 'building-office-2',
-      description: 'Mappa interattiva ubicazioni e zone'
+      descriptionKey: 'layout.warehouseLayoutDesc'
     },
     {
       href: '/auth/ordini',
-      label: 'Gestione Ordini',
+      labelKey: 'layout.orderManagement',
       icon: 'shopping-bag',
-      description: 'Ordini B2B per committenti'
+      descriptionKey: 'layout.orderManagementDesc'
     },
     {
       href: '/auth/wave-planning',
-      label: 'Wave Planning',
+      labelKey: 'layout.wavePlanning',
       icon: 'adjustments-horizontal',
-      description: 'Ottimizzazione picking multi-committente'
+      descriptionKey: 'layout.wavePlanningDesc'
     },
     {
       href: '/auth/reports',
-      label: 'Report & Analytics',
+      labelKey: 'layout.reportsAnalytics',
       icon: 'chart-line',
-      description: 'Report aggregati e per committente'
+      descriptionKey: 'layout.reportsAnalyticsDesc'
     }
   ];
   
@@ -124,9 +125,9 @@
   
   // Gestione temi moderna con Tailwind
   const themes = [
-    { id: 'light', name: 'Chiaro', icon: '☀️', description: 'Tema chiaro professionale' },
-    { id: 'dark', name: 'Scuro', icon: '🌙', description: 'Tema scuro moderno' },
-    { id: 'system', name: 'Sistema', icon: '🖥️', description: 'Segue le preferenze del sistema' }
+    { id: 'light', nameKey: 'layout.light', icon: '☀️', description: 'Tema chiaro professionale' },
+    { id: 'dark', nameKey: 'layout.dark', icon: '🌙', description: 'Tema scuro moderno' },
+    { id: 'system', nameKey: 'layout.system', icon: '🖥️', description: 'Segue le preferenze del sistema' }
   ];
   
   let currentTheme = 'system';
@@ -223,24 +224,24 @@
             <div>
               <div class="flex items-center gap-4">
                 <img src="/morlappo-logo-white.png" alt="Morlappo" class="h-10" />
-                <h1 class="text-xl font-bold text-neutral-900 dark:text-white">WMS</h1>
+                <h1 class="text-xl font-bold text-neutral-900 dark:text-white">{$t('layout.wms')}</h1>
               </div>
-              <p class="text-sm text-neutral-800 dark:text-gray-200 mt-1 font-bold whitespace-nowrap">Morlappo Srl</p>
+              <p class="text-sm text-neutral-800 dark:text-gray-200 mt-1 font-bold whitespace-nowrap">{$t('layout.company')}</p>
             </div>
-            <span class="badge badge-primary">Multi-Committente</span>
+            <span class="badge badge-primary">{$t('layout.multiClient')}</span>
           </div>
           
           <nav class="flex items-center gap-1">
             {#each mainMenu as item}
-              {#if item.type === 'dropdown' && item.label === 'Anagrafiche'}
+              {#if item.type === 'dropdown' && item.labelKey === 'layout.masterData'}
                 <div class="relative anagrafiche-menu-container">
                   <button 
                     on:click={() => showAnagraficheMenu = !showAnagraficheMenu}
                     class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors {isDropdownActive(item.items) ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'}"
-                    title={item.description}
+                    title={$t(item.descriptionKey)}
                   >
                     <Icon name={item.icon} class="w-4 h-4" />
-                    <span class="hidden md:inline">{item.label}</span>
+                    <span class="hidden md:inline">{$t(item.labelKey)}</span>
                     <Icon name="chevron-down" class="w-3 h-3 ml-1 transition-transform {showAnagraficheMenu ? 'rotate-180' : ''}" />
                   </button>
                   
@@ -253,13 +254,13 @@
                           <a 
                             href={subItem.href}
                             class="flex items-center gap-3 px-4 py-3 text-sm transition-colors {isActive(subItem.href) ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'}"
-                            title={subItem.description}
+                            title={$t(subItem.descriptionKey)}
                             on:click={() => showAnagraficheMenu = false}
                           >
                             <Icon name={subItem.icon} class="w-4 h-4" />
                             <div class="flex-1">
-                              <div class="font-medium">{subItem.label}</div>
-                              <div class="text-xs text-neutral-500 dark:text-gray-400 mt-0.5">{subItem.description}</div>
+                              <div class="font-medium">{$t(subItem.labelKey)}</div>
+                              <div class="text-xs text-neutral-500 dark:text-gray-400 mt-0.5">{$t(subItem.descriptionKey)}</div>
                             </div>
                           </a>
                         {/if}
@@ -271,7 +272,7 @@
                 <a 
                   href={item.adminOnly && $page.data.user?.ruolo !== 'super_admin' ? '#' : item.href}
                   class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors {isActive(item.href) ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'} {item.adminOnly && $page.data.user?.ruolo !== 'super_admin' ? 'cursor-not-allowed opacity-50' : ''}"
-                  title={item.adminOnly && $page.data.user?.ruolo !== 'super_admin' ? 'Accesso riservato ai super admin' : item.description}
+                  title={item.adminOnly && $page.data.user?.ruolo !== 'super_admin' ? $t('layout.adminOnly') : $t(item.descriptionKey)}
                   on:click={(e) => {
                     if (item.adminOnly && $page.data.user?.ruolo !== 'super_admin') {
                       e.preventDefault();
@@ -279,7 +280,7 @@
                   }}
                 >
                   <Icon name={item.icon} class="w-4 h-4" />
-                  <span class="hidden md:inline">{item.label}</span>
+                  <span class="hidden md:inline">{$t(item.labelKey)}</span>
                 </a>
               {/if}
             {/each}
@@ -304,7 +305,7 @@
                   >
                     <div class="flex items-center gap-2">
                       <span class="text-lg">🔧</span>
-                      <span>Sistema & Status</span>
+                      <span>{$t('layout.systemStatus')}</span>
                     </div>
                   </a>
                   <a 
@@ -314,7 +315,7 @@
                   >
                     <div class="flex items-center gap-2">
                       <span class="text-lg">👥</span>
-                      <span>Gestione Utenti</span>
+                      <span>{$t('layout.userManagement')}</span>
                     </div>
                   </a>
                   <a 
@@ -324,7 +325,7 @@
                   >
                     <div class="flex items-center gap-2">
                       <span class="text-lg">🔍</span>
-                      <span>Audit Trail</span>
+                      <span>{$t('layout.auditTrail')}</span>
                     </div>
                   </a>
                   <hr class="my-1 border-neutral-200 dark:border-gray-700">
@@ -335,7 +336,7 @@
                   >
                     <div class="flex items-center gap-2">
                       <span class="text-lg">👤</span>
-                      <span>Profilo</span>
+                      <span>{$t('layout.profile')}</span>
                     </div>
                   </a>
                   <a 
@@ -345,7 +346,7 @@
                   >
                     <div class="flex items-center gap-2">
                       <span class="text-lg">⚙️</span>
-                      <span>Impostazioni</span>
+                      <span>{$t('layout.settings')}</span>
                     </div>
                   </a>
                   
@@ -359,7 +360,7 @@
                       <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                           <span class="text-lg">{getCurrentTheme().icon}</span>
-                          <span>Temi</span>
+                          <span>{$t('layout.themes')}</span>
                         </div>
                         <Icon name="chevron-left" class="w-3 h-3 transition-transform {showThemeMenu ? '-rotate-90' : ''}" />
                       </div>
@@ -367,7 +368,7 @@
                     
                     {#if showThemeMenu}
                       <div class="absolute right-full top-0 mr-1 w-44 bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg shadow-lg border border-neutral-200 dark:border-gray-700 py-1 z-60">
-                        <div class="px-3 py-2 text-xs text-neutral-500 dark:text-gray-400 border-b border-neutral-200 dark:border-gray-700">Seleziona Tema</div>
+                        <div class="px-3 py-2 text-xs text-neutral-500 dark:text-gray-400 border-b border-neutral-200 dark:border-gray-700">{$t('layout.selectTheme')}</div>
                         {#each themes as theme}
                           <button
                             type="button"
@@ -375,7 +376,7 @@
                             on:click={() => applyTheme(theme.id)}
                           >
                             <span class="text-sm">{theme.icon}</span>
-                            <span class="flex-1">{theme.name}</span>
+                            <span class="flex-1">{$t(theme.nameKey)}</span>
                             {#if theme.id === currentTheme}
                               <Icon name="check" class="w-3 h-3 text-blue-600 dark:text-blue-400" />
                             {/if}
@@ -416,7 +417,7 @@
                   >
                     <div class="flex items-center gap-2">
                       <span class="text-lg">🚪</span>
-                      <span>Logout</span>
+                      <span>{$t('layout.logout')}</span>
                     </div>
                   </button>
                 </div>
@@ -428,7 +429,7 @@
     </header>
 
     <!-- Contenuto per pagine non-committente -->
-    <main class="w-full px-6 py-8">
+    <main class="w-full px-6 py-8 bg-transparent">
       <slot />
     </main>
   {:else}

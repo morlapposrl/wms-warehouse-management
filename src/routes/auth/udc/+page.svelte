@@ -3,6 +3,7 @@
   import { enhance } from '$app/forms';
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
+  import { t } from '$lib/i18n';
   
   export let data: PageData;
   export let form: ActionData;
@@ -35,6 +36,18 @@
       case 'CASSA_PLASTICA': return '🧰';
       default: return '📦';
     }
+  }
+
+  // Traduzioni UDC
+  function translateUdcStatus(stato: string): string {
+    return $t(`udc.statuses.${stato}`);
+  }
+
+  function translateUdcType(tipo: string): string {
+    if (!tipo || tipo === 'UNKNOWN') {
+      return $t('udc.list.details.unknownType');
+    }
+    return $t(`udc.types.${tipo}`) || tipo.replace('_', ' ');
   }
 
   // Scroll automatico all'UDC quando si torna dal dettaglio
@@ -70,7 +83,7 @@
 </script>
 
 <svelte:head>
-  <title>Gestione UDC - Unità Di Carico</title>
+  <title>{$t('udc.pageTitle')}</title>
 </svelte:head>
 
 <div class="w-full p-6">
@@ -78,9 +91,16 @@
   <!-- Header -->
   <div class="flex justify-between items-center mb-6">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">📦 UDC Globali</h1>
-      <p class="text-gray-600 dark:text-gray-400 mt-1">Gestione completa di tutte le UDC con filtri avanzati</p>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">📦 {$t('udc.title')}</h1>
+      <p class="text-gray-600 dark:text-gray-400 mt-1">{$t('udc.subtitle')}</p>
     </div>
+    <button 
+      class="btn btn-ghost btn-sm"
+      on:click={() => window.location.reload()}
+      title="{$t('common.refresh')}"
+    >
+      🔄
+    </button>
   </div>
 
   <!-- Messaggi -->
@@ -97,44 +117,19 @@
   {/if}
 
 
-  <!-- Filtri -->
-  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 mb-8">
-    <!-- Header Filtri -->
-    <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-            </svg>
-          </div>
+  <!-- Filtri Compatti -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+    <div class="p-4">
+      <form method="GET" class="space-y-4">
+        <!-- Filtri Principali - Una riga -->
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <!-- Committente -->
           <div>
-            <h2 class="text-gray-900 dark:text-gray-100 font-semibold text-lg">Filtri di Ricerca</h2>
-            <p class="text-gray-600 dark:text-gray-400 text-sm">Filtra e cerca tra tutte le UDC</p>
-          </div>
-        </div>
-        <div class="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-gray-700 dark:text-gray-300 text-sm font-medium">
-          UDC Globali
-        </div>
-      </div>
-    </div>
-    <!-- Contenuto Filtri -->
-    <div class="p-6">
-      <form method="GET" class="space-y-6">
-        <!-- Prima sezione: Filtri Principali -->
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <!-- Filtro Committente -->
-          <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              <span class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                </svg>
-                Committente
-              </span>
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              🏢 {$t('udc.filters.client')}
             </label>
-            <select name="committente" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-              <option value="">Tutti i committenti</option>
+            <select name="committente" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+              <option value="">{$t('udc.filters.allClients')}</option>
               {#each data.committenti as committente}
                 <option value={committente.id} selected={data.filtri.committente_filter == committente.id}>
                   {committente.ragione_sociale}
@@ -143,127 +138,71 @@
             </select>
           </div>
 
-          <!-- Filtro Stato -->
-          <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              <span class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                </svg>
-                Stato UDC
-              </span>
+          <!-- Stato -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              📊 {$t('udc.filters.status')}
             </label>
-            <select name="stato" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-              <option value="">Tutti gli stati</option>
-              <option value="VUOTO" selected={data.filtri.stato_filter === 'VUOTO'}>🟡 Vuoto</option>
-              <option value="PARZIALE" selected={data.filtri.stato_filter === 'PARZIALE'}>🟠 Parziale</option>
-              <option value="PIENO" selected={data.filtri.stato_filter === 'PIENO'}>🟢 Pieno</option>
-              <option value="IN_MOVIMENTO" selected={data.filtri.stato_filter === 'IN_MOVIMENTO'}>🔵 In Movimento</option>
-              <option value="BLOCCATO" selected={data.filtri.stato_filter === 'BLOCCATO'}>🔴 Bloccato</option>
+            <select name="stato" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+              <option value="">{$t('udc.filters.allStatuses')}</option>
+              <option value="VUOTO" selected={data.filtri.stato_filter === 'VUOTO'}>🟡 {$t('udc.statuses.VUOTO')}</option>
+              <option value="PARZIALE" selected={data.filtri.stato_filter === 'PARZIALE'}>🟠 {$t('udc.statuses.PARZIALE')}</option>
+              <option value="PIENO" selected={data.filtri.stato_filter === 'PIENO'}>🟢 {$t('udc.statuses.PIENO')}</option>
+              <option value="IN_MOVIMENTO" selected={data.filtri.stato_filter === 'IN_MOVIMENTO'}>🔵 {$t('udc.statuses.IN_MOVIMENTO')}</option>
+              <option value="BLOCCATO" selected={data.filtri.stato_filter === 'BLOCCATO'}>🔴 {$t('udc.statuses.BLOCCATO')}</option>
             </select>
           </div>
 
-          <!-- Filtro Tipo -->
-          <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              <span class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                </svg>
-                Tipo UDC
-              </span>
+          <!-- Tipo -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              📦 {$t('udc.filters.type')}
             </label>
-            <select name="tipo" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-              <option value="">Tutti i tipi</option>
-              <option value="PALLET_EPAL" selected={data.filtri.tipo_filter === 'PALLET_EPAL'}>🏗️ Pallet EPAL</option>
-              <option value="PALLET_EUR" selected={data.filtri.tipo_filter === 'PALLET_EUR'}>📦 Pallet EUR</option>
-              <option value="ROLL_CONTAINER" selected={data.filtri.tipo_filter === 'ROLL_CONTAINER'}>🛒 Roll Container</option>
-              <option value="BOX_STANDARD" selected={data.filtri.tipo_filter === 'BOX_STANDARD'}>📋 Box Standard</option>
+            <select name="tipo" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+              <option value="">{$t('udc.filters.allTypes')}</option>
+              <option value="PALLET_EPAL" selected={data.filtri.tipo_filter === 'PALLET_EPAL'}>🏗️ {$t('udc.types.PALLET_EPAL')}</option>
+              <option value="PALLET_EUR" selected={data.filtri.tipo_filter === 'PALLET_EUR'}>📦 {$t('udc.types.PALLET_EUR')}</option>
+              <option value="ROLL_CONTAINER" selected={data.filtri.tipo_filter === 'ROLL_CONTAINER'}>🛒 {$t('udc.types.ROLL_CONTAINER')}</option>
+              <option value="BOX_STANDARD" selected={data.filtri.tipo_filter === 'BOX_STANDARD'}>📋 {$t('udc.types.BOX_STANDARD')}</option>
             </select>
           </div>
 
-          <!-- Ricerca Barcode -->
-          <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              <span class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-                Ricerca Barcode
-              </span>
+          <!-- Barcode -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              🔍 {$t('udc.filters.barcode')}
             </label>
             <input 
               type="text" 
               name="barcode" 
-              placeholder="Inserisci barcode o codice UDC..."
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+              placeholder="{$t('udc.filters.searchBarcode')}"
+              class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
               value={data.filtri.barcode_search}
             />
           </div>
-        </div>
 
-        <!-- Seconda sezione: Filtri Avanzati -->
-        <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-          <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
-            </svg>
-            Filtri Avanzati
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Data Scadenza Da -->
-            <div class="space-y-2">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                <span class="flex items-center gap-2">
-                  <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                  </svg>
-                  Scadenza Da
-                </span>
-              </label>
-              <input 
-                type="date" 
-                name="scadenza_da" 
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                value={data.filtri.scadenza_da || ''}
-              />
-            </div>
+          <!-- Scadenza Da -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              📅 Scadenza Da
+            </label>
+            <input 
+              type="date" 
+              name="scadenza_da" 
+              class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              value={data.filtri.scadenza_da || ''}
+            />
+          </div>
 
-            <!-- Data Scadenza A -->
-            <div class="space-y-2">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                <span class="flex items-center gap-2">
-                  <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                  </svg>
-                  Scadenza A
-                </span>
-              </label>
-              <input 
-                type="date" 
-                name="scadenza_a" 
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                value={data.filtri.scadenza_a || ''}
-              />
-            </div>
-
-            <!-- Pulsanti Azione -->
-            <div class="space-y-2">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 opacity-0">Azioni</label>
-              <div class="flex gap-3">
-                <button type="submit" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 shadow-lg">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                  </svg>
-                  Filtra
-                </button>
-                <button type="button" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 flex items-center justify-center gap-2" on:click={() => window.location.href = '/auth/udc'}>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                  </svg>
-                  Reset
-                </button>
-              </div>
+          <!-- Pulsanti -->
+          <div class="flex items-end">
+            <div class="flex gap-2 w-full">
+              <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 text-sm rounded font-medium transition-colors flex items-center justify-center gap-1">
+                🔍 {$t('common.filter')}
+              </button>
+              <button type="button" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" on:click={() => window.location.href = '/auth/udc'} title="Reset">
+                🔄
+              </button>
             </div>
           </div>
         </div>
@@ -274,22 +213,22 @@
   <!-- Lista UDC -->
   <div class="card bg-base-100 shadow-sm">
     <div class="card-body">
-      <h2 class="card-title">📋 Lista UDC ({data.udc_list.length})</h2>
+      <h2 class="card-title">📋 {$t('udc.list.title')} ({data.udc_list.length})</h2>
       
       {#if data.udc_list.length > 0}
         <div class="overflow-x-auto">
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th>Barcode</th>
-                <th>Tipo</th>
-                <th>Stato</th>
-                <th>Ubicazione</th>
-                <th>Contenuto</th>
-                <th>Peso</th>
-                <th>Riempimento</th>
-                <th>Ultimo Movimento</th>
-                <th>Azioni</th>
+                <th>{$t('udc.list.table.barcode')}</th>
+                <th>{$t('udc.list.table.type')}</th>
+                <th>{$t('udc.list.table.status')}</th>
+                <th>{$t('udc.list.table.location')}</th>
+                <th>{$t('udc.list.table.content')}</th>
+                <th>{$t('udc.list.table.weight')}</th>
+                <th>{$t('udc.list.table.filling')}</th>
+                <th>{$t('udc.list.table.lastMovement')}</th>
+                <th>{$t('udc.list.table.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -300,7 +239,7 @@
                       <a 
                         href="/auth/udc/{udc.id}?back=udc-{udc.id}" 
                         class="text-primary hover:text-blue-focus hover:underline"
-                        title="Visualizza dettaglio UDC"
+                        title="{$t('udc.list.details.viewDetail')}"
                       >
                         {udc.barcode}
                       </a>
@@ -313,7 +252,7 @@
                   <td>
                     <div class="flex items-center">
                       <span class="text-xl mr-2">{getTipoIcon(udc.tipo_udc || 'UNKNOWN')}</span>
-                      <span class="text-sm">{udc.tipo_udc ? udc.tipo_udc.replace('_', ' ') : 'Tipo sconosciuto'}</span>
+                      <span class="text-sm">{translateUdcType(udc.tipo_udc)}</span>
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">
                       {udc.lunghezza_cm || '?'}×{udc.larghezza_cm || '?'}×{udc.altezza_max_cm || '?'}cm
@@ -322,22 +261,22 @@
                   
                   <td>
                     <span class="{getStatoBadgeClass(udc.stato)}">
-                      {udc.stato}
+                      {translateUdcStatus(udc.stato)}
                     </span>
                   </td>
                   
                   <td>
                     {#if udc.codice_ubicazione}
                       <div class="font-mono text-sm">{udc.codice_ubicazione}</div>
-                      <div class="text-xs text-gray-500 dark:text-gray-400">Zona {udc.zona}</div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400">{$t('udc.list.details.zone')} {udc.zona}</div>
                     {:else}
-                      <span class="text-gray-400 dark:text-gray-500">Non assegnata</span>
+                      <span class="text-gray-400 dark:text-gray-500">{$t('udc.list.details.notAssigned')}</span>
                     {/if}
                   </td>
                   
                   <td>
                     {#if udc.quantita_contenuto > 0}
-                      <div class="text-sm font-semibold">{udc.quantita_contenuto} pz</div>
+                      <div class="text-sm font-semibold">{udc.quantita_contenuto} {$t('udc.list.details.pieces')}</div>
                       {#if udc.prodotto_contenuto}
                         <div class="text-xs text-gray-600 dark:text-gray-400 truncate" title={udc.prodotto_contenuto}>
                           {udc.prodotto_contenuto}
@@ -345,26 +284,26 @@
                       {/if}
                       <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 space-y-1">
                         {#if udc.lotto}
-                          <div>🏷️ {udc.lotto}</div>
+                          <div>🏷️ {$t('udc.list.details.lot')}: {udc.lotto}</div>
                         {/if}
                         {#if udc.scadenza}
-                          <div>📅 {new Date(udc.scadenza).toLocaleDateString('it-IT')}</div>
+                          <div>📅 {$t('udc.list.details.expiry')}: {new Date(udc.scadenza).toLocaleDateString('it-IT')}</div>
                         {/if}
                         {#if udc.peso_netto > 0}
-                          <div>⚖️ Netto: {udc.peso_netto}kg</div>
+                          <div>⚖️ {$t('udc.list.details.netWeight')}: {udc.peso_netto}kg</div>
                         {/if}
                       </div>
                     {:else if udc.righe_contenuto > 0}
                       <div class="text-sm font-semibold">{udc.righe_contenuto} SKU</div>
                       <div class="text-xs text-gray-500 dark:text-gray-400">{udc.pezzi_totali} pezzi</div>
                     {:else}
-                      <span class="text-gray-400 dark:text-gray-500">Vuoto</span>
+                      <span class="text-gray-400 dark:text-gray-500">{$t('udc.list.details.empty')}</span>
                     {/if}
                   </td>
                   
                   <td>
                     <div class="text-sm font-semibold">{udc.peso_attuale_kg || 0} kg</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">max {udc.peso_max_kg || '?'} kg</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">{$t('udc.list.details.max')} {udc.peso_max_kg || '?'} kg</div>
                   </td>
                   
                   <td>
@@ -388,17 +327,12 @@
                       </label>
                       <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-box w-52">
                         <li>
-                          <a href="/auth/udc/{udc.id}?back=udc-{udc.id}">👁️ Visualizza Dettaglio</a>
+                          <a href="/auth/udc/{udc.id}?back=udc-{udc.id}">👁️ {$t('udc.list.details.viewDetailAction')}</a>
                         </li>
                         <li>
-                          <button on:click={() => {/* TODO: Sposta UDC */}}>
-                            🚚 Sposta UDC
-                          </button>
-                        </li>
-                        <li>
-                          <button class="text-error" on:click={() => {/* TODO: Blocca UDC */}}>
-                            🚫 Blocca UDC
-                          </button>
+                          <a href="/auth/transfer?type=byUdc&udc_id={udc.id}&udc_barcode={encodeURIComponent(udc.barcode)}">
+                            🚚 {$t('udc.list.details.moveUdc')}
+                          </a>
                         </li>
                       </ul>
                     </div>
@@ -412,10 +346,10 @@
         <div class="text-center py-12">
           <div class="text-6xl mb-4">📦</div>
           <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Nessun UDC trovato
+            {$t('udc.list.empty.title')}
           </h3>
           <p class="text-gray-600 dark:text-gray-400">
-            Non ci sono UDC che corrispondono ai filtri selezionati
+            {$t('udc.list.empty.description')}
           </p>
         </div>
       {/if}
@@ -426,19 +360,19 @@
   {#if data.udc_per_zona.length > 0}
     <div class="card bg-base-100 shadow-sm mt-6">
       <div class="card-body">
-        <h2 class="card-title">🏢 UDC per Zone</h2>
+        <h2 class="card-title">🏢 {$t('udc.list.zones.title')}</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           {#each data.udc_per_zona as zona}
             <div class="stat bg-base-200 rounded-lg">
-              <div class="stat-title dark:text-gray-300">Zona {zona.zona || 'Non assegnata'}</div>
+              <div class="stat-title dark:text-gray-300">{$t('udc.list.zones.zone')} {zona.zona || $t('udc.list.zones.notAssignedZone')}</div>
               <div class="stat-value text-primary">{zona.numero_udc}</div>
               <div class="stat-desc dark:text-gray-400">
-                {zona.udc_pieni} pieni, {zona.udc_vuoti} vuoti
+                {zona.udc_pieni} {$t('udc.list.zones.full')}, {zona.udc_vuoti} {$t('udc.list.zones.empty')}
                 <br>
-                Peso: {Math.round(zona.peso_totale || 0)} kg
+                {$t('udc.list.zones.weight')}: {Math.round(zona.peso_totale || 0)} kg
                 <br>
-                Riempimento: {Math.round(zona.riempimento_medio || 0)}%
+                {$t('udc.list.zones.filling')}: {Math.round(zona.riempimento_medio || 0)}%
               </div>
             </div>
           {/each}
@@ -467,7 +401,7 @@
           <!-- Barcode -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text">Barcode *</span>
+              <span class="label-text">{$t('udc.form.barcode')} *</span>
             </label>
             <input 
               type="text" 
@@ -481,10 +415,10 @@
           <!-- Tipo UDC -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text">Tipo UDC *</span>
+              <span class="label-text">{$t('udc.form.type')} *</span>
             </label>
             <select name="tipo_udc" class="select select-bordered" required>
-              <option value="">Seleziona tipo...</option>
+              <option value="">{$t('common.select')} tipo...</option>
               <option value="PALLET_EPAL">🏗️ Pallet EPAL</option>
               <option value="PALLET_EUR">📦 Pallet EUR</option>
               <option value="ROLL_CONTAINER">🛒 Roll Container</option>
@@ -499,10 +433,10 @@
           <!-- Committente -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text">Committente Proprietario</span>
+              <span class="label-text">{$t('udc.form.client')}</span>
             </label>
             <select name="committente_id" class="select select-bordered">
-              <option value="">Nessun proprietario</option>
+              <option value="">{$t('common.none')} proprietario</option>
               {#each data.committenti as committente}
                 <option value={committente.id}>{committente.ragione_sociale}</option>
               {/each}
@@ -512,10 +446,10 @@
           <!-- Ubicazione -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text">Ubicazione Iniziale</span>
+              <span class="label-text">{$t('udc.form.location')}</span>
             </label>
             <select name="ubicazione_id" class="select select-bordered">
-              <option value="">Seleziona ubicazione...</option>
+              <option value="">{$t('common.select')} ubicazione...</option>
               {#each data.ubicazioni as ubicazione}
                 <option value={ubicazione.id}>
                   {ubicazione.codice_ubicazione} - Zona {ubicazione.zona}
@@ -527,7 +461,7 @@
           <!-- Dimensioni -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text">Lunghezza (cm)</span>
+              <span class="label-text">{$t('udc.form.length')}</span>
             </label>
             <input 
               type="number" 
@@ -539,7 +473,7 @@
 
           <div class="form-control">
             <label class="label">
-              <span class="label-text">Larghezza (cm)</span>
+              <span class="label-text">{$t('udc.form.width')}</span>
             </label>
             <input 
               type="number" 
@@ -551,7 +485,7 @@
 
           <div class="form-control">
             <label class="label">
-              <span class="label-text">Altezza Max (cm)</span>
+              <span class="label-text">{$t('udc.form.height')}</span>
             </label>
             <input 
               type="number" 
@@ -563,7 +497,7 @@
 
           <div class="form-control">
             <label class="label">
-              <span class="label-text">Peso Max (kg)</span>
+              <span class="label-text">{$t('udc.form.weight')}</span>
             </label>
             <input 
               type="number" 
@@ -578,9 +512,9 @@
         <!-- Note -->
         <div class="form-control mt-4">
           <label class="label">
-            <span class="label-text">Note</span>
+            <span class="label-text">{$t('udc.form.notes')}</span>
           </label>
-          <textarea name="note" class="textarea textarea-bordered" placeholder="Note aggiuntive..."></textarea>
+          <textarea name="note" class="textarea textarea-bordered" placeholder="{$t('udc.form.notesPlaceholder')}"></textarea>
         </div>
 
         <!-- Operatore -->

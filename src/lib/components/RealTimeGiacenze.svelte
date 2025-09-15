@@ -3,6 +3,7 @@
   import { fade, fly } from 'svelte/transition';
   import { giacenzeStore, criticalAlerts, lowStockProducts, recentChanges } from '$lib/stores/giacenzeStore';
   import type { AlertGiacenza } from '$lib/stores/giacenzeStore';
+  import { t } from '$lib/i18n';
 
   export let committente_id: number | undefined = undefined;
   export let showAlerts = true;
@@ -190,7 +191,7 @@
       </div>
       <div class="text-center p-2 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
         <div class="text-lg font-bold text-red-600">{lowStock.length}</div>
-        <div class="text-xs text-gray-600">Scorte basse</div>
+        <div class="text-xs text-gray-600">{$t('common.lowStock')}</div>
       </div>
       <div class="text-center p-2 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
         <div class="text-lg font-bold text-green-600">{changes.length}</div>

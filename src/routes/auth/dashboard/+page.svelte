@@ -3,6 +3,7 @@
   import Icon from '$lib/components/Icon.svelte';
   import DashboardCompact from '$lib/components/DashboardCompact.svelte';
   import { dashboardMode } from '$lib/stores/dashboard.js';
+  import { t } from '$lib/i18n';
   import type { PageData } from './$types.js';
 
   export let data: PageData;
@@ -141,11 +142,26 @@
     }
   }
 
-  function getOccupancyLevel(percentage: number): { color: string; label: string; pulse: boolean } {
-    if (percentage >= 95) return { color: 'bg-red-500', label: 'Critico', pulse: true };
-    if (percentage >= 85) return { color: 'bg-orange-500', label: 'Alto', pulse: false };
-    if (percentage >= 70) return { color: 'bg-yellow-500', label: 'Medio', pulse: false };
-    return { color: 'bg-green-500', label: 'Normale', pulse: false };
+  function getOccupancyLevel(percentage: number): { color: string; labelKey: string; pulse: boolean } {
+    if (percentage >= 95) return { color: 'bg-red-500', labelKey: 'dashboard.zones.occupancyLevel.critical', pulse: true };
+    if (percentage >= 85) return { color: 'bg-orange-500', labelKey: 'dashboard.zones.occupancyLevel.high', pulse: false };
+    if (percentage >= 70) return { color: 'bg-yellow-500', labelKey: 'dashboard.zones.occupancyLevel.medium', pulse: false };
+    return { color: 'bg-green-500', labelKey: 'dashboard.zones.occupancyLevel.normal', pulse: false };
+  }
+
+  function getAlertTypeTranslation(tipo: string): string {
+    const translations = {
+      'SCORTA_BASSA': $t('dashboard.alerts.types.lowStock'),
+      'OPERATORE_INATTIVO': $t('dashboard.alerts.types.inactiveOperator'),
+      'ZONA_SATURA': $t('dashboard.alerts.types.saturatedZone'),
+      'MOVIMENTO_BLOCCATO': $t('dashboard.alerts.types.blockedMovement'),
+      'PERFORMANCE_BASSA': $t('dashboard.alerts.types.lowPerformance'),
+      'SISTEMA': $t('dashboard.alerts.types.system'),
+      'URGENTE': $t('dashboard.alerts.types.urgent'),
+      'ORDINE_SCADUTO': $t('dashboard.alerts.types.expiredOrder'),
+      'WAVE_LENTA': $t('dashboard.alerts.types.slowWave')
+    };
+    return translations[tipo] || tipo.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
   }
 
   function getAbcBadge(classe: string): string {
@@ -173,7 +189,7 @@
 </script>
 
 <svelte:head>
-  <title>Dashboard Real-Time Operatori | Gestionale Magazzino</title>
+  <title>{$t('dashboard.title')} | Gestionale Magazzino</title>
 </svelte:head>
 
 <div class="w-full">
@@ -183,33 +199,33 @@
       <div>
         <h1 class="flex items-center gap-3">
           <Icon name="chart-bar" class="w-8 h-8 text-blue-600" />
-          Dashboard Real-Time
+          {$t('dashboard.title')}
           <span class="badge {isConnected ? 'badge-success animate-pulse' : 'badge-danger'}">
-            {isConnected ? 'LIVE' : 'OFFLINE'}
+            {isConnected ? $t('dashboard.live') : $t('dashboard.offline')}
           </span>
         </h1>
         <p class="text-neutral-600 mt-2">
-          Centro di controllo operativo - Aggiornamento automatico ogni 5s
+          {$t('dashboard.subtitle')}
         </p>
       </div>
       
       <div class="flex items-center gap-4">
         <div class="text-sm text-neutral-500">
-          Ultimo aggiornamento: {lastUpdate.toLocaleTimeString('it-IT')}
+          {$t('dashboard.lastUpdate')}: {lastUpdate.toLocaleTimeString('it-IT')}
         </div>
         <div class="flex items-center gap-4">
           <!-- Dashboard Mode Toggle -->
           <button 
             on:click={() => dashboardMode.toggle()}
             class="flex items-center gap-2 px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm font-medium transition-colors"
-            title="Cambia modalità visualizzazione"
+            title={$t('dashboard.toggleMode')}
           >
             {#if $dashboardMode === 'compact'}
               <Icon name="expand" class="w-4 h-4" />
-              Espandi
+              {$t('common.all')}
             {:else}
               <Icon name="compress" class="w-4 h-4" />
-              Compatta
+              {$t('dashboard.titleCompact')}
             {/if}
           </button>
           
@@ -220,7 +236,7 @@
               class="checkbox"
             />
             <span class="text-sm {isRefreshing ? 'text-blue-600' : ''}">
-              {isRefreshing ? '🔄 Aggiornando...' : 'Auto-refresh'}
+              {isRefreshing ? '🔄 ' + $t('common.loading') : $t('dashboard.autoRefresh')}
             </span>
           </div>
         </div>
@@ -230,7 +246,7 @@
           class="btn btn-sm btn-secondary {isRefreshing ? 'loading' : ''}"
         >
           <Icon name="arrow-clockwise" class="w-4 h-4 mr-2 {isRefreshing ? 'animate-spin' : ''}" />
-          {isRefreshing ? 'Aggiornando...' : 'Aggiorna'}
+          {isRefreshing ? $t('common.loading') : $t('common.refresh')}
         </button>
       </div>
     </div>
@@ -246,7 +262,7 @@
     <div class="stat-card">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Ordini Oggi</p>
+          <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('dashboard.kpi.ordersToday')}</p>
           <p class="text-3xl font-bold text-neutral-900 dark:text-gray-100">{data.kpiData.ordini_oggi}</p>
           <div class="flex gap-2 mt-1">
             <span class="text-xs text-orange-600">{data.kpiData.ordini_in_picking} picking</span>
@@ -263,11 +279,11 @@
     <div class="stat-card">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Movimenti</p>
+          <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('dashboard.kpi.todayMovements')}</p>
           <p class="text-3xl font-bold text-neutral-900 dark:text-gray-100">{data.kpiData.movimenti_oggi}</p>
           <div class="flex gap-2 mt-1">
-            <span class="text-xs text-green-600">{data.kpiData.movimenti_completati} completati</span>
-            <span class="text-xs text-orange-600">{data.kpiData.movimenti_in_corso} in corso</span>
+            <span class="text-xs text-green-600">{data.kpiData.movimenti_completati} {$t('common.confirm')}</span>
+            <span class="text-xs text-orange-600">{data.kpiData.movimenti_in_corso} {$t('movements.types.inbound')}</span>
           </div>
         </div>
         <div class="stat-icon bg-blue-100 dark:bg-blue-900">
@@ -280,10 +296,10 @@
     <div class="stat-card">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Operatori Attivi</p>
+          <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('dashboard.kpi.activeOperators')}</p>
           <p class="text-3xl font-bold text-neutral-900 dark:text-gray-100">{data.kpiData.operatori_attivi}</p>
           <div class="flex gap-2 mt-1">
-            <span class="text-xs text-blue-600">Efficienza: {efficienzaOperatori.toFixed(1)}</span>
+            <span class="text-xs text-blue-600">{$t('dashboard.kpi.efficiency')}: {efficienzaOperatori.toFixed(1)}</span>
           </div>
         </div>
         <div class="stat-icon bg-green-100 dark:bg-green-900">
@@ -296,10 +312,10 @@
     <div class="stat-card">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">Wave Attive</p>
+          <p class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('dashboard.kpi.todayShipments')}</p>
           <p class="text-3xl font-bold text-neutral-900 dark:text-gray-100">{data.kpiData.wave_attive}</p>
           <div class="flex gap-2 mt-1">
-            <span class="text-xs text-green-600">{data.kpiData.spedizioni_oggi} spedite oggi</span>
+            <span class="text-xs text-green-600">{data.kpiData.spedizioni_oggi} {$t('dashboard.kpi.todayShipments').toLowerCase()}</span>
           </div>
         </div>
         <div class="stat-icon bg-purple-100 dark:bg-purple-900">
@@ -320,9 +336,9 @@
               <Icon name="exclamation-triangle" class="w-6 h-6 text-red-600 dark:text-red-400" />
             </div>
             <div>
-              <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Alert Operativi</h2>
+              <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">{$t('dashboard.alerts.title')}</h2>
               <p class="text-sm text-gray-600 dark:text-gray-400">
-                {data.alertsOperatori.length} alert attivi richiedono attenzione
+                {data.alertsOperatori.length} {$t('dashboard.alerts.subtitle')}
               </p>
             </div>
           </div>
@@ -332,19 +348,19 @@
             {#if critici > 0}
               <div class="flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900/20 rounded-full">
                 <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                <span class="text-xs font-semibold text-red-800 dark:text-red-200">{critici} Critici</span>
+                <span class="text-xs font-semibold text-red-800 dark:text-red-200">{critici} {$t('dashboard.alerts.priority.critical')}</span>
               </div>
             {/if}
             {#if alti > 0}
               <div class="flex items-center gap-1 px-3 py-1 bg-orange-100 dark:bg-orange-900/20 rounded-full">
                 <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
-                <span class="text-xs font-semibold text-orange-800 dark:text-orange-200">{alti} Alti</span>
+                <span class="text-xs font-semibold text-orange-800 dark:text-orange-200">{alti} {$t('dashboard.alerts.priority.high')}</span>
               </div>
             {/if}
             {#if medi > 0}
               <div class="flex items-center gap-1 px-3 py-1 bg-yellow-100 dark:bg-yellow-900/20 rounded-full">
                 <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                <span class="text-xs font-semibold text-yellow-800 dark:text-yellow-200">{medi} Medi</span>
+                <span class="text-xs font-semibold text-yellow-800 dark:text-yellow-200">{medi} {$t('dashboard.alerts.priority.medium')}</span>
               </div>
             {/if}
           </div>
@@ -368,11 +384,11 @@
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 mb-1">
                       <h3 class="font-semibold text-sm">
-                        {alert.tipo_alert.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
+                        {getAlertTypeTranslation(alert.tipo_alert)}
                       </h3>
                       {#if alert.priorita === 'CRITICO'}
                         <span class="px-2 py-1 bg-red-500 text-white text-xs rounded-full font-bold animate-pulse">
-                          URGENTE
+                          {$t('dashboard.alerts.types.urgent')}
                         </span>
                       {/if}
                     </div>
@@ -387,19 +403,19 @@
                         {#if alert.timestamp_alert}
                           {formatDateTime(alert.timestamp_alert)}
                         {:else}
-                          Ora sconosciuta
+                          {$t('common.noData')}
                         {/if}
                       </div>
                       
                       <!-- Azioni rapide -->
                       <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10" title="Visualizza dettagli">
+                        <button class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10" title="{$t('dashboard.alerts.details')}">
                           <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
                             <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
                           </svg>
                         </button>
-                        <button class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10" title="Risolvi alert">
+                        <button class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10" title="{$t('dashboard.alerts.resolve')}">
                           <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                           </svg>
@@ -436,7 +452,7 @@
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
                 </svg>
-                Mostra meno alert
+                {$t('dashboard.alerts.showLess')}
                 <span class="ml-2 px-2 py-0.5 bg-gray-200 dark:bg-gray-600 rounded-full text-xs">
                   -{data.alertsOperatori.length - 2}
                 </span>
@@ -444,7 +460,7 @@
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
-                Mostra tutti gli alert
+                {$t('dashboard.alerts.showMore')}
                 <span class="ml-2 px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs">
                   +{data.alertsOperatori.length - 2}
                 </span>
@@ -457,14 +473,14 @@
         <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
           <div class="flex justify-between items-center">
             <div class="text-xs text-gray-500 dark:text-gray-400">
-              Aggiornamento automatico ogni 5 secondi
+              {$t('dashboard.autoRefresh')}
             </div>
             <div class="flex gap-2">
               <button class="px-3 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800">
-                Risolvi tutti i Medi
+                {$t('dashboard.alerts.resolve')} {$t('dashboard.alerts.priority.medium')}
               </button>
               <button class="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
-                Esporta Report
+                {$t('common.export')}
               </button>
             </div>
           </div>
@@ -479,7 +495,7 @@
       <div class="card-header border-b border-gray-200 dark:border-gray-700">
         <h2 class="flex items-center gap-2">
           <Icon name="users" class="w-5 h-5" />
-          Performance Operatori Today
+          {$t('dashboard.operators.title')}
         </h2>
       </div>
       <div class="card-body p-0">
@@ -487,12 +503,12 @@
           <table class="table table-sm">
             <thead>
               <tr>
-                <th>Operatore</th>
-                <th>Status</th>
-                <th>Movimenti</th>
-                <th>Picks/h</th>
-                <th>Durata Media</th>
-                <th>Device</th>
+                <th>{$t('dashboard.operators.name')}</th>
+                <th>{$t('common.status')}</th>
+                <th>{$t('dashboard.operators.movements')}</th>
+                <th>{$t('dashboard.operators.picksPerHour')}</th>
+                <th>{$t('dashboard.operators.avgDuration')}</th>
+                <th>{$t('dashboard.operators.device')}</th>
               </tr>
             </thead>
             <tbody>
@@ -515,10 +531,10 @@
                     <div class="text-sm">
                       <div class="font-medium">{operatore.movimenti_completati}/{operatore.movimenti_oggi}</div>
                       {#if operatore.movimenti_in_corso > 0}
-                        <div class="text-orange-600 text-xs">+{operatore.movimenti_in_corso} in corso</div>
+                        <div class="text-orange-600 text-xs">+{operatore.movimenti_in_corso} {$t('movements.types.inbound')}</div>
                       {/if}
                       {#if operatore.pezzi_prelevati > 0}
-                        <div class="text-xs text-neutral-600 dark:text-gray-400">{operatore.pezzi_prelevati} pezzi</div>
+                        <div class="text-xs text-neutral-600 dark:text-gray-400">{operatore.pezzi_prelevati} {$t('common.quantity').toLowerCase()}</div>
                       {/if}
                     </div>
                   </td>
@@ -553,9 +569,9 @@
               <Icon name="map" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Status Zone Magazzino</h2>
+              <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">{$t('dashboard.zones.title')}</h2>
               <p class="text-sm text-gray-600 dark:text-gray-400">
-                Monitoraggio real-time dell'occupazione e performance per zona
+                {$t('dashboard.zones.subtitle')}
               </p>
             </div>
           </div>
@@ -565,7 +581,7 @@
             <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
               {formatPercentage(occupazioneMediaMagazzino)}
             </div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Occupazione Media</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">{$t('dashboard.zones.avgOccupancy')}</div>
           </div>
         </div>
       </div>
@@ -588,16 +604,16 @@
                       <div>
                         <div class="flex items-center gap-2">
                           <span class="font-bold text-lg text-gray-900 dark:text-gray-100">
-                            Zona {zona.zona_velocita}
+                            {$t('dashboard.zones.zone')} {zona.zona_velocita}
                           </span>
                           <span class="px-2 py-1 text-xs font-semibold rounded-full {getZoneColor(zona.zona_velocita)}">
-                            {zona.zona_velocita === 'HOT' ? 'Alta Rotazione' : 
-                             zona.zona_velocita === 'WARM' ? 'Media Rotazione' : 
-                             'Bassa Rotazione'}
+                            {zona.zona_velocita === 'HOT' ? $t('dashboard.zones.velocity.hot') : 
+                             zona.zona_velocita === 'WARM' ? $t('dashboard.zones.velocity.warm') : 
+                             $t('dashboard.zones.velocity.cold')}
                           </span>
                         </div>
                         <div class="text-sm text-gray-600 dark:text-gray-400">
-                          {zona.ubicazioni_occupate} di {zona.ubicazioni_totali} ubicazioni occupate
+                          {zona.ubicazioni_occupate} / {zona.ubicazioni_totali} {$t('inventory.location').toLowerCase()}
                         </div>
                       </div>
                     </div>
@@ -607,11 +623,11 @@
                   <div class="flex gap-2">
                     {#if zona.percentuale_occupazione >= 95}
                       <div class="px-2 py-1 bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 text-xs font-bold rounded-full animate-pulse">
-                        CRITICO
+                        {$t('dashboard.alerts.priority.critical')}
                       </div>
                     {:else if zona.percentuale_occupazione >= 85}
                       <div class="px-2 py-1 bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-200 text-xs font-bold rounded-full">
-                        ALTO
+                        {$t('dashboard.alerts.priority.high')}
                       </div>
                     {/if}
                   </div>
@@ -621,10 +637,10 @@
                 <div class="mb-4">
                   <div class="flex items-center justify-between mb-2">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Occupazione: {formatPercentage(zona.percentuale_occupazione)}
+                      {$t('dashboard.zones.occupancy')}: {formatPercentage(zona.percentuale_occupazione)}
                     </span>
                     <span class="text-xs text-gray-500 dark:text-gray-400 {occupancyLevel.pulse ? 'animate-pulse' : ''}">
-                      {occupancyLevel.label}
+                      {$t(occupancyLevel.labelKey)}
                     </span>
                   </div>
                   
@@ -657,9 +673,9 @@
                     <div class="text-lg font-bold text-orange-600 dark:text-orange-400">
                       {zona.movimenti_in_corso}
                     </div>
-                    <div class="text-xs text-gray-600 dark:text-gray-400">In Corso</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400">{$t('movements.types.inbound')}</div>
                     {#if zona.movimenti_in_corso > 0}
-                      <div class="text-xs text-orange-600 dark:text-orange-400">🔄 Attivi</div>
+                      <div class="text-xs text-orange-600 dark:text-orange-400">🔄 {$t('products.status.active')}</div>
                     {/if}
                   </div>
                   
@@ -668,8 +684,8 @@
                     <div class="text-lg font-bold text-green-600 dark:text-green-400">
                       {zona.movimenti_completati_oggi}
                     </div>
-                    <div class="text-xs text-gray-600 dark:text-gray-400">Completati</div>
-                    <div class="text-xs text-green-600 dark:text-green-400">✅ Oggi</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400">{$t('common.confirm')}</div>
+                    <div class="text-xs text-green-600 dark:text-green-400">✅ {$t('common.date')}</div>
                   </div>
                   
                   <!-- Prime picking -->
@@ -678,9 +694,9 @@
                     <div class="text-lg font-bold text-red-600 dark:text-red-400">
                       {zona.prime_picking}
                     </div>
-                    <div class="text-xs text-gray-600 dark:text-gray-400">PRIME</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400">{$t('dashboard.prime')}</div>
                     {#if zona.prime_picking > 0}
-                      <div class="text-xs text-red-600 dark:text-red-400 animate-pulse">⚡ Urgenti</div>
+                      <div class="text-xs text-red-600 dark:text-red-400 animate-pulse">⚡ {$t('dashboard.alerts.types.urgent')}</div>
                     {:else}
                       <div class="text-xs text-gray-500">-</div>
                     {/if}
@@ -692,11 +708,11 @@
                   <div class="flex gap-2 justify-end">
                     <button class="px-3 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 
                                    rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors">
-                      Vedi Dettagli
+                      {$t('dashboard.zones.viewDetails')}
                     </button>
                     <button class="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 
                                    rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                      Mappa Zone
+                      {$t('dashboard.zones.zoneMap')}
                     </button>
                   </div>
                 </div>
@@ -717,10 +733,10 @@
               </div>
               <div>
                 <div class="font-semibold text-blue-900 dark:text-blue-100">
-                  Riepilogo Magazzino
+                  {$t('dashboard.zones.title')}
                 </div>
                 <div class="text-sm text-blue-700 dark:text-blue-300">
-                  {data.zoneStatus.length} zone monitorate • Aggiornamento real-time
+                  {data.zoneStatus.length} {$t('dashboard.zones.zone').toLowerCase()} • {$t('dashboard.live')}
                 </div>
               </div>
             </div>
@@ -730,11 +746,11 @@
                 {formatPercentage(occupazioneMediaMagazzino)}
               </div>
               <div class="text-sm text-blue-700 dark:text-blue-300">
-                Occupazione Globale
+                {$t('dashboard.zones.avgOccupancy')}
               </div>
               <div class="text-xs text-blue-600 dark:text-blue-400">
                 {data.zoneStatus.reduce((sum, z) => sum + z.ubicazioni_occupate, 0)} / 
-                {data.zoneStatus.reduce((sum, z) => sum + z.ubicazioni_totali, 0)} ubicazioni
+                {data.zoneStatus.reduce((sum, z) => sum + z.ubicazioni_totali, 0)} {$t('inventory.location').toLowerCase()}
               </div>
             </div>
           </div>
@@ -778,7 +794,7 @@
                   <div class="text-sm font-medium">
                     {formatDuration(slot.durata_media_secondi)}
                   </div>
-                  <div class="text-xs text-neutral-500">media</div>
+                  <div class="text-xs text-neutral-500">{$t('dashboard.average')}</div>
                 </div>
               </div>
             </div>
@@ -800,11 +816,11 @@
           <table class="table table-sm">
             <thead>
               <tr>
-                <th>Prodotto</th>
-                <th>Classe</th>
-                <th>Giacenza</th>
-                <th>Mov. 7gg</th>
-                <th>Velocity</th>
+                <th>{$t('products.table.code')}</th>
+                <th>{$t('dashboard.velocity.class')}</th>
+                <th>{$t('products.table.stock')}</th>
+                <th>{$t('dashboard.velocity.movements7days')}</th>
+                <th>{$t('dashboard.velocity.title')}</th>
               </tr>
             </thead>
             <tbody>

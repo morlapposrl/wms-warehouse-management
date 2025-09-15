@@ -120,6 +120,9 @@
 	"/api/prodotti/global": [
 		"src/routes/api/prodotti/global/+server.ts"
 	],
+	"/api/prodotti/[id]": [
+		"src/routes/api/prodotti/[id]/+server.ts"
+	],
 	"/api/test-db": [
 		"src/routes/api/test-db/+server.ts"
 	],
@@ -250,6 +253,9 @@
 	],
 	"/auth/tipi-udc": [
 		"src/routes/auth/tipi-udc/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/auth/transfer": [
 		"src/routes/+layout.server.ts"
 	],
 	"/auth/udc": [
