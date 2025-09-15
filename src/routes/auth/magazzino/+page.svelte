@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
+  import { t } from '$lib/i18n';
   import LocationPicker from '$lib/components/LocationPicker.svelte';
   
   export let data;
@@ -249,7 +250,7 @@
     newUbicazione.coordinata_x = Math.round(x * 10) / 10;
     newUbicazione.coordinata_y = Math.round(y * 10) / 10;
     
-    console.log(`📍 Posizione selezionata: X=${newUbicazione.coordinata_x}, Y=${newUbicazione.coordinata_y}`);
+    console.log(`📍 {$t("warehouse.locations.fields.position")} selezionata: X=${newUbicazione.coordinata_x}, Y=${newUbicazione.coordinata_y}`);
   }
 
   async function createUbicazione() {
@@ -450,26 +451,38 @@
             <span class="text-xl">🏭</span>
           </div>
           <div>
-            <h1 class="text-xl font-bold text-neutral-900 dark:text-gray-100">Gestione Magazzino</h1>
-            <p class="text-sm text-neutral-600 dark:text-gray-400">Ubicazioni e contenuti</p>
+            <h1 class="text-xl font-bold text-neutral-900 dark:text-gray-100">{$t('warehouse.layout.title')}</h1>
+            <p class="text-sm text-neutral-600 dark:text-gray-400">{$t('warehouse.layout.subtitle')}</p>
           </div>
         </div>
         
         <!-- Toggle Vista -->
         <div class="flex items-center gap-4">
-          <div class="flex items-center bg-neutral-100 rounded-lg p-1">
-            <button 
-              on:click={() => viewMode = 'table'}
-              class="px-3 py-1 text-sm font-medium rounded-md transition-colors {viewMode === 'table' ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm' : 'text-neutral-600 dark:text-gray-400 hover:text-neutral-900 dark:hover:text-gray-100'}"
-            >
-              📊 Tabella
-            </button>
-            <button 
-              on:click={() => viewMode = 'map'}
-              class="px-3 py-1 text-sm font-medium rounded-md transition-colors {viewMode === 'map' ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm' : 'text-neutral-600 dark:text-gray-400 hover:text-neutral-900 dark:hover:text-gray-100'}"
-            >
-              🗺️ Mappa
-            </button>
+          <!-- Selettore Vista Moderno con Gradiente -->
+          <div class="relative bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 rounded-xl p-1 border border-blue-200/50 dark:border-blue-700/30 shadow-sm">
+            <div class="flex items-center relative">
+              <!-- Indicatore Scorrevole -->
+              <div 
+                class="absolute top-0 bottom-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-md transition-all duration-300 ease-out"
+                style="width: 50%; left: {viewMode === 'table' ? '0%' : '50%'}; transform: translateX(0%);"
+              ></div>
+              
+              <!-- Pulsanti -->
+              <button 
+                on:click={() => viewMode = 'table'}
+                class="relative z-10 px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 flex items-center gap-2 min-w-[120px] justify-center {viewMode === 'table' ? 'text-white shadow-sm' : 'text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300'}"
+              >
+                <span class="text-base">{viewMode === 'table' ? '📊' : '📋'}</span>
+                {$t('warehouse.layout.tableView')}
+              </button>
+              <button 
+                on:click={() => viewMode = 'map'}
+                class="relative z-10 px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 flex items-center gap-2 min-w-[120px] justify-center {viewMode === 'map' ? 'text-white shadow-sm' : 'text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300'}"
+              >
+                <span class="text-base">{viewMode === 'map' ? '🗺️' : '🌐'}</span>
+                {$t('warehouse.layout.mapView')}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -485,10 +498,10 @@
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-md font-semibold text-neutral-900 dark:text-gray-100 flex items-center gap-2">
           <span class="text-lg">🔍</span>
-          <span>Filtri</span>
+          <span>{$t('warehouse.layout.searchTitle')}</span>
         </h2>
         <button on:click={resetFilters} class="btn btn-secondary btn-sm">
-          🔄 Reset
+          🔄 {$t('warehouse.layout.filters.resetFilters')}
         </button>
       </div>
       
@@ -499,7 +512,7 @@
             <input 
               type="text" 
               name="search" 
-              placeholder="Codice..."
+              placeholder="{$t('warehouse.layout.searchPlaceholder')}"
               value={data.filters?.search || ''}
               class="form-input text-sm"
             />
@@ -508,7 +521,7 @@
           <!-- Zona Filter -->
           <div class="min-w-24">
             <select name="zona" value={data.filters?.zona || ''} class="form-input text-sm">
-              <option value="">Tutte zone</option>
+              <option value="">{$t('warehouse.layout.filters.allZones')}</option>
               {#each data.zone || [] as zona}
                 <option value={zona.zona}>{zona.zona}</option>
               {/each}
@@ -518,18 +531,18 @@
           <!-- Tipo Filter -->
           <div class="min-w-32">
             <select name="tipo" value={data.filters?.tipo || ''} class="form-input text-sm">
-              <option value="">Tutti tipi</option>
-              <option value="SCAFFALE">📦 Scaffale</option>
-              <option value="PALLET">🚚 Pallet</option>
-              <option value="FRIGO">🧊 Frigo</option>
-              <option value="CONGELATORE">❄️ Congelatore</option>
+              <option value="">{$t('warehouse.layout.filters.allTypes')}</option>
+              <option value="SCAFFALE">📦 {$t('warehouse.locations.types.SCAFFALE')}</option>
+              <option value="PALLET">🚚 {$t('warehouse.locations.types.PALLET')}</option>
+              <option value="FRIGO">🧊 {$t('warehouse.locations.types.FRIGO')}</option>
+              <option value="CONGELATORE">❄️ {$t("warehouse.locations.types.CONGELATORE")}</option>
             </select>
           </div>
           
-          <!-- Zona Velocità Filter -->
+          <!-- {$t("warehouse.locations.fields.speedZone")} Filter -->
           <div class="min-w-28">
             <select name="zona_velocita" value={data.filters?.zona_velocita || ''} class="form-input text-sm">
-              <option value="">Tutte velocità</option>
+              <option value="">{$t('warehouse.layout.filters.allStatuses')}</option>
               <option value="HOT">🔥 Hot</option>
               <option value="WARM">🌡️ Warm</option>
               <option value="COLD">🧊 Cold</option>
@@ -539,11 +552,11 @@
           <!-- Stato -->
           <div class="min-w-32">
             <select name="stato" value={data.filters?.stato || ''} class="form-input text-sm">
-              <option value="">Tutti stati</option>
-              <option value="vuoto">🟢 Vuoto</option>
-              <option value="basso">🟡 Poco</option>
-              <option value="medio">🟠 Medio</option>
-              <option value="alto">🔴 Pieno</option>
+              <option value="">{$t('warehouse.layout.filters.allStatuses')}</option>
+              <option value="vuoto">🟢 {$t('warehouse.layout.filters.empty')}</option>
+              <option value="basso">🟡 {$t('warehouse.layout.filters.partial')}</option>
+              <option value="medio">🟠 {$t('warehouse.layout.filters.partial')}</option>
+              <option value="alto">🔴 {$t('warehouse.layout.filters.full')}</option>
             </select>
           </div>
           
@@ -571,9 +584,9 @@
               </div>
             </div>
             <div class="ml-2">
-              <p class="text-xs font-medium text-neutral-600 dark:text-gray-400">Ubicazioni</p>
+              <p class="text-xs font-medium text-neutral-600 dark:text-gray-400">{$t('warehouse.layout.statistics.totalLocations')}</p>
               <p class="text-xl font-bold text-neutral-900 dark:text-gray-100">{data.statistiche.totale_ubicazioni}</p>
-              <p class="text-xs text-neutral-500 dark:text-gray-400">{data.statistiche?.ubicazioni_occupate || 0} occupate</p>
+              <p class="text-xs text-neutral-500 dark:text-gray-400">{data.statistiche?.ubicazioni_occupate || 0} {$t('warehouse.layout.statistics.occupiedLocations')}</p>
             </div>
           </div>
         </div>
@@ -660,12 +673,22 @@
       <div class="px-6 py-4 border-b border-neutral-200">
         <div class="flex items-center justify-between">
           <h3 class="text-lg font-medium text-neutral-900 dark:text-gray-100">
-            📍 Ubicazioni ({ubicazioniFiltrate?.length || 0})
+            📍 {$t('warehouse.layout.table.location')} ({ubicazioniFiltrate?.length || 0})
           </h3>
           
-          <!-- Paginazione Info -->
-          <div class="text-sm text-neutral-500 dark:text-gray-400">
-            Visualizzati {ubicazioniFiltrate?.length || 0} risultati
+          <div class="flex items-center gap-3">
+            <!-- Pulsante Crea Ubicazione -->
+            <button 
+              on:click={startCreationMode} 
+              class="btn btn-primary btn-sm flex items-center gap-2"
+            >
+              ➕ {$t('warehouse.locations.create')}
+            </button>
+            
+            <!-- Paginazione Info -->
+            <div class="text-sm text-neutral-500 dark:text-gray-400">
+              Visualizzati {ubicazioniFiltrate?.length || 0} risultati
+            </div>
           </div>
         </div>
       </div>
@@ -675,25 +698,25 @@
           <thead class="bg-neutral-50 dark:bg-gray-800">
             <tr>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-gray-400 uppercase tracking-wider">
-                Ubicazione
+                {$t('warehouse.layout.table.location')}
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-gray-400 uppercase tracking-wider">
-                Zona
+                {$t('warehouse.layout.table.zone')}
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-gray-400 uppercase tracking-wider">
-                Tipo
+                {$t('warehouse.layout.table.type')}
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-gray-400 uppercase tracking-wider">
-                Occupazione
+                {$t('warehouse.layout.table.occupancy')}
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-gray-400 uppercase tracking-wider">
                 Velocità
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-gray-400 uppercase tracking-wider">
-                Dimensioni
+                {$t('warehouse.layout.table.dimensions')}
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-gray-400 uppercase tracking-wider">
-                Azioni
+                {$t('warehouse.layout.table.actions')}
               </th>
             </tr>
           </thead>
@@ -864,16 +887,16 @@
           <label class="block text-sm font-medium text-neutral-700 mb-1">Tipo</label>
           <select name="tipo" value={data.filters ? data.filters.tipo : ''} class="form-input w-full text-sm">
             <option value="">Tutti i tipi</option>
-            <option value="SCAFFALE">📦 Scaffale</option>
-            <option value="PALLET">🚚 Pallet</option>
-            <option value="FRIGO">🧊 Frigo</option>
-            <option value="CONGELATORE">❄️ Congelatore</option>
+            <option value="SCAFFALE">📦 {$t("warehouse.locations.types.SCAFFALE")}</option>
+            <option value="PALLET">🚚 {$t("warehouse.locations.types.PALLET")}</option>
+            <option value="FRIGO">🧊 {$t("warehouse.locations.types.FRIGO")}</option>
+            <option value="CONGELATORE">❄️ {$t("warehouse.locations.types.CONGELATORE")}</option>
           </select>
         </div>
         
-        <!-- Zona Velocità Filter -->
+        <!-- {$t("warehouse.locations.fields.speedZone")} Filter -->
         <div>
-          <label class="block text-sm font-medium text-neutral-700 mb-1">Zona Velocità</label>
+          <label class="block text-sm font-medium text-neutral-700 mb-1">{$t("warehouse.locations.fields.speedZone")}</label>
           <select name="zona_velocita" value={data.filters ? data.filters.zona_velocita : ''} class="form-input w-full text-sm">
             <option value="">Tutte</option>
             <option value="HOT">🔥 Hot Zone</option>
@@ -905,11 +928,11 @@
         <div class="border-t pt-3">
           {#if !creationMode}
             <button on:click={startCreationMode} class="btn btn-primary w-full mb-2">
-              ➕ Crea Nuova Ubicazione
+              ➕ {$t('warehouse.locations.create')}
             </button>
           {:else}
             <button on:click={closeModals} class="btn btn-secondary w-full mb-2">
-              ❌ Annulla Creazione
+              ❌ {$t('common.cancel')}
             </button>
           {/if}
         </div>
@@ -932,7 +955,7 @@
     <!-- Ubicazione Details -->
     {#if selectedUbicazione}
       <div class="p-4 flex-1 overflow-y-auto min-h-[400px]">
-        <h3 class="font-semibold text-neutral-900 dark:text-gray-100 mb-4">📍 Dettagli Ubicazione</h3>
+        <h3 class="font-semibold text-neutral-900 dark:text-gray-100 mb-4">📍 {$t('warehouse.layout.table.location')} - {$t('common.description')}</h3>
         <div class="space-y-3">
           
           <div class="flex justify-between">
@@ -966,7 +989,7 @@
           {/if}
           
           <div class="flex justify-between">
-            <span class="text-sm text-neutral-600 dark:text-gray-400">Zona Velocità:</span>
+            <span class="text-sm text-neutral-600 dark:text-gray-400">{$t("warehouse.locations.fields.speedZone")}:</span>
             <span class="text-sm">
               {#if selectedUbicazione.zona_velocita === 'HOT'}🔥 Hot
               {:else if selectedUbicazione.zona_velocita === 'WARM'}🌡️ Warm
@@ -1136,169 +1159,237 @@
 {/if}
 </div>
 
-<!-- Content Modal -->
+<!-- Content Modal Moderna -->
 {#if showContentModal}
-  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" on:click={closeModals}>
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl mx-4 max-h-[80vh] overflow-y-auto" on:click|stopPropagation>
-      <div class="p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-neutral-900 dark:text-gray-100">
-            📦 Contenuto Ubicazione {selectedUbicazione?.codice_ubicazione}
-          </h3>
-          <button on:click={closeModals} class="text-neutral-500 hover:text-neutral-700 dark:text-gray-300">
+  <div class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50" on:click={closeModals}>
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-6xl mx-4 max-h-[90vh] overflow-hidden" on:click|stopPropagation>
+      
+      <!-- Header con Gradiente -->
+      <div class="bg-gradient-to-r from-emerald-500 to-teal-600 p-6 rounded-t-xl">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              <span class="text-2xl">📦</span>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-white">
+                {$t('warehouse.locations.content.title', { code: selectedUbicazione?.codice_ubicazione })}
+              </h3>
+              <p class="text-emerald-100 text-sm">
+                {$t('warehouse.locations.content.empty.subtitle')}
+              </p>
+            </div>
+          </div>
+          <button on:click={closeModals} class="text-white/80 hover:text-white text-2xl transition-colors p-2 hover:bg-white/10 rounded-lg">
             ✕
           </button>
         </div>
+      </div>
+      
+      <!-- Body Content -->
+      <div class="p-6 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-blue-900 overflow-y-auto max-h-[75vh]">
         
         {#if ubicazioneContent.length > 0}
-          <!-- Statistiche riassuntive -->
-          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <div class="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <div class="text-xl font-bold text-blue-600">{ubicazioneContent.length}</div>
-                <div class="text-xs text-blue-800">SKU Diversi</div>
+          <!-- Statistiche Moderne con Gradienti -->
+          <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-700 border border-blue-300 rounded-xl p-4 text-center shadow-sm">
+              <div class="text-2xl font-bold text-blue-700 dark:text-blue-100">{ubicazioneContent.length}</div>
+              <div class="text-sm text-blue-600 dark:text-blue-200 font-medium">{$t('warehouse.locations.content.stats.differentSku')}</div>
+              <div class="mt-1">
+                <span class="text-xs px-2 py-1 bg-blue-200 dark:bg-blue-600 text-blue-800 dark:text-blue-100 rounded-full">
+                  📦 SKU
+                </span>
               </div>
-              <div>
-                <div class="text-xl font-bold text-green-600">{ubicazioneContent.reduce((sum, sku) => sum + sku.quantita_fisica_totale, 0)}</div>
-                <div class="text-xs text-green-800">Pezzi Totali</div>
+            </div>
+            <div class="bg-gradient-to-br from-green-100 to-green-200 dark:from-green-800 dark:to-green-700 border border-green-300 rounded-xl p-4 text-center shadow-sm">
+              <div class="text-2xl font-bold text-green-700 dark:text-green-100">{ubicazioneContent.reduce((sum, sku) => sum + sku.quantita_fisica_totale, 0)}</div>
+              <div class="text-sm text-green-600 dark:text-green-200 font-medium">{$t('warehouse.locations.content.stats.totalPieces')}</div>
+              <div class="mt-1">
+                <span class="text-xs px-2 py-1 bg-green-200 dark:bg-green-600 text-green-800 dark:text-green-100 rounded-full">
+                  📊 Pezzi
+                </span>
               </div>
-              <div>
-                <div class="text-xl font-bold text-orange-600">{new Set(ubicazioneContent.flatMap(sku => sku.proprietari.map(p => p.committente_id))).size}</div>
-                <div class="text-xs text-orange-800">Committenti</div>
+            </div>
+            <div class="bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-800 dark:to-orange-700 border border-orange-300 rounded-xl p-4 text-center shadow-sm">
+              <div class="text-2xl font-bold text-orange-700 dark:text-orange-100">{new Set(ubicazioneContent.flatMap(sku => sku.proprietari.map(p => p.committente_id))).size}</div>
+              <div class="text-sm text-orange-600 dark:text-orange-200 font-medium">{$t('warehouse.locations.content.stats.clients')}</div>
+              <div class="mt-1">
+                <span class="text-xs px-2 py-1 bg-orange-200 dark:bg-orange-600 text-orange-800 dark:text-orange-100 rounded-full">
+                  🏢 Clienti
+                </span>
               </div>
             </div>
           </div>
           
-          <!-- Contenuto gerarchico: SKU → Proprietari → Lotti -->
-          <div class="space-y-4">
+          <!-- Contenuto SKU Moderno con Gradienti -->
+          <div class="space-y-6">
             {#each ubicazioneContent as sku}
-              <div class="border rounded-lg bg-white dark:bg-gray-800 shadow-sm">
-                <!-- Header SKU -->
-                <div class="bg-neutral-50 px-4 py-3 border-b">
+              <div class="bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-blue-900 rounded-xl shadow-lg border border-blue-200 dark:border-blue-700 overflow-hidden">
+                <!-- Header SKU con Gradiente -->
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-4">
                   <div class="flex justify-between items-start">
                     <div class="flex-1">
-                      <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-blue-500"></div>
-                        <div class="font-semibold text-lg text-blue-700">{sku.sku_code}</div>
+                      <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                          <span class="text-sm font-bold text-white">📦</span>
+                        </div>
+                        <div>
+                          <div class="font-bold text-xl text-white">{sku.sku_code}</div>
+                          <div class="text-indigo-100 text-sm">{sku.prodotto_nome || $t('warehouse.locations.content.sku.noDescription')}</div>
+                        </div>
                       </div>
-                      <div class="text-sm text-neutral-600 mt-1">{sku.prodotto_nome || 'Prodotto senza descrizione'}</div>
                     </div>
                     <div class="text-right">
-                      <div class="text-xl font-bold text-neutral-900 dark:text-gray-100">{sku.quantita_fisica_totale} pz</div>
-                      <div class="text-xs text-neutral-500 dark:text-gray-400">{(sku.volume_occupato_cm3 / 1000).toFixed(1)} L</div>
+                      <div class="text-2xl font-bold text-white">{sku.quantita_fisica_totale} <span class="text-lg">pz</span></div>
+                      <div class="text-indigo-200 text-sm">{(sku.volume_occupato_cm3 / 1000).toFixed(1)} L</div>
                     </div>
                   </div>
                 </div>
                 
-                <!-- Proprietari (Multi-committente) -->
-                <div class="p-4">
+                <!-- Proprietari con Gradienti Colorati per Stato -->
+                <div class="p-6">
                   {#if sku.proprietari && sku.proprietari.length > 0}
-                    <div class="space-y-3">
+                    <div class="space-y-4">
                       {#each sku.proprietari as proprietario}
-                        <div class="bg-neutral-50 rounded-lg p-3 border-l-4" 
-                             class:border-l-green-500={proprietario.stato === 'DISPONIBILE'}
-                             class:border-l-yellow-500={proprietario.stato === 'RISERVATO'}
-                             class:border-l-red-500={proprietario.stato === 'DANNEGGIATO'}>
-                          
-                          <!-- Header Proprietario -->
-                          <div class="flex justify-between items-start mb-2">
+                        <!-- Gradiente dinamico basato sullo stato -->
+                        <div class="rounded-xl p-4 shadow-sm border-l-4 {proprietario.stato === 'DISPONIBILE' ? 'bg-gradient-to-r from-green-50 to-emerald-100 dark:from-green-900/30 dark:to-emerald-800/30 border-l-green-500' : proprietario.stato === 'RISERVATO' ? 'bg-gradient-to-r from-yellow-50 to-amber-100 dark:from-yellow-900/30 dark:to-amber-800/30 border-l-yellow-500' : 'bg-gradient-to-r from-red-50 to-rose-100 dark:from-red-900/30 dark:to-rose-800/30 border-l-red-500'}">
+                          <!-- Header Proprietario Moderno -->
+                          <div class="flex justify-between items-start mb-4">
                             <div class="flex-1">
-                              <div class="flex items-center gap-2">
-                                <span class="text-sm font-medium text-neutral-900 dark:text-gray-100">
-                                  {proprietario.committente_nome}
-                                </span>
-                                <span class="text-xs px-2 py-1 rounded-full bg-neutral-200 text-neutral-600 dark:text-gray-400">
+                              <div class="flex items-center gap-3 flex-wrap">
+                                <div class="flex items-center gap-2">
+                                  <div class="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                                    <span class="text-xs text-white font-bold">🏢</span>
+                                  </div>
+                                  <span class="font-bold text-gray-900 dark:text-gray-100">
+                                    {proprietario.committente_nome}
+                                  </span>
+                                </div>
+                                <span class="px-3 py-1 rounded-full bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 text-slate-700 dark:text-slate-300 text-sm font-medium">
                                   {proprietario.committente_codice}
                                 </span>
-                                <span class="text-xs px-2 py-1 rounded-full" 
-                                      class:bg-green-100={proprietario.stato === 'DISPONIBILE'}
-                                      class:text-green-700={proprietario.stato === 'DISPONIBILE'}
-                                      class:bg-yellow-100={proprietario.stato === 'RISERVATO'}
-                                      class:text-yellow-700={proprietario.stato === 'RISERVATO'}
-                                      class:bg-red-100={proprietario.stato === 'DANNEGGIATO'}
-                                      class:text-red-700={proprietario.stato === 'DANNEGGIATO'}>
-                                  {proprietario.stato}
+                                <span class="px-3 py-1 rounded-full font-semibold text-sm {proprietario.stato === 'DISPONIBILE' ? 'bg-gradient-to-r from-green-200 to-emerald-300 dark:from-green-700 dark:to-emerald-600 text-green-800 dark:text-green-200' : proprietario.stato === 'RISERVATO' ? 'bg-gradient-to-r from-yellow-200 to-amber-300 dark:from-yellow-700 dark:to-amber-600 text-yellow-800 dark:text-yellow-200' : 'bg-gradient-to-r from-red-200 to-rose-300 dark:from-red-700 dark:to-rose-600 text-red-800 dark:text-red-200'}">
+                                  {proprietario.stato === 'DISPONIBILE' ? '✅ ' + $t('warehouse.locations.content.owner.state.DISPONIBILE') : proprietario.stato === 'RISERVATO' ? '🔒 ' + $t('warehouse.locations.content.owner.state.RISERVATO') : '⚠️ ' + $t('warehouse.locations.content.owner.state.DANNEGGIATO')}
                                 </span>
                               </div>
                             </div>
                             <div class="text-right">
-                              <div class="text-lg font-semibold text-green-600">{proprietario.quantita} pz</div>
-                              <div class="text-xs text-neutral-500 dark:text-gray-400">{proprietario.percentuale}% del totale</div>
+                              <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{proprietario.quantita} <span class="text-lg">pz</span></div>
+                              <div class="text-sm text-gray-600 dark:text-gray-400">{proprietario.percentuale}% del totale</div>
                             </div>
                           </div>
                           
-                          <!-- Dettagli Lotto e Date -->
-                          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
-                            <div>
-                              <div class="text-neutral-600 text-xs">Lotto</div>
-                              <div class="font-medium">{proprietario.lotto || '—'}</div>
+                          <!-- Dettagli Moderni con Mini-Cards -->
+                          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                            <!-- Lotto Card -->
+                            <div class="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-800/50 dark:to-purple-700/50 p-3 rounded-lg border border-purple-200 dark:border-purple-600">
+                              <div class="flex items-center gap-2 mb-2">
+                                <span class="text-sm">🏷️</span>
+                                <div class="text-xs font-medium text-purple-700 dark:text-purple-300">{$t("warehouse.locations.content.fields.lot")}</div>
+                              </div>
+                              <div class="font-bold text-purple-900 dark:text-purple-100">{proprietario.lotto || '—'}</div>
                             </div>
-                            <div>
-                              <div class="text-neutral-600 text-xs">Caricato</div>
-                              <div class="font-medium">
+                            
+                            <!-- Data Carico Card -->
+                            <div class="bg-gradient-to-br from-cyan-100 to-cyan-200 dark:from-cyan-800/50 dark:to-cyan-700/50 p-3 rounded-lg border border-cyan-200 dark:border-cyan-600">
+                              <div class="flex items-center gap-2 mb-2">
+                                <span class="text-sm">📅</span>
+                                <div class="text-xs font-medium text-cyan-700 dark:text-cyan-300">{$t("warehouse.locations.content.fields.loaded")}</div>
+                              </div>
+                              <div class="font-bold text-cyan-900 dark:text-cyan-100 text-sm">
                                 {proprietario.data_posizionamento ? 
                                   new Date(proprietario.data_posizionamento).toLocaleDateString('it-IT') : '—'}
                               </div>
                               {#if proprietario.giorni_stoccaggio}
-                                <div class="text-xs text-neutral-500 dark:text-gray-400">{proprietario.giorni_stoccaggio} giorni fa</div>
+                                <div class="text-xs text-cyan-600 dark:text-cyan-400 mt-1">{$t('warehouse.locations.content.fields.daysAgo', { days: proprietario.giorni_stoccaggio })}</div>
                               {/if}
                             </div>
-                            <div>
-                              <div class="text-neutral-600 text-xs">Scadenza</div>
-                              <div class="font-medium" 
-                                   class:text-red-600={proprietario.giorni_a_scadenza !== null && proprietario.giorni_a_scadenza < 30}
-                                   class:text-yellow-600={proprietario.giorni_a_scadenza !== null && proprietario.giorni_a_scadenza < 90}>
+                            
+                            <!-- Scadenza Card -->
+                            <div class="bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-800/50 dark:to-orange-700/50 p-3 rounded-lg border border-orange-200 dark:border-orange-600">
+                              <div class="flex items-center gap-2 mb-2">
+                                <span class="text-sm">⏰</span>
+                                <div class="text-xs font-medium text-orange-700 dark:text-orange-300">{$t("warehouse.locations.content.fields.expiry")}</div>
+                              </div>
+                              <div class="font-bold text-sm {proprietario.giorni_a_scadenza !== null && proprietario.giorni_a_scadenza < 30 ? 'text-red-600 dark:text-red-400' : proprietario.giorni_a_scadenza !== null && proprietario.giorni_a_scadenza < 90 ? 'text-yellow-600 dark:text-yellow-400' : 'text-orange-900 dark:text-orange-100'}">
                                 {proprietario.data_scadenza ? 
                                   new Date(proprietario.data_scadenza).toLocaleDateString('it-IT') : '—'}
                               </div>
                               {#if proprietario.giorni_a_scadenza !== null}
-                                <div class="text-xs" 
-                                     class:text-red-500={proprietario.giorni_a_scadenza < 30}
-                                     class:text-yellow-500={proprietario.giorni_a_scadenza < 90}>
+                                <div class="text-xs mt-1 {proprietario.giorni_a_scadenza < 30 ? 'text-red-500' : proprietario.giorni_a_scadenza < 90 ? 'text-yellow-500' : 'text-orange-600 dark:text-orange-400'}">
                                   {proprietario.giorni_a_scadenza > 0 ? 
-                                    `${proprietario.giorni_a_scadenza} giorni` : 
-                                    'SCADUTO'}
+                                    $t('warehouse.locations.content.fields.daysLeft', { days: proprietario.giorni_a_scadenza }) : 
+                                    $t('warehouse.locations.content.fields.expired')}
                                 </div>
                               {/if}
                             </div>
-                            <div>
-                              <div class="text-neutral-600 text-xs">Valore</div>
-                              <div class="font-medium">
+                            
+                            <!-- Valore Card -->
+                            <div class="bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-800/50 dark:to-emerald-700/50 p-3 rounded-lg border border-emerald-200 dark:border-emerald-600">
+                              <div class="flex items-center gap-2 mb-2">
+                                <span class="text-sm">💰</span>
+                                <div class="text-xs font-medium text-emerald-700 dark:text-emerald-300">{$t("warehouse.locations.content.fields.value")}</div>
+                              </div>
+                              <div class="font-bold text-emerald-900 dark:text-emerald-100">
                                 {proprietario.costo_acquisto ? 
                                   `€${(proprietario.costo_acquisto * proprietario.quantita).toFixed(2)}` : '—'}
                               </div>
                               {#if proprietario.costo_acquisto}
-                                <div class="text-xs text-neutral-500 dark:text-gray-400">€{proprietario.costo_acquisto}/pz</div>
+                                <div class="text-xs text-emerald-600 dark:text-emerald-400 mt-1">€{proprietario.costo_acquisto}/pz</div>
                               {/if}
                             </div>
                           </div>
                           
-                          <!-- Note se presenti -->
+                          <!-- Note se presenti - Con gradiente -->
                           {#if proprietario.note}
-                            <div class="mt-2 pt-2 border-t border-neutral-200">
-                              <div class="text-xs text-neutral-600 dark:text-gray-400">Note: <span class="text-neutral-800 dark:text-gray-200">{proprietario.note}</span></div>
+                            <div class="mt-3 p-3 bg-gradient-to-r from-slate-100 to-gray-200 dark:from-slate-800/50 dark:to-gray-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
+                              <div class="flex items-center gap-2 mb-1">
+                                <span class="text-sm">📝</span>
+                                <div class="text-xs font-medium text-slate-700 dark:text-slate-300">{$t("warehouse.locations.content.fields.notes")}</div>
+                              </div>
+                              <div class="text-sm text-slate-900 dark:text-slate-100">{proprietario.note}</div>
                             </div>
                           {/if}
                           
-                          <!-- Dettagli UDC -->
+                          <!-- Dettagli UDC con Gradiente Moderno -->
                           {#if proprietario.udc_details && proprietario.udc_details.length > 0}
-                            <div class="mt-3 pt-3 border-t border-neutral-200">
-                              <div class="text-xs font-medium text-neutral-700 mb-2">🏗️ Dettagli UDC ({proprietario.udc_count})</div>
+                            <div class="mt-3 p-4 bg-gradient-to-br from-indigo-50 to-blue-100 dark:from-indigo-900/30 dark:to-blue-800/30 rounded-lg border border-indigo-200 dark:border-indigo-600">
+                              <div class="flex items-center gap-2 mb-3">
+                                <div class="w-6 h-6 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-lg flex items-center justify-center">
+                                  <span class="text-xs text-white">🏗️</span>
+                                </div>
+                                <div class="text-sm font-bold text-indigo-800 dark:text-indigo-200">
+                                  {$t("warehouse.locations.content.fields.udcDetails", { count: proprietario.udc_count })}
+                                </div>
+                              </div>
                               <div class="space-y-2">
                                 {#each proprietario.udc_details as udc}
-                                  <div class="bg-white dark:bg-gray-800 border border-neutral-200 rounded p-2 text-xs">
+                                  <div class="bg-gradient-to-r from-white to-indigo-50 dark:from-gray-800/80 dark:to-indigo-900/40 border border-indigo-200 dark:border-indigo-600 rounded-lg p-3 shadow-sm">
                                     <div class="flex justify-between items-start">
                                       <div class="flex-1">
-                                        <div class="font-medium text-blue-700">{udc.udc_barcode}</div>
-                                        <div class="text-neutral-600 dark:text-gray-400">{udc.tipo_udc || 'Tipo UDC'} • {udc.udc_stato}</div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                          <span class="text-xs">📦</span>
+                                          <div class="font-bold text-indigo-700 dark:text-indigo-300 text-sm">{udc.udc_barcode}</div>
+                                        </div>
+                                        <div class="flex items-center gap-3 text-xs">
+                                          <span class="px-2 py-1 bg-gradient-to-r from-blue-100 to-indigo-200 dark:from-blue-700 dark:to-indigo-600 text-blue-800 dark:text-blue-200 rounded-full font-medium">
+                                            {$t("warehouse.locations.content.fields.type")}: {udc.tipo_udc || 'Standard'}
+                                          </span>
+                                          <span class="px-2 py-1 bg-gradient-to-r from-green-100 to-emerald-200 dark:from-green-700 dark:to-emerald-600 text-green-800 dark:text-green-200 rounded-full font-medium">
+                                            {$t("warehouse.locations.content.fields.state")}: {udc.udc_stato}
+                                          </span>
+                                        </div>
                                         {#if udc.posizione}
-                                          <div class="text-neutral-500">📍 {udc.posizione}</div>
+                                          <div class="mt-1 flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-400">
+                                            <span>📍</span>
+                                            <span class="font-medium">{$t("warehouse.locations.content.fields.position")}: {udc.posizione}</span>
+                                          </div>
                                         {/if}
                                       </div>
                                       <div class="text-right">
-                                        <div class="font-semibold">{udc.quantita} pz</div>
+                                        <div class="text-lg font-bold text-indigo-800 dark:text-indigo-200">{udc.quantita} <span class="text-sm">pz</span></div>
                                         {#if udc.lotto}
-                                          <div class="text-neutral-500">Lotto: {udc.lotto}</div>
+                                          <div class="text-xs text-indigo-600 dark:text-indigo-400 font-medium">{$t("warehouse.locations.content.fields.lot")}: {udc.lotto}</div>
                                         {/if}
                                       </div>
                                     </div>
@@ -1311,9 +1402,11 @@
                       {/each}
                     </div>
                   {:else}
-                    <div class="text-center py-4 text-neutral-500">
-                      <div class="text-2xl mb-2">⚠️</div>
-                      <div class="text-sm">Nessun proprietario definito per questo SKU</div>
+                    <div class="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-900/30 dark:to-orange-800/30 rounded-lg p-6 text-center border border-amber-200 dark:border-amber-600">
+                      <div class="w-12 h-12 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span class="text-2xl text-white">⚠️</span>
+                      </div>
+                      <div class="text-sm font-medium text-amber-800 dark:text-amber-200">{$t("warehouse.locations.content.sku.noOwner")}</div>
                     </div>
                   {/if}
                 </div>
@@ -1321,9 +1414,17 @@
             {/each}
           </div>
         {:else}
-          <div class="text-center py-8 text-neutral-500">
-            <div class="text-4xl mb-2">📭</div>
-            <div>Nessun contenuto in questa ubicazione</div>
+          <!-- Stato Vuoto Moderno -->
+          <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-xl p-8 text-center border border-gray-300 dark:border-gray-600">
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span class="text-3xl">📭</span>
+            </div>
+            <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              {$t("warehouse.locations.content.empty.title")}
+            </h4>
+            <p class="text-gray-600 dark:text-gray-400">
+              {$t("warehouse.locations.content.empty.subtitle")}
+            </p>
           </div>
         {/if}
       </div>
@@ -1375,483 +1476,520 @@
   </div>
 {/if}
 
-<!-- Modal Creazione Ubicazione -->
+<!-- Modal Creazione Ubicazione COMPATTA -->
 {#if showCreateModal}
   <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" on:click={closeModals}>
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl mx-4 max-h-[90vh] overflow-y-auto" on:click|stopPropagation>
-      <div class="p-6">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-xl font-semibold text-neutral-900 dark:text-gray-100">
-            {bulkMode ? '⚡ Creazione Multipla Ubicazioni' : '➕ Crea Nuova Ubicazione'}
-          </h3>
-          <button on:click={closeModals} class="text-neutral-500 hover:text-neutral-700 text-xl">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl mx-4 max-h-[90vh] overflow-hidden" on:click|stopPropagation>
+      
+      <!-- Header con Gradiente Moderno -->
+      <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-lg">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+              <span class="text-xl">{bulkMode ? '⚡' : '➕'}</span>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-white">
+                {bulkMode ? $t('warehouse.layout.creation.bulk') : $t('warehouse.locations.form.title')}
+              </h3>
+              <p class="text-sm text-blue-100">
+                {bulkMode ? $t('warehouse.layout.creation.bulkOptions.title') : $t('warehouse.locations.form.description')}
+              </p>
+            </div>
+          </div>
+          <button on:click={closeModals} class="text-white/80 hover:text-white text-xl transition-colors">
             ✕
           </button>
         </div>
+      </div>
+
+      <!-- Form Content in 2 Columns -->
+      <div class="p-6 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-blue-900 overflow-y-auto max-h-[75vh]">
         
-        <!-- Toggle Modalità -->
-        <div class="mb-6 p-4 bg-neutral-50 rounded-lg">
+        <!-- Toggle Modalità Compatto -->
+        <div class="mb-4 bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-blue-200 dark:border-blue-700">
           <div class="flex items-center justify-between">
-            <div>
-              <h4 class="font-medium text-neutral-900 dark:text-gray-100">Modalità Creazione</h4>
-              <p class="text-sm text-neutral-600 dark:text-gray-400">
-                {bulkMode ? 'Genera multiple ubicazioni con range di coordinate' : 'Crea una singola ubicazione'}
-              </p>
-            </div>
             <div class="flex items-center gap-3">
-              <span class="text-sm {!bulkMode ? 'font-semibold text-blue-600' : 'text-neutral-500'}">Singola</span>
+              <span class="text-xl">{bulkMode ? '⚡' : '🏗️'}</span>
+              <div>
+                <h4 class="font-semibold text-gray-900 dark:text-gray-100">{$t('warehouse.locations.fields.modalityCreation')}</h4>
+                <p class="text-xs text-gray-600 dark:text-gray-400">
+                  {bulkMode ? $t('warehouse.locations.actions.generateMultiple') : $t('warehouse.locations.actions.createSpecific')}
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs {!bulkMode ? 'font-bold text-blue-600' : 'text-gray-500'}">{$t('warehouse.locations.fields.singleMode')}</span>
               <button 
                 type="button"
                 on:click={() => bulkMode = !bulkMode}
-                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 {bulkMode ? 'bg-blue-600' : 'bg-neutral-300'}"
+                class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 {bulkMode ? 'bg-purple-600' : 'bg-blue-600'}"
               >
                 <span class="sr-only">Toggle bulk mode</span>
-                <span class="inline-block h-4 w-4 rounded-full bg-white dark:bg-gray-800 shadow transform transition-transform duration-200 {bulkMode ? 'translate-x-6' : 'translate-x-1'}"></span>
+                <span class="inline-block h-3 w-3 rounded-full bg-white shadow transform transition-transform duration-200 {bulkMode ? 'translate-x-5' : 'translate-x-1'}"></span>
               </button>
-              <span class="text-sm {bulkMode ? 'font-semibold text-blue-600' : 'text-neutral-500'}">Multipla</span>
+              <span class="text-xs {bulkMode ? 'font-bold text-purple-600' : 'text-gray-500'}">{$t('warehouse.locations.fields.bulkMode')}</span>
             </div>
           </div>
         </div>
         
-        <!-- Form con handler condizionale -->
-        <form on:submit|preventDefault={bulkMode ? createBulkUbicazioni : createUbicazione} class="space-y-4">
+        <!-- Form con handler condizionale - Layout a 2 colonne per eliminare scroll -->
+        <form on:submit|preventDefault={bulkMode ? createBulkUbicazioni : createUbicazione} class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
-          {#if bulkMode}
-            <!-- Generazione Multipla -->
-            <div class="bg-purple-50 p-4 rounded-lg mb-6">
-              <h4 class="font-semibold text-purple-900 mb-3">⚡ Generazione Range Ubicazioni</h4>
-              <div class="space-y-4">
-                <div class="grid grid-cols-5 gap-3">
+          <!-- COLONNA SINISTRA -->
+          <div class="space-y-4">
+            {#if bulkMode}
+              <!-- Generazione Multipla Compatta -->
+              <div class="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800 p-4 rounded-lg border border-purple-300">
+                <h4 class="font-semibold text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">
+                  ⚡ {$t('warehouse.locations.fields.rangeLocations')}
+                </h4>
+                <div class="grid grid-cols-5 gap-2">
                   <!-- Area -->
                   <div>
-                    <label class="block text-sm font-medium text-purple-700 mb-1">Area</label>
-                    <div class="space-y-1">
-                      <input 
-                        type="text" 
-                        bind:value={bulkGeneration.area_start}
-                        placeholder="A"
-                        class="form-input w-full text-sm"
-                        required
-                      />
-                      <input 
-                        type="text" 
-                        bind:value={bulkGeneration.area_end}
-                        placeholder="C"
-                        class="form-input w-full text-sm"
-                        required
-                      />
-                    </div>
-                    <div class="text-xs text-purple-600 mt-1">Da → A</div>
+                    <label class="block text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">{$t('warehouse.locations.fields.area')}</label>
+                    <input 
+                      type="text" 
+                      bind:value={bulkGeneration.area_start}
+                      placeholder="A"
+                      class="form-input w-full text-xs h-8"
+                      required
+                    />
+                    <input 
+                      type="text" 
+                      bind:value={bulkGeneration.area_end}
+                      placeholder="C"
+                      class="form-input w-full text-xs h-8 mt-1"
+                      required
+                    />
+                    <div class="text-xs text-purple-600 dark:text-purple-400 mt-1">Da → A</div>
                   </div>
                   
                   <!-- Zona -->
                   <div>
-                    <label class="block text-sm font-medium text-purple-700 mb-1">Zona</label>
-                    <div class="space-y-1">
-                      <input 
-                        type="text" 
-                        bind:value={bulkGeneration.zona_start}
-                        placeholder="01"
-                        class="form-input w-full text-sm"
-                        required
-                      />
-                      <input 
-                        type="text" 
-                        bind:value={bulkGeneration.zona_end}
-                        placeholder="03"
-                        class="form-input w-full text-sm"
-                        required
-                      />
-                    </div>
-                    <div class="text-xs text-purple-600 mt-1">Da → A</div>
+                    <label class="block text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">{$t('warehouse.locations.fields.zona')}</label>
+                    <input 
+                      type="text" 
+                      bind:value={bulkGeneration.zona_start}
+                      placeholder="01"
+                      class="form-input w-full text-xs h-8"
+                      required
+                    />
+                    <input 
+                      type="text" 
+                      bind:value={bulkGeneration.zona_end}
+                      placeholder="03"
+                      class="form-input w-full text-xs h-8 mt-1"
+                      required
+                    />
+                    <div class="text-xs text-purple-600 dark:text-purple-400 mt-1">Da → A</div>
                   </div>
                   
                   <!-- Fronte -->
                   <div>
-                    <label class="block text-sm font-medium text-purple-700 mb-1">Fronte</label>
-                    <div class="space-y-1">
-                      <input 
-                        type="text" 
-                        bind:value={bulkGeneration.fronte_start}
-                        placeholder="01"
-                        class="form-input w-full text-sm"
-                        required
-                      />
-                      <input 
-                        type="text" 
-                        bind:value={bulkGeneration.fronte_end}
-                        placeholder="02"
-                        class="form-input w-full text-sm"
-                        required
-                      />
-                    </div>
-                    <div class="text-xs text-purple-600 mt-1">Da → A</div>
+                    <label class="block text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">{$t('warehouse.locations.fields.fronte')}</label>
+                    <input 
+                      type="text" 
+                      bind:value={bulkGeneration.fronte_start}
+                      placeholder="01"
+                      class="form-input w-full text-xs h-8"
+                      required
+                    />
+                    <input 
+                      type="text" 
+                      bind:value={bulkGeneration.fronte_end}
+                      placeholder="02"
+                      class="form-input w-full text-xs h-8 mt-1"
+                      required
+                    />
+                    <div class="text-xs text-purple-600 dark:text-purple-400 mt-1">Da → A</div>
                   </div>
                   
                   <!-- Colonna -->
                   <div>
-                    <label class="block text-sm font-medium text-purple-700 mb-1">Colonna</label>
-                    <div class="space-y-1">
-                      <input 
-                        type="text" 
-                        bind:value={bulkGeneration.colonna_start}
-                        placeholder="A"
-                        class="form-input w-full text-sm"
-                        required
-                      />
-                      <input 
-                        type="text" 
-                        bind:value={bulkGeneration.colonna_end}
-                        placeholder="D"
-                        class="form-input w-full text-sm"
-                        required
-                      />
-                    </div>
-                    <div class="text-xs text-purple-600 mt-1">Da → A</div>
+                    <label class="block text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">{$t('warehouse.locations.fields.colonna')}</label>
+                    <input 
+                      type="text" 
+                      bind:value={bulkGeneration.colonna_start}
+                      placeholder="A"
+                      class="form-input w-full text-xs h-8"
+                      required
+                    />
+                    <input 
+                      type="text" 
+                      bind:value={bulkGeneration.colonna_end}
+                      placeholder="D"
+                      class="form-input w-full text-xs h-8 mt-1"
+                      required
+                    />
+                    <div class="text-xs text-purple-600 dark:text-purple-400 mt-1">Da → A</div>
                   </div>
                   
                   <!-- Piano -->
                   <div>
-                    <label class="block text-sm font-medium text-purple-700 mb-1">Piano</label>
-                    <div class="space-y-1">
-                      <input 
-                        type="text" 
-                        bind:value={bulkGeneration.piano_start}
-                        placeholder="1"
-                        class="form-input w-full text-sm"
-                        required
-                      />
-                      <input 
-                        type="text" 
-                        bind:value={bulkGeneration.piano_end}
-                        placeholder="4"
-                        class="form-input w-full text-sm"
-                        required
-                      />
-                    </div>
-                    <div class="text-xs text-purple-600 mt-1">Da → A</div>
+                    <label class="block text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">{$t('warehouse.locations.fields.piano')}</label>
+                    <input 
+                      type="text" 
+                      bind:value={bulkGeneration.piano_start}
+                      placeholder="1"
+                      class="form-input w-full text-xs h-8"
+                      required
+                    />
+                    <input 
+                      type="text" 
+                      bind:value={bulkGeneration.piano_end}
+                      placeholder="4"
+                      class="form-input w-full text-xs h-8 mt-1"
+                      required
+                    />
+                    <div class="text-xs text-purple-600 dark:text-purple-400 mt-1">Da → A</div>
                   </div>
                 </div>
                 
                 <!-- Preview Generazione -->
                 {#if previewCount > 0}
-                  <div class="p-3 bg-white dark:bg-gray-800 rounded border border-purple-200">
+                  <div class="mt-3 p-2 bg-white dark:bg-gray-800 rounded border border-purple-300 shadow-inner">
                     <div class="flex items-center justify-between">
-                      <div class="text-sm text-neutral-600 dark:text-gray-400">Ubicazioni da creare:</div>
-                      <div class="text-lg font-bold text-purple-600">{previewCount}</div>
+                      <div class="text-xs text-gray-600 dark:text-gray-400">Ubicazioni da creare:</div>
+                      <div class="text-sm font-bold text-purple-600 dark:text-purple-400">{previewCount}</div>
                     </div>
-                    <div class="text-xs text-neutral-500 dark:text-gray-400 mt-1">
-                      Range: {bulkGeneration.area_start}-{bulkGeneration.zona_start}-{bulkGeneration.fronte_start}-{bulkGeneration.colonna_start}-{bulkGeneration.piano_start}
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 font-mono">
+                      {bulkGeneration.area_start}-{bulkGeneration.zona_start}-{bulkGeneration.fronte_start}-{bulkGeneration.colonna_start}-{bulkGeneration.piano_start}
                       → {bulkGeneration.area_end}-{bulkGeneration.zona_end}-{bulkGeneration.fronte_end}-{bulkGeneration.colonna_end}-{bulkGeneration.piano_end}
                     </div>
                   </div>
                 {/if}
               </div>
-            </div>
-          {:else}
-            <!-- Struttura Gerarchica Singola -->
-            <div class="bg-blue-50 p-4 rounded-lg mb-6">
-              <h4 class="font-semibold text-blue-900 mb-3">🏗️ Struttura Gerarchica</h4>
-              <div class="grid grid-cols-5 gap-3">
-                <div>
-                  <label class="block text-sm font-medium text-blue-700 mb-1">Area</label>
-                  <input 
-                    type="text" 
-                    bind:value={newUbicazione.area}
-                    placeholder="A"
-                    class="form-input w-full text-sm"
-                    required
-                  />
-                  <div class="text-xs text-blue-600 mt-1">Es: A, B, C</div>
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-blue-700 mb-1">Zona</label>
-                  <input 
-                    type="text" 
-                    bind:value={newUbicazione.zona}
-                    placeholder="01"
-                    class="form-input w-full text-sm"
-                    required
-                  />
-                  <div class="text-xs text-blue-600 mt-1">Es: 01, 02, 03</div>
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-blue-700 mb-1">Fronte</label>
-                  <input 
-                    type="text" 
-                    bind:value={newUbicazione.fronte}
-                    placeholder="01"
-                    class="form-input w-full text-sm"
-                    required
-                  />
-                  <div class="text-xs text-blue-600 mt-1">Es: 01, 02</div>
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-blue-700 mb-1">Colonna</label>
-                  <input 
-                    type="text" 
-                    bind:value={newUbicazione.colonna}
-                    placeholder="A"
-                    class="form-input w-full text-sm"
-                    required
-                  />
-                  <div class="text-xs text-blue-600 mt-1">Es: A, B, C</div>
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-blue-700 mb-1">Piano</label>
-                  <input 
-                    type="text" 
-                    bind:value={newUbicazione.piano}
-                    placeholder="1"
-                    class="form-input w-full text-sm"
-                    required
-                  />
-                  <div class="text-xs text-blue-600 mt-1">Es: 1, 2, 3</div>
-                </div>
-              </div>
-              
-              <!-- Anteprima Codice -->
-              <div class="mt-3 p-3 bg-white dark:bg-gray-800 rounded border">
-                <div class="text-sm text-neutral-600 dark:text-gray-400">Codice Ubicazione:</div>
-                <div class="text-lg font-bold text-blue-600 font-mono">
-                  {newUbicazione.area}-{newUbicazione.zona}-{newUbicazione.fronte}-{newUbicazione.colonna}-{newUbicazione.piano}
-                </div>
-              </div>
-            </div>
-          {/if}
-          
-          <!-- Tipo e Caratteristiche -->
-          <div class="grid grid-cols-2 gap-4">
-            {#if bulkMode}
-              <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-1">Tipo Ubicazione</label>
-                <select bind:value={bulkGeneration.tipo} class="form-input w-full">
-                  <option value="SCAFFALE">📦 Scaffale</option>
-                  <option value="PALLET">🚚 Pallet</option>
-                  <option value="FRIGO">🧊 Frigo</option>
-                  <option value="CONGELATORE">❄️ Congelatore</option>
-                  <option value="QUARANTENA">⚠️ Quarantena</option>
-                  <option value="UFFICIO">🏢 Ufficio</option>
-                  <option value="PASSAGGIO">🚶 Passaggio</option>
-                </select>
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-1">Zona Velocità</label>
-                <select bind:value={bulkGeneration.zona_velocita} class="form-input w-full">
-                  <option value="HOT">🔥 Hot Zone (alta rotazione)</option>
-                  <option value="WARM">🌡️ Warm Zone (media rotazione)</option>
-                  <option value="COLD">🧊 Cold Zone (bassa rotazione)</option>
-                </select>
-              </div>
             {:else}
-              <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-1">Tipo Ubicazione</label>
-                <select bind:value={newUbicazione.tipo} class="form-input w-full">
-                  <option value="SCAFFALE">📦 Scaffale</option>
-                  <option value="PALLET">🚚 Pallet</option>
-                  <option value="FRIGO">🧊 Frigo</option>
-                  <option value="CONGELATORE">❄️ Congelatore</option>
-                  <option value="QUARANTENA">⚠️ Quarantena</option>
-                  <option value="UFFICIO">🏢 Ufficio</option>
-                  <option value="PASSAGGIO">🚶 Passaggio</option>
-                </select>
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-1">Zona Velocità</label>
-                <select bind:value={newUbicazione.zona_velocita} class="form-input w-full">
-                  <option value="HOT">🔥 Hot Zone (alta rotazione)</option>
-                  <option value="WARM">🌡️ Warm Zone (media rotazione)</option>
-                  <option value="COLD">🧊 Cold Zone (bassa rotazione)</option>
-                </select>
+              <!-- Struttura Gerarchica Singola Compatta -->
+              <div class="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 p-4 rounded-lg border border-blue-300">
+                <h4 class="font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
+                  🏗️ {$t('warehouse.locations.fields.hierarchicalStructure')}
+                </h4>
+                <div class="grid grid-cols-5 gap-3">
+                  <div>
+                    <label class="block text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">{$t('warehouse.locations.fields.area')}</label>
+                    <input 
+                      type="text" 
+                      bind:value={newUbicazione.area}
+                      placeholder="A"
+                      class="form-input w-full text-sm h-9"
+                      required
+                    />
+                    <div class="text-xs text-blue-600 dark:text-blue-400 mt-1">Es: A, B, C</div>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">{$t("warehouse.locations.fields.zona")}</label>
+                    <input 
+                      type="text" 
+                      bind:value={newUbicazione.zona}
+                      placeholder="01"
+                      class="form-input w-full text-sm h-9"
+                      required
+                    />
+                    <div class="text-xs text-blue-600 dark:text-blue-400 mt-1">Es: 01, 02</div>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">{$t("warehouse.locations.fields.fronte")}</label>
+                    <input 
+                      type="text" 
+                      bind:value={newUbicazione.fronte}
+                      placeholder="01"
+                      class="form-input w-full text-sm h-9"
+                      required
+                    />
+                    <div class="text-xs text-blue-600 dark:text-blue-400 mt-1">Es: 01, 02</div>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">{$t("warehouse.locations.fields.colonna")}</label>
+                    <input 
+                      type="text" 
+                      bind:value={newUbicazione.colonna}
+                      placeholder="A"
+                      class="form-input w-full text-sm h-9"
+                      required
+                    />
+                    <div class="text-xs text-blue-600 dark:text-blue-400 mt-1">Es: A, B</div>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">{$t("warehouse.locations.fields.piano")}</label>
+                    <input 
+                      type="text" 
+                      bind:value={newUbicazione.piano}
+                      placeholder="1"
+                      class="form-input w-full text-sm h-9"
+                      required
+                    />
+                    <div class="text-xs text-blue-600 dark:text-blue-400 mt-1">Es: 1, 2</div>
+                  </div>
+                </div>
+                
+                <!-- Anteprima Codice Compatta -->
+                <div class="mt-3 p-2 bg-white dark:bg-gray-800 rounded border border-blue-300 shadow-inner">
+                  <div class="text-xs text-gray-600 dark:text-gray-400">Codice Ubicazione:</div>
+                  <div class="text-lg font-bold text-blue-600 dark:text-blue-400 font-mono">
+                    {newUbicazione.area}-{newUbicazione.zona}-{newUbicazione.fronte}-{newUbicazione.colonna}-{newUbicazione.piano}
+                  </div>
+                </div>
               </div>
             {/if}
+            
+            <!-- Tipo e Caratteristiche Compatte -->
+            <div class="bg-gradient-to-br from-green-100 to-teal-200 dark:from-green-900 dark:to-teal-800 p-4 rounded-lg border border-green-300">
+              <h4 class="font-semibold text-green-900 dark:text-green-100 mb-3 flex items-center gap-2">
+                ⚙️ {$t("warehouse.locations.fields.characteristics")}
+              </h4>
+              <div class="space-y-3">
+                {#if bulkMode}
+                  <div>
+                    <label class="block text-xs font-medium text-green-700 dark:text-green-300 mb-1">{$t("warehouse.locations.fields.locationType")}</label>
+                    <select bind:value={bulkGeneration.tipo} class="form-input w-full text-sm h-9">
+                      <option value="SCAFFALE">📦 {$t("warehouse.locations.types.SCAFFALE")}</option>
+                      <option value="PALLET">🚚 {$t("warehouse.locations.types.PALLET")}</option>
+                      <option value="FRIGO">🧊 {$t("warehouse.locations.types.FRIGO")}</option>
+                      <option value="CONGELATORE">❄️ {$t("warehouse.locations.types.CONGELATORE")}</option>
+                      <option value="QUARANTENA">⚠️ {$t("warehouse.locations.types.QUARANTENA")}</option>
+                      <option value="UFFICIO">🏢 {$t("warehouse.locations.types.UFFICIO")}</option>
+                      <option value="PASSAGGIO">🚶 {$t("warehouse.locations.types.PASSAGGIO")}</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-xs font-medium text-green-700 dark:text-green-300 mb-1">{$t("warehouse.locations.fields.speedZone")}</label>
+                    <select bind:value={bulkGeneration.zona_velocita} class="form-input w-full text-sm h-9">
+                      <option value="HOT">🔥 {$t("warehouse.locations.speeds.HOT")}</option>
+                      <option value="WARM">🌡️ {$t("warehouse.locations.speeds.WARM")}</option>
+                      <option value="COLD">🧊 {$t("warehouse.locations.speeds.COLD")}</option>
+                    </select>
+                  </div>
+                {:else}
+                  <div>
+                    <label class="block text-xs font-medium text-green-700 dark:text-green-300 mb-1">{$t("warehouse.locations.fields.locationType")}</label>
+                    <select bind:value={newUbicazione.tipo} class="form-input w-full text-sm h-9">
+                      <option value="SCAFFALE">📦 {$t("warehouse.locations.types.SCAFFALE")}</option>
+                      <option value="PALLET">🚚 {$t("warehouse.locations.types.PALLET")}</option>
+                      <option value="FRIGO">🧊 {$t("warehouse.locations.types.FRIGO")}</option>
+                      <option value="CONGELATORE">❄️ {$t("warehouse.locations.types.CONGELATORE")}</option>
+                      <option value="QUARANTENA">⚠️ {$t("warehouse.locations.types.QUARANTENA")}</option>
+                      <option value="UFFICIO">🏢 {$t("warehouse.locations.types.UFFICIO")}</option>
+                      <option value="PASSAGGIO">🚶 {$t("warehouse.locations.types.PASSAGGIO")}</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-xs font-medium text-green-700 dark:text-green-300 mb-1">{$t("warehouse.locations.fields.speedZone")}</label>
+                    <select bind:value={newUbicazione.zona_velocita} class="form-input w-full text-sm h-9">
+                      <option value="HOT">🔥 {$t("warehouse.locations.speeds.HOT")}</option>
+                      <option value="WARM">🌡️ {$t("warehouse.locations.speeds.WARM")}</option>
+                      <option value="COLD">🧊 {$t("warehouse.locations.speeds.COLD")}</option>
+                    </select>
+                  </div>
+                {/if}
+              </div>
+            </div>
           </div>
           
+          <!-- COLONNA DESTRA -->
+          <div class="space-y-4">
+          
           {#if bulkMode}
-            <!-- Coordinate e Spaziatura Bulk -->
-            <div class="bg-gray-50 p-4 rounded-lg">
-              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">📍 Posizione e Spaziatura</h4>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coordinata X Inizio</label>
-                  <input 
-                    type="number" 
-                    bind:value={bulkGeneration.coordinata_x_start}
-                    step="0.1"
-                    class="form-input w-full"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coordinata Y Inizio</label>
-                  <input 
-                    type="number" 
-                    bind:value={bulkGeneration.coordinata_y_start}
-                    step="0.1"
-                    class="form-input w-full"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Spaziatura X (cm)</label>
-                  <input 
-                    type="number" 
-                    bind:value={bulkGeneration.coordinata_x_spacing}
-                    min="50"
-                    step="10"
-                    class="form-input w-full"
-                    required
-                  />
-                  <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">Distanza tra ubicazioni orizzontalmente</div>
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Spaziatura Y (cm)</label>
-                  <input 
-                    type="number" 
-                    bind:value={bulkGeneration.coordinata_y_spacing}
-                    min="50"
-                    step="10"
-                    class="form-input w-full"
-                    required
-                  />
-                  <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">Distanza tra file verticalmente</div>
+            <!-- Coordinate e Spaziatura Bulk Compatte -->
+            <div class="bg-gradient-to-br from-orange-100 to-red-200 dark:from-orange-900 dark:to-red-800 p-4 rounded-lg border border-orange-300">
+              <h4 class="font-semibold text-orange-900 dark:text-orange-100 mb-3 flex items-center gap-2">📍 {$t("warehouse.locations.fields.positionSpacing")}</h4>
+              <div class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-medium text-orange-700 dark:text-orange-300 mb-1">{$t("warehouse.locations.fields.coordinateXStart")}</label>
+                    <input 
+                      type="number" 
+                      bind:value={bulkGeneration.coordinata_x_start}
+                      step="0.1"
+                      class="form-input w-full text-sm h-8"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label class="block text-xs font-medium text-orange-700 dark:text-orange-300 mb-1">{$t("warehouse.locations.fields.coordinateYStart")}</label>
+                    <input 
+                      type="number" 
+                      bind:value={bulkGeneration.coordinata_y_start}
+                      step="0.1"
+                      class="form-input w-full text-sm h-8"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label class="block text-xs font-medium text-orange-700 dark:text-orange-300 mb-1">{$t("warehouse.locations.fields.spacingX")}</label>
+                    <input 
+                      type="number" 
+                      bind:value={bulkGeneration.coordinata_x_spacing}
+                      min="50"
+                      step="10"
+                      class="form-input w-full text-sm h-8"
+                      required
+                    />
+                    <div class="text-xs text-orange-600 dark:text-orange-400 mt-1">{$t("warehouse.locations.fields.horizontalDistance")}</div>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-xs font-medium text-orange-700 dark:text-orange-300 mb-1">{$t("warehouse.locations.fields.spacingY")}</label>
+                    <input 
+                      type="number" 
+                      bind:value={bulkGeneration.coordinata_y_spacing}
+                      min="50"
+                      step="10"
+                      class="form-input w-full text-sm h-8"
+                      required
+                    />
+                    <div class="text-xs text-orange-600 dark:text-orange-400 mt-1">{$t("warehouse.locations.fields.verticalDistance")}</div>
+                  </div>
                 </div>
               </div>
             </div>
             
-            <!-- Dimensioni Standard Bulk -->
-            <div class="grid grid-cols-3 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-1">Larghezza (cm)</label>
-                <input 
-                  type="number" 
-                  bind:value={bulkGeneration.larghezza_cm}
-                  min="10"
-                  class="form-input w-full"
-                  required
-                />
-                <div class="text-xs text-neutral-600 mt-1">Uguale per tutte</div>
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-1">Profondità (cm)</label>
-                <input 
-                  type="number" 
-                  bind:value={bulkGeneration.profondita_cm}
-                  min="10"
-                  class="form-input w-full"
-                  required
-                />
-                <div class="text-xs text-neutral-600 mt-1">Uguale per tutte</div>
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-1">Altezza (cm)</label>
-                <input 
-                  type="number" 
-                  bind:value={bulkGeneration.altezza_cm}
-                  min="10"
-                  class="form-input w-full"
-                  required
-                />
-                <div class="text-xs text-neutral-600 mt-1">Uguale per tutte</div>
+            <!-- Dimensioni Standard Bulk Compatte -->
+            <div class="bg-gradient-to-br from-amber-100 to-yellow-200 dark:from-amber-900 dark:to-yellow-800 p-4 rounded-lg border border-amber-300">
+              <h4 class="font-semibold text-amber-900 dark:text-amber-100 mb-3 flex items-center gap-2">📏 {$t("warehouse.locations.fields.standardDimensions")}</h4>
+              <div class="grid grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-amber-700 dark:text-amber-300 mb-1">{$t("warehouse.locations.fields.widthCm")}</label>
+                  <input 
+                    type="number" 
+                    bind:value={bulkGeneration.larghezza_cm}
+                    min="10"
+                    class="form-input w-full text-sm h-8"
+                    required
+                  />
+                  <div class="text-xs text-amber-600 dark:text-amber-400 mt-1">{$t("warehouse.locations.fields.sameForAll")}</div>
+                </div>
+                
+                <div>
+                  <label class="block text-xs font-medium text-amber-700 dark:text-amber-300 mb-1">{$t("warehouse.locations.fields.depthCm")}</label>
+                  <input 
+                    type="number" 
+                    bind:value={bulkGeneration.profondita_cm}
+                    min="10"
+                    class="form-input w-full text-sm h-8"
+                    required
+                  />
+                  <div class="text-xs text-amber-600 dark:text-amber-400 mt-1">{$t("warehouse.locations.fields.sameForAll")}</div>
+                </div>
+                
+                <div>
+                  <label class="block text-xs font-medium text-amber-700 dark:text-amber-300 mb-1">{$t("warehouse.locations.fields.heightCm")}</label>
+                  <input 
+                    type="number" 
+                    bind:value={bulkGeneration.altezza_cm}
+                    min="10"
+                    class="form-input w-full text-sm h-8"
+                    required
+                  />
+                  <div class="text-xs text-amber-600 dark:text-amber-400 mt-1">{$t("warehouse.locations.fields.sameForAll")}</div>
+                </div>
               </div>
             </div>
           {:else}
-            <!-- Coordinate Singola -->
-            <div class="bg-gray-50 p-4 rounded-lg">
-              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">📍 Posizione</h4>
-              <div class="grid grid-cols-2 gap-4">
+            <!-- Coordinate Singola Compatte -->
+            <div class="bg-gradient-to-br from-cyan-100 to-blue-200 dark:from-cyan-900 dark:to-blue-800 p-4 rounded-lg border border-cyan-300">
+              <h4 class="font-semibold text-cyan-900 dark:text-cyan-100 mb-3 flex items-center gap-2">📍 {$t("warehouse.locations.fields.position")}</h4>
+              <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coordinata X</label>
+                  <label class="block text-xs font-medium text-cyan-700 dark:text-cyan-300 mb-1">{$t("warehouse.locations.fields.coordinateX")}</label>
                   <input 
                     type="number" 
                     bind:value={newUbicazione.coordinata_x}
                     step="0.1"
-                    class="form-input w-full"
+                    class="form-input w-full text-sm h-9"
                     required
                   />
                 </div>
                 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coordinata Y</label>
+                  <label class="block text-xs font-medium text-cyan-700 dark:text-cyan-300 mb-1">{$t("warehouse.locations.fields.coordinateY")}</label>
                   <input 
                     type="number" 
                     bind:value={newUbicazione.coordinata_y}
                     step="0.1"
-                    class="form-input w-full"
+                    class="form-input w-full text-sm h-9"
                     required
                   />
                 </div>
               </div>
-              <div class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                💡 Clicca sulla mappa per impostare automaticamente le coordinate
+              <div class="text-xs text-cyan-600 dark:text-cyan-400 mt-2 flex items-center gap-1">
+                💡 {$t("warehouse.locations.fields.automaticCoordinates")}
               </div>
             </div>
             
-            <!-- Dimensioni Singola -->
-            <div class="grid grid-cols-3 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-1">Larghezza (cm)</label>
-                <input 
-                  type="number" 
-                  bind:value={newUbicazione.larghezza_cm}
-                  min="10"
-                  class="form-input w-full"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-1">Profondità (cm)</label>
-                <input 
-                  type="number" 
-                  bind:value={newUbicazione.profondita_cm}
-                  min="10"
-                  class="form-input w-full"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-1">Altezza (cm)</label>
-                <input 
-                  type="number" 
-                  bind:value={newUbicazione.altezza_cm}
-                  min="10"
-                  class="form-input w-full"
-                  required
-                />
+            <!-- Dimensioni Singola Compatte -->
+            <div class="bg-gradient-to-br from-indigo-100 to-purple-200 dark:from-indigo-900 dark:to-purple-800 p-4 rounded-lg border border-indigo-300">
+              <h4 class="font-semibold text-indigo-900 dark:text-indigo-100 mb-3 flex items-center gap-2">📏 {$t("warehouse.locations.fields.dimensions")}</h4>
+              <div class="grid grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-indigo-700 dark:text-indigo-300 mb-1">{$t("warehouse.locations.fields.widthCm")}</label>
+                  <input 
+                    type="number" 
+                    bind:value={newUbicazione.larghezza_cm}
+                    min="10"
+                    class="form-input w-full text-sm h-9"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label class="block text-xs font-medium text-indigo-700 dark:text-indigo-300 mb-1">{$t("warehouse.locations.fields.depthCm")}</label>
+                  <input 
+                    type="number" 
+                    bind:value={newUbicazione.profondita_cm}
+                    min="10"
+                    class="form-input w-full text-sm h-9"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label class="block text-xs font-medium text-indigo-700 dark:text-indigo-300 mb-1">{$t("warehouse.locations.fields.heightCm")}</label>
+                  <input 
+                    type="number" 
+                    bind:value={newUbicazione.altezza_cm}
+                    min="10"
+                    class="form-input w-full text-sm h-9"
+                    required
+                  />
+                </div>
               </div>
             </div>
           {/if}
+          </div>
           
-          <!-- Pulsanti -->
-          <div class="flex gap-3 pt-6 border-t">
-            {#if bulkMode}
-              <button type="button" on:click={() => {bulkMode = false; previewCount = 0;}} class="btn btn-secondary flex-1">
-                ← Modalità Singola
-              </button>
-              <button type="submit" class="btn btn-primary flex-1" disabled={previewCount === 0}>
-                ⚡ Crea {previewCount} Ubicazioni
-              </button>
-            {:else}
-              <button type="button" on:click={resetNewUbicazione} class="btn btn-secondary flex-1">
-                🔄 Reset Campi
-              </button>
-              <button type="submit" class="btn btn-primary flex-1">
-                ✅ Crea Ubicazione
-              </button>
-            {/if}
+          <!-- Pulsanti Finali Compatti - Span su entrambe le colonne -->
+          <div class="lg:col-span-2 mt-4">
+            <div class="bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 p-4 rounded-lg border border-gray-300">
+              <div class="flex gap-3">
+                {#if bulkMode}
+                  <button type="button" on:click={() => {bulkMode = false; previewCount = 0;}} 
+                    class="btn btn-secondary flex-1 h-12 text-sm flex items-center justify-center gap-2 bg-white hover:bg-gray-50 border-2 border-gray-300">
+                    ← {$t("warehouse.locations.actions.singleMode")}
+                  </button>
+                  <button type="submit" class="btn btn-primary flex-1 h-12 text-sm flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white border-0" disabled={previewCount === 0}>
+                    ⚡ {$t("warehouse.locations.actions.createLocations", { count: previewCount })}
+                  </button>
+                {:else}
+                  <button type="button" on:click={resetNewUbicazione} 
+                    class="btn btn-secondary flex-1 h-12 text-sm flex items-center justify-center gap-2 bg-white hover:bg-gray-50 border-2 border-gray-300">
+                    🔄 {$t("warehouse.locations.actions.resetFields")}
+                  </button>
+                  <button type="submit" class="btn btn-primary flex-1 h-12 text-sm flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white border-0">
+                    ✅ {$t("warehouse.locations.actions.createLocation")}
+                  </button>
+                {/if}
+              </div>
+            </div>
           </div>
           
         </form>
