@@ -448,7 +448,14 @@
   <meta name="description" content={content.hero.description} />
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900 dark:to-purple-900">
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900 dark:to-purple-900 relative overflow-hidden">
+  
+  <!-- Decorative Background Elements -->
+  <div class="absolute inset-0 overflow-hidden">
+    <div class="absolute -top-4 -right-4 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl animate-pulse"></div>
+    <div class="absolute top-1/3 -left-8 w-80 h-80 bg-purple-400/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-indigo-400/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 4s;"></div>
+  </div>
   
   <!-- Language Selector -->
   <div class="fixed top-4 right-4 z-50">
@@ -474,8 +481,13 @@
       <!-- Logo/Brand -->
       <div class="mb-8 {isVisible ? 'animate-fade-in-up' : 'opacity-0'}">
         <div class="inline-flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-2xl mb-6">
-          <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-            <span class="text-4xl">🏭</span>
+          <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm p-2">
+            <img 
+              src="https://connect.microlops.it:3304/morlappo-logo-white.png" 
+              alt="Morlappo Logo" 
+              class="w-full h-full object-contain"
+              on:error={(e) => e.target.style.display = 'none'}
+            />
           </div>
           <div class="text-left">
             <h1 class="text-3xl font-bold text-white mb-1">{content.hero.title}</h1>
@@ -500,6 +512,7 @@
           🚀 {content.hero.cta}
         </button>
         <button
+          on:click={() => window.open('https://github.com/morlapposrl/wms-warehouse-management', '_blank')}
           class="px-8 py-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-800 dark:text-gray-200 font-bold rounded-lg shadow-lg hover:shadow-xl border border-white/20 dark:border-gray-700/20 transform hover:scale-105 transition-all duration-200"
         >
           📋 {content.hero.demo}
@@ -510,8 +523,12 @@
   </section>
 
   <!-- Features Section -->
-  <section class="py-16 px-4">
-    <div class="max-w-6xl mx-auto">
+  <section class="relative py-16 px-4 bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-900/30 dark:to-purple-900/30">
+    <!-- Subtle Pattern Background -->
+    <div class="absolute inset-0 opacity-5 dark:opacity-10">
+      <div class="absolute inset-0" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(59, 130, 246, 0.1) 20px, rgba(59, 130, 246, 0.1) 21px);"></div>
+    </div>
+    <div class="max-w-6xl mx-auto relative z-10">
       
       <h2 class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-gray-200">
         {content.features.title}
@@ -578,13 +595,95 @@
     </div>
   </section>
 
+  <!-- GitHub Section -->
+  <section class="relative py-16 px-4 bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 text-white overflow-hidden">
+    <!-- Animated Background Pattern -->
+    <div class="absolute inset-0 opacity-10">
+      <div class="absolute inset-0" style="background-image: radial-gradient(circle at 25% 25%, white 2px, transparent 2px), radial-gradient(circle at 75% 75%, white 2px, transparent 2px); background-size: 100px 100px; animation: slide 20s linear infinite;"></div>
+      <div class="absolute inset-0" style="background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 50px 50px; animation: slide-reverse 15s linear infinite;"></div>
+    </div>
+    
+    <!-- Floating Elements -->
+    <div class="absolute top-10 left-10 w-20 h-20 bg-blue-400/20 rounded-full animate-float"></div>
+    <div class="absolute top-32 right-16 w-14 h-14 bg-purple-400/20 rounded-full animate-float-delay"></div>
+    <div class="absolute bottom-20 left-1/4 w-16 h-16 bg-indigo-400/20 rounded-full animate-float"></div>
+    <div class="absolute bottom-32 right-1/3 w-12 h-12 bg-pink-400/20 rounded-full animate-float-delay"></div>
+    <div class="max-w-4xl mx-auto text-center">
+      
+      <div class="mb-8">
+        <h2 class="text-3xl font-bold mb-4">🚀 Open Source</h2>
+        <p class="text-lg text-gray-300 max-w-2xl mx-auto">
+          Sistema completamente open source disponibile su GitHub. Contribuisci, forka, e personalizza secondo le tue esigenze.
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+          <div class="text-3xl mb-3">⭐</div>
+          <h3 class="font-bold text-lg mb-2">MIT License</h3>
+          <p class="text-gray-300 text-sm">Licenza permissiva per uso commerciale e privato</p>
+        </div>
+        
+        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+          <div class="text-3xl mb-3">🔧</div>
+          <h3 class="font-bold text-lg mb-2">Customizable</h3>
+          <p class="text-gray-300 text-sm">Facilmente personalizzabile per ogni business</p>
+        </div>
+        
+        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+          <div class="text-3xl mb-3">👥</div>
+          <h3 class="font-bold text-lg mb-2">Community</h3>
+          <p class="text-gray-300 text-sm">Supporto della community e contributi welcome</p>
+        </div>
+      </div>
+      
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <button
+          on:click={() => window.open('https://github.com/morlapposrl/wms-warehouse-management', '_blank')}
+          class="flex items-center justify-center gap-3 px-6 py-3 bg-white text-gray-900 font-bold rounded-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+          <span>Vedi su GitHub</span>
+        </button>
+        
+        <button
+          on:click={() => window.open('https://github.com/morlapposrl/wms-warehouse-management/fork', '_blank')}
+          class="flex items-center justify-center gap-3 px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 01-2 0v-2A5 5 0 0011 9H5.414l2.293 2.293a1 1 0 11-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+          <span>Fork Project</span>
+        </button>
+        
+        <button
+          on:click={() => window.open('https://github.com/morlapposrl/wms-warehouse-management/releases/latest', '_blank')}
+          class="flex items-center justify-center gap-3 px-6 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-all duration-200 transform hover:scale-105"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+          <span>Download Latest</span>
+        </button>
+      </div>
+      
+    </div>
+  </section>
+
   <!-- Footer -->
   <footer class="py-12 px-4 bg-gradient-to-r from-slate-900 to-blue-900 text-white">
     <div class="max-w-4xl mx-auto text-center">
       
       <div class="flex items-center justify-center gap-4 mb-6">
-        <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-          <span class="text-2xl">🏭</span>
+        <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center p-2">
+          <img 
+            src="https://connect.microlops.it:3304/morlappo-logo-white.png" 
+            alt="Morlappo Logo" 
+            class="w-full h-full object-contain"
+            on:error={(e) => e.target.style.display = 'none'}
+          />
         </div>
         <div>
           <div class="font-bold text-lg">Morlappo WMS</div>
@@ -596,10 +695,30 @@
       <p class="text-blue-300 text-sm">© 2025 - {content.footer.rights}</p>
       
       <div class="mt-8 pt-6 border-t border-blue-800">
-        <div class="flex justify-center gap-6 text-sm text-blue-300">
+        <div class="flex justify-center gap-6 text-sm text-blue-300 mb-4">
           <span>📧 info@morlappo.com</span>
           <span>🌐 morlappo.com</span>
           <span>📱 +39 395 348 147 95</span>
+        </div>
+        <div class="flex justify-center gap-4">
+          <button
+            on:click={() => window.open('https://github.com/morlapposrl/wms-warehouse-management', '_blank')}
+            class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-200 text-blue-200 hover:text-white"
+          >
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            <span>GitHub Repository</span>
+          </button>
+          <button
+            on:click={() => window.open('https://github.com/morlapposrl/wms-warehouse-management/releases', '_blank')}
+            class="flex items-center gap-2 px-4 py-2 bg-green-600/80 hover:bg-green-600 rounded-lg transition-all duration-200 text-white"
+          >
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+            <span>Download</span>
+          </button>
         </div>
       </div>
       
@@ -630,5 +749,53 @@
   
   .animation-delay-400 {
     animation-delay: 0.4s;
+  }
+  
+  @keyframes slide {
+    0% {
+      transform: translateX(-100px) translateY(-100px);
+    }
+    100% {
+      transform: translateX(100px) translateY(100px);
+    }
+  }
+  
+  @keyframes slide-reverse {
+    0% {
+      transform: translateX(50px) translateY(50px);
+    }
+    100% {
+      transform: translateX(-50px) translateY(-50px);
+    }
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-20px) rotate(180deg);
+    }
+  }
+  
+  @keyframes float-delay {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg) scale(1);
+    }
+    33% {
+      transform: translateY(-15px) rotate(120deg) scale(1.1);
+    }
+    66% {
+      transform: translateY(-25px) rotate(240deg) scale(0.9);
+    }
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-float-delay {
+    animation: float-delay 8s ease-in-out infinite;
+    animation-delay: 2s;
   }
 </style>
