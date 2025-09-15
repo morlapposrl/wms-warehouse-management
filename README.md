@@ -234,6 +234,38 @@ npm run preview
 
 ---
 
+## 📸 Screenshots
+
+### 🏠 Homepage Multilingua
+La pagina di presentazione professionale è disponibile su: **https://connect.microlops.it:3304/**
+
+**Caratteristiche principali:**
+- 🌍 **6 lingue supportate**: Italiano, English, Français, Deutsch, Español, 中文
+- 🎨 **Sfondi accattivanti** con animazioni CSS
+- 📱 **Design responsive** ottimizzato per tutti i dispositivi
+- 🚀 **GitHub integration** con link diretti al repository
+- 🏢 **Branding Morlappo** con logo aziendale
+
+**Sezioni incluse:**
+- **Hero Section**: Logo, titolo, descrizione, CTA buttons
+- **Features**: 6 caratteristiche principali del WMS
+- **Performance Stats**: Metriche del sistema
+- **Technology Stack**: SvelteKit, TypeScript, SQLite, Tailwind
+- **Open Source**: Links GitHub repository, fork, download
+- **Footer**: Informazioni aziendali complete
+
+### 🏭 Sistema WMS
+Accesso completo al sistema: **https://connect.microlops.it:3304/login**
+
+**Screenshots disponibili in:** `./screenshots/`
+- Homepage multilingua completa
+- Dashboard operativo
+- Modal moderne con gradienti
+- Gestione magazzino interattiva
+- Dark mode support
+
+---
+
 ## 🚀 Setup Nuovo Repository GitHub
 
 Per configurare un nuovo repository GitHub per questo progetto:
