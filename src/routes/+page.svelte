@@ -676,10 +676,10 @@
       <!-- Pricing -->
       <div class="bg-gradient-to-r from-white/95 to-blue-50/95 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border-2 border-blue-300 mb-8">
         <div class="text-center">
-          <div class="text-6xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
-            €2.500
+          <div class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+            Disponibile a Giorni
           </div>
-          <div class="text-xl text-gray-600 mb-4">Canone annuale</div>
+          <div class="text-xl text-gray-600 mb-4">Versione Cloud Premium</div>
           <div class="text-sm text-gray-500 mb-6">
             Include: Hosting, Supporto, Backup, Aggiornamenti, SSL, Monitoraggio
           </div>
