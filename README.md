@@ -256,5 +256,5 @@ Oppure manualmente:
 ---
 
 **Versione**: v1.4.0 - Build 2025.01  
-**Ultima modifica**: Gennaio 2025  
+**Ultima modifica**: Settembre 2025  
 **Status**: ✅ Sistema Operativo e Funzionante
