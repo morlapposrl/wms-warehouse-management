@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PageData, ActionData } from './$types';
   import { enhance } from '$app/forms';
+  import { t } from '$lib/i18n';
 
   export let data: PageData;
   export let form: ActionData;
@@ -132,7 +133,7 @@
   }
 
   function formatTipoOrdine(tipo: string): string {
-    return tipo === 'INBOUND' ? 'In Entrata' : 'In Uscita';
+    return tipo === 'INBOUND' ? $t('orders.type.inbound') : $t('orders.type.outbound');
   }
 
   // Genera numero ordine automatico
@@ -146,8 +147,8 @@
   function precompilaRicevimento() {
     if (tipo_ordine === 'INBOUND' && data.magazzino) {
       indirizzo_destinazione = `${data.magazzino.indirizzo || ''}, ${data.magazzino.citta || ''} ${data.magazzino.cap || ''}`;
-      contatti_destinazione = `${data.magazzino.nome || 'Magazzino'} - Ufficio Ricevimento`;
-      note_spedizione = 'Consegnare negli orari: 8:00-12:00 / 14:00-17:00. Suonare citofono magazzino.';
+      contatti_destinazione = `${data.magazzino.nome || $t('orders.new.warehouse')} - ${$t('orders.new.receivingOffice')}`;
+      note_spedizione = $t('orders.new.deliveryInstructions');
     } else if (tipo_ordine === 'OUTBOUND') {
       // Reset per ordini in uscita
       indirizzo_destinazione = '';
@@ -170,20 +171,20 @@
   <!-- Header -->
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="h1">Nuovo Ordine</h1>
+      <h1 class="h1">{$t('orders.new.title')}</h1>
     </div>
     <a href="/auth/ordini?committente={data.committente?.id || committente_id}" class="btn btn-secondary">
       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
       </svg>
-      Torna alla lista
+      {$t('orders.new.backToList')}
     </a>
   </div>
 
   <!-- Alert errori -->
   {#if form?.error}
     <div class="alert alert-error mb-6">
-      <strong>Errore:</strong> {form.error}
+      <strong>{$t('common.error')}:</strong> {form.error}
     </div>
   {/if}
 
@@ -199,7 +200,7 @@
       if (result.type === 'redirect') {
         console.log('✅ Ordine creato con successo! Redirect verso:', result.location);
         // Popup di conferma decente e redirect manuale
-        if (confirm('✅ Ordine creato con successo!\n\nVuoi andare alla lista degli ordini?')) {
+        if (confirm(`✅ ${$t('orders.new.successCreated')}\n\n${$t('orders.new.goToOrdersList')}`)) {
           window.location.href = result.location;
         }
       } else if (result.type === 'failure') {
@@ -220,13 +221,13 @@
       <!-- Colonna 1: Dati ordine -->
       <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div class="card-header border-b border-gray-200 dark:border-gray-700">
-          <h2 class="text-lg font-semibold">Dati Ordine</h2>
+          <h2 class="text-lg font-semibold">{$t('orders.new.dataSection')}</h2>
         </div>
         <div class="card-body space-y-4">
           
           <!-- Numero ordine -->
           <div>
-            <label class="form-label">Numero Ordine</label>
+            <label class="form-label">{$t('orders.new.orderNumber')}</label>
             <div class="flex gap-2">
               <input 
                 type="text" 
@@ -243,7 +244,7 @@
 
           <!-- Committente -->
           <div>
-            <label class="form-label">Committente</label>
+            <label class="form-label">{$t('orders.new.client')}</label>
             <select bind:value={committente_id} name="committente_id" class="form-input" required disabled={righe.some(r => r.prodotto_id !== null)}>
               {#each data.committenti || [] as committente}
                 <option value={committente.id}>{committente.codice} - {committente.ragione_sociale}</option>
@@ -251,42 +252,42 @@
             </select>
             {#if righe.some(r => r.prodotto_id !== null)}
               <p class="text-sm text-orange-600 dark:text-orange-400 mt-1">
-                ⚠️ Committente bloccato: rimuovi tutti i prodotti per cambiarlo
+                ⚠️ {$t('orders.new.clientLocked')}
               </p>
             {/if}
           </div>
 
           <!-- Tipo ordine -->
           <div>
-            <label class="form-label">Tipo Ordine</label>
+            <label class="form-label">{$t('orders.new.orderType')}</label>
             <select bind:value={tipo_ordine} name="tipo_ordine" class="form-input" on:change={generaNuovoNumero}>
-              <option value="OUTBOUND">In Uscita (spedizione)</option>
-              <option value="INBOUND">In Entrata (ricevimento)</option>
+              <option value="OUTBOUND">{$t('orders.new.outboundType')}</option>
+              <option value="INBOUND">{$t('orders.new.inboundType')}</option>
             </select>
           </div>
 
           <!-- Cliente/Fornitore -->
           <div>
             <label class="form-label">
-              {tipo_ordine === 'INBOUND' ? 'Fornitore' : 'Cliente'}
+              {tipo_ordine === 'INBOUND' ? $t('orders.new.supplier') : $t('orders.new.customer')}
             </label>
             
             <!-- Selezione modalità cliente/fornitore -->
             <div class="mb-2">
               <label class="inline-flex items-center mr-4">
                 <input type="radio" bind:group={modalita_cliente} value="esistente" class="form-radio" />
-                <span class="ml-2">{tipo_ordine === 'INBOUND' ? 'Fornitore' : 'Cliente'} esistente</span>
+                <span class="ml-2">{tipo_ordine === 'INBOUND' ? $t('orders.new.existingSupplier') : $t('orders.new.existingCustomer')}</span>
               </label>
               <label class="inline-flex items-center">
                 <input type="radio" bind:group={modalita_cliente} value="nuovo" class="form-radio" />
-                <span class="ml-2">Nuovo {tipo_ordine === 'INBOUND' ? 'fornitore' : 'cliente'}</span>
+                <span class="ml-2">{tipo_ordine === 'INBOUND' ? $t('orders.new.newSupplier') : $t('orders.new.newCustomer')}</span>
               </label>
             </div>
 
             {#if modalita_cliente === 'esistente'}
               <!-- Select clienti/fornitori esistenti -->
               <select bind:value={cliente_fornitore} name="cliente_fornitore" class="form-input" required>
-                <option value="">-- Seleziona {tipo_ordine === 'INBOUND' ? 'fornitore' : 'cliente'} --</option>
+                <option value="">-- {tipo_ordine === 'INBOUND' ? $t('orders.new.selectSupplier') : $t('orders.new.selectCustomer')} --</option>
                 
                 {#if tipo_ordine === 'INBOUND'}
                   <!-- Mostra fornitori per ordini in entrata -->
@@ -306,7 +307,7 @@
               
               {#if tipo_ordine === 'INBOUND' && fornitori_committente.length > 0}
                 <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  🏢 = Fornitore specifico del committente • 🌐 = Fornitore globale
+                  🏢 = {$t('orders.new.specificSupplier')} • 🌐 = {$t('orders.new.globalSupplier')}
                 </div>
               {/if}
             {:else}
@@ -316,7 +317,7 @@
                 name="cliente_fornitore" 
                 bind:value={nuovo_cliente}
                 class="form-input"
-                placeholder="Nome nuovo {tipo_ordine === 'INBOUND' ? 'fornitore' : 'cliente'}"
+                placeholder="{tipo_ordine === 'INBOUND' ? $t('orders.new.newSupplierName') : $t('orders.new.newCustomerName')}"
                 required
               />
             {/if}
@@ -324,7 +325,7 @@
 
           <!-- Data richiesta -->
           <div>
-            <label class="form-label">Data Richiesta Consegna *</label>
+            <label class="form-label">{$t('orders.new.requestedDeliveryDate')} *</label>
             <input 
               type="date" 
               name="data_richiesta" 
@@ -341,44 +342,44 @@
       <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div class="card-header border-b border-gray-200 dark:border-gray-700">
           <h2 class="text-lg font-semibold">
-            {tipo_ordine === 'INBOUND' ? 'Dati Ricevimento' : 'Dati Spedizione'}
+            {tipo_ordine === 'INBOUND' ? $t('orders.new.receivingSection') : $t('orders.new.shippingSection')}
           </h2>
         </div>
         <div class="card-body space-y-4">
           
           <!-- Indirizzo -->
           <div>
-            <label class="form-label">Indirizzo</label>
+            <label class="form-label">{$t('orders.new.address')}</label>
             <textarea 
               name="indirizzo_destinazione" 
               bind:value={indirizzo_destinazione}
               class="form-input"
               rows="3"
-              placeholder="Via, città, CAP..."
+              placeholder="{$t('orders.new.addressPlaceholder')}"
             ></textarea>
           </div>
 
           <!-- Contatti -->
           <div>
-            <label class="form-label">Contatti</label>
+            <label class="form-label">{$t('orders.new.contacts')}</label>
             <input 
               type="text" 
               name="contatti_destinazione" 
               bind:value={contatti_destinazione}
               class="form-input"
-              placeholder="Nome referente, telefono, email..."
+              placeholder="{$t('orders.new.contactsPlaceholder')}"
             />
           </div>
 
           <!-- Note spedizione -->
           <div>
-            <label class="form-label">Note</label>
+            <label class="form-label">{$t('orders.new.shippingNotes')}</label>
             <textarea 
               name="note_spedizione" 
               bind:value={note_spedizione}
               class="form-input"
               rows="3"
-              placeholder="Istruzioni speciali..."
+              placeholder="{$t('orders.new.notesPlaceholder')}"
             ></textarea>
           </div>
 
@@ -388,23 +389,23 @@
       <!-- Colonna 3: Riepilogo -->
       <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div class="card-header border-b border-gray-200 dark:border-gray-700">
-          <h2 class="text-lg font-semibold">Riepilogo</h2>
+          <h2 class="text-lg font-semibold">{$t('orders.new.summarySection')}</h2>
         </div>
         <div class="card-body space-y-4">
           
           <div class="stat-card text-center">
             <div class="text-2xl font-bold text-blue-600">{totale_colli}</div>
-            <div class="text-sm text-neutral-600 dark:text-gray-400">Totale Colli</div>
+            <div class="text-sm text-neutral-600 dark:text-gray-400">{$t('orders.new.totalPackages')}</div>
           </div>
 
           <div class="stat-card text-center">
             <div class="text-2xl font-bold text-green-600">€ {totale_valore.toFixed(2)}</div>
-            <div class="text-sm text-neutral-600 dark:text-gray-400">Totale Valore</div>
+            <div class="text-sm text-neutral-600 dark:text-gray-400">{$t('orders.new.totalValue')}</div>
           </div>
 
           <div class="stat-card text-center">
             <div class="text-2xl font-bold text-purple-600">{righe.length}</div>
-            <div class="text-sm text-neutral-600 dark:text-gray-400">Righe Ordine</div>
+            <div class="text-sm text-neutral-600 dark:text-gray-400">{$t('orders.new.orderLines')}</div>
           </div>
 
         </div>
@@ -417,14 +418,14 @@
       <div class="card-header border-b border-gray-200 dark:border-gray-700">
         <div class="flex justify-between items-center">
           <div class="flex items-center gap-3">
-            <h2 class="text-lg font-semibold">Righe Ordine</h2>
+            <h2 class="text-lg font-semibold">{$t('orders.new.orderLinesSection')}</h2>
             <button 
               type="button" 
               on:click={aggiungiRiga} 
               class="btn btn-sm btn-success"
               disabled={!committente_id}
             >
-              + Aggiungi Riga
+              + {$t('orders.new.addLine')}
             </button>
           </div>
         </div>
@@ -433,8 +434,8 @@
         
         {#if data.prodotti.length === 0}
           <div class="alert alert-warning">
-            <strong>Attenzione:</strong> Nessun prodotto disponibile per questo committente. 
-            <a href="/auth/prodotti" class="underline">Aggiungi prodotti</a> prima di creare ordini.
+            <strong>{$t('common.attention')}:</strong> {$t('orders.new.noProductsWarning')} 
+            <a href="/auth/prodotti" class="underline">{$t('orders.new.addProductsLink')}</a> {$t('orders.new.addProductsText')}
           </div>
         {:else}
         
@@ -442,12 +443,12 @@
             <table class="table table-zebra">
               <thead>
                 <tr>
-                  <th>Prodotto</th>
-                  <th>Quantità</th>
-                  <th>Prezzo Unit.</th>
-                  <th>Subtotale</th>
-                  <th>Note</th>
-                  <th>Azioni</th>
+                  <th>{$t('orders.new.productHeader')}</th>
+                  <th>{$t('orders.new.quantityHeader')}</th>
+                  <th>{$t('orders.new.unitPriceHeader')}</th>
+                  <th>{$t('orders.new.subtotalHeader')}</th>
+                  <th>{$t('orders.new.notesHeader')}</th>
+                  <th>{$t('orders.new.actionsHeader')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -471,7 +472,7 @@
                             on:click={() => openProductModal(i)}
                             class="btn btn-sm btn-secondary w-full"
                           >
-                            🔄 Cambia Prodotto
+                            🔄 {$t('orders.new.changeProduct')}
                           </button>
                         {:else}
                           <!-- Nessun prodotto selezionato -->
@@ -481,7 +482,7 @@
                             class="btn btn-primary w-full"
                             disabled={data.prodotti.length === 0}
                           >
-                            🔍 Seleziona Prodotto
+                            🔍 {$t('orders.new.selectProduct')}
                           </button>
                         {/if}
                         
@@ -533,7 +534,7 @@
                         bind:value={riga.note_riga}
                         name={`riga_${i}_note`}
                         class="form-input w-32"
-                        placeholder="Note..."
+                        placeholder="{$t('orders.new.notesPlaceholder2')}"
                       />
                     </td>
                     
@@ -563,7 +564,7 @@
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
-        Annulla
+        {$t('orders.new.cancel')}
       </a>
       <button 
         type="submit" 
@@ -579,7 +580,7 @@
           });
         }}
       >
-        {submitting ? 'Creazione...' : 'Crea Ordine'}
+        {submitting ? $t('orders.actions.creating') : $t('orders.new.createOrder')}
       </button>
     </div>
 
@@ -592,7 +593,7 @@
     <div class="modal-content-large" on:click|stopPropagation>
       <div class="modal-header">
         <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-          🔍 Seleziona Prodotto - Riga {currentRigaIndex + 1}
+          🔍 {$t('orders.productModal.title', { line: currentRigaIndex + 1 })}
         </h2>
         <button on:click={closeProductModal} class="text-neutral-400 hover:text-neutral-600 dark:text-gray-400 dark:hover:text-gray-200">✖️</button>
       </div>
@@ -604,7 +605,7 @@
             <input
               type="text"
               bind:value={searchProdotti}
-              placeholder="Cerca per codice, descrizione o categoria..."
+              placeholder="{$t('orders.productModal.searchPlaceholder')}"
               class="form-input w-full pl-10"
               autofocus
             />
@@ -614,7 +615,7 @@
           </div>
           {#if searchProdotti}
             <div class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-              {prodottiFiltrati.length} di {data.prodotti.length} prodotti
+              {$t('orders.productModal.resultsCount', { count: prodottiFiltrati.length, total: data.prodotti.length })}
             </div>
           {/if}
         </div>
@@ -625,12 +626,12 @@
             <table class="table table-zebra">
               <thead class="sticky top-0 bg-gray-50 dark:bg-gray-800">
                 <tr>
-                  <th>Codice</th>
-                  <th>Descrizione</th>
-                  <th>Categoria</th>
-                  <th>U.M.</th>
-                  <th>Prezzo</th>
-                  <th>Azione</th>
+                  <th>{$t('orders.productModal.codeHeader')}</th>
+                  <th>{$t('orders.productModal.descriptionHeader')}</th>
+                  <th>{$t('orders.productModal.categoryHeader')}</th>
+                  <th>{$t('orders.productModal.unitHeader')}</th>
+                  <th>{$t('orders.productModal.priceHeader')}</th>
+                  <th>{$t('orders.new.actionsHeader')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -656,9 +657,9 @@
                         type="button"
                         on:click={() => selectProduct(prodotto)}
                         class="btn btn-sm btn-success"
-                        title="Seleziona questo prodotto"
+                        title="{$t('orders.new.selectProductTooltip')}"
                       >
-                        ✓ Seleziona
+                        ✓ {$t('orders.productModal.selectAction')}
                       </button>
                     </td>
                   </tr>
@@ -670,10 +671,10 @@
           <div class="text-center py-12">
             <div class="text-4xl mb-4">📦</div>
             <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              {searchProdotti ? 'Nessun prodotto trovato' : 'Nessun prodotto disponibile'}
+              {searchProdotti ? $t('orders.productModal.noProductsFound') : $t('orders.productModal.noProductsAvailable')}
             </h3>
             <p class="text-gray-500 dark:text-gray-400">
-              {searchProdotti ? 'Prova con un termine di ricerca diverso' : 'Aggiungi prodotti per questo committente'}
+              {searchProdotti ? $t('orders.productModal.tryDifferentSearch') : $t('orders.productModal.addProductsForClient')}
             </p>
           </div>
         {/if}
@@ -681,14 +682,14 @@
         <!-- Footer Modal -->
         <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
           <div class="text-sm text-gray-500 dark:text-gray-400">
-            💡 Suggerimento: Usa la ricerca per trovare rapidamente i prodotti
+            💡 {$t('orders.productModal.searchTip')}
           </div>
           <button 
             type="button" 
             on:click={closeProductModal} 
             class="btn btn-secondary"
           >
-            Annulla
+            {$t('orders.productModal.cancel')}
           </button>
         </div>
       </div>

@@ -4,7 +4,7 @@
   import Icon from '$lib/components/Icon.svelte';
   import ErrorNotifications from '$lib/components/ErrorNotifications.svelte';
   import ThemeSelector from '$lib/components/ThemeSelector.svelte';
-  import { t } from '$lib/i18n';
+  import { t, initializeI18n } from '$lib/i18n';
   import '../../app.css';
   
   let showUserMenu = false;
@@ -169,7 +169,10 @@
   }
   
   // Setup listener per preferenze sistema
-  onMount(() => {
+  onMount(async () => {
+    // Inizializza i18n
+    await initializeI18n();
+    
     document.addEventListener('click', handleClickOutside);
     
     // Ascolta i cambi delle preferenze del sistema
@@ -428,8 +431,8 @@
       </div>
     </header>
 
-    <!-- Contenuto per pagine non-committente -->
-    <main class="w-full px-6 py-8 bg-transparent">
+    <!-- Contenuto per pagine non-committente - Compact Professional Layout -->
+    <main class="w-full px-3 sm:px-6 py-3 sm:py-6 bg-transparent">
       <slot />
     </main>
   {:else}

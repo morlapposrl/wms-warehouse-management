@@ -27,7 +27,21 @@
 
   // Funzione per formattare il tipo ordine
   function formatTipoOrdine(tipo: string): string {
-    return tipo === 'INBOUND' ? $t('orders.type.inbound') : $t('orders.type.outbound');
+    return tipo === 'INBOUND' ? $t('orders.statuses.inbound') : $t('orders.statuses.outbound');
+  }
+
+  // Funzione per formattare stati ordine
+  function formatStatoOrdine(stato: string): string {
+    const statiMap = {
+      'NUOVO': $t('orders.statuses.new'),
+      'CONFERMATO': $t('orders.statuses.confirmed'),
+      'IN_PREPARAZIONE': $t('orders.statuses.inPreparation'),
+      'PRONTO': $t('orders.statuses.ready'),
+      'SPEDITO': $t('orders.statuses.shipped'),
+      'CONSEGNATO': $t('orders.statuses.delivered'),
+      'ANNULLATO': $t('orders.statuses.cancelled')
+    };
+    return statiMap[stato] || stato;
   }
 
   // Funzione per formattare data
@@ -150,42 +164,42 @@
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="form-label">Stato Attuale</label>
-            <span class="badge {getBadgeClass(data.ordine.stato)}">{data.ordine.stato}</span>
+            <label class="form-label">{$t('orders.labels.currentStatus')}</label>
+            <span class="badge {getBadgeClass(data.ordine.stato)}">{formatStatoOrdine(data.ordine.stato)}</span>
           </div>
           
           <div>
-            <label class="form-label">Data Ordine</label>
+            <label class="form-label">{$t('orders.labels.orderDate')}</label>
             <div>{formatDate(data.ordine.data_ordine)}</div>
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="form-label">Data Richiesta</label>
+            <label class="form-label">{$t('orders.labels.requestedDate')}</label>
             <div>{formatDate(data.ordine.data_richiesta)}</div>
           </div>
           
           <div>
-            <label class="form-label">Data Spedizione</label>
+            <label class="form-label">{$t('orders.labels.shippingDate')}</label>
             <div>{formatDate(data.ordine.data_spedizione)}</div>
           </div>
         </div>
 
         <div>
-          <label class="form-label">Cliente/Fornitore</label>
+          <label class="form-label">{$t('orders.labels.clientSupplier')}</label>
           <div class="font-medium">{data.ordine.cliente_fornitore}</div>
         </div>
 
         {#if data.ordine.corriere || data.ordine.tracking_number}
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="form-label">Corriere</label>
+              <label class="form-label">{$t('orders.labels.carrier')}</label>
               <div>{data.ordine.corriere || '-'}</div>
             </div>
             
             <div>
-              <label class="form-label">Tracking</label>
+              <label class="form-label">{$t('orders.labels.tracking')}</label>
               {#if data.ordine.tracking_number}
                 <div class="font-mono text-sm">{data.ordine.tracking_number}</div>
               {:else}
@@ -234,7 +248,7 @@
     <!-- Colonna 3: Riepilogo Quantità -->
     <div class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
       <div class="card-header border-b border-gray-200 dark:border-gray-700">
-        <h2 class="text-lg font-semibold">Riepilogo</h2>
+        <h2 class="text-lg font-semibold">{$t('orders.labels.summary')}</h2>
       </div>
       <div class="card-body space-y-4">
         
@@ -284,11 +298,11 @@
           
           <!-- Nuovo stato -->
           <div>
-            <label class="form-label">Nuovo Stato</label>
+            <label class="form-label">{$t('orders.labels.newStatus')}</label>
             <select bind:value={selectedStatus} name="stato" class="form-input" required>
               {#each data.stati_disponibili as stato}
                 <option value={stato} selected={stato === data.ordine.stato}>
-                  {stato}
+                  {formatStatoOrdine(stato)}
                 </option>
               {/each}
             </select>
@@ -297,9 +311,9 @@
           <!-- Corriere (solo se spedito) -->
           {#if showShippingFields}
             <div>
-              <label class="form-label">Corriere</label>
+              <label class="form-label">{$t('orders.labels.carrier')}</label>
               <select name="corriere" class="form-input">
-                <option value="">Seleziona corriere...</option>
+                <option value="">{$t('orders.labels.selectCarrier')}</option>
                 {#each data.corrieri_disponibili as corriere}
                   <option value={corriere}>{corriere}</option>
                 {/each}
@@ -308,15 +322,15 @@
 
             <!-- Tracking number -->
             <div>
-              <label class="form-label">Tracking Number</label>
-              <input type="text" name="tracking_number" class="form-input" placeholder="Codice tracciamento..."/>
+              <label class="form-label">{$t('orders.labels.trackingNumber')}</label>
+              <input type="text" name="tracking_number" class="form-input" placeholder="{$t('orders.labels.trackingPlaceholder')}"/>
             </div>
           {/if}
 
           <!-- Note -->
           <div class={showShippingFields ? 'md:col-span-1' : 'md:col-span-3'}>
-            <label class="form-label">Note (opzionale)</label>
-            <input type="text" name="note" class="form-input" placeholder="Note aggiornamento stato..."/>
+            <label class="form-label">{$t('orders.labels.optionalNotes')}</label>
+            <input type="text" name="note" class="form-input" placeholder="{$t('orders.labels.statusNotesPlaceholder')}"/>
           </div>
 
         </div>
@@ -344,12 +358,12 @@
         <table class="table table-zebra">
           <thead>
             <tr>
-              <th>Prodotto</th>
-              <th>Quantità Ordinata</th>
-              <th>Quantità Evasa</th>
-              <th>Prezzo Unit.</th>
-              <th>Subtotale</th>
-              <th>Note</th>
+              <th>{$t('orders.labels.product')}</th>
+              <th>{$t('orders.labels.orderedQuantity')}</th>
+              <th>{$t('orders.labels.fulfilledQuantity')}</th>
+              <th>{$t('orders.labels.unitPrice')}</th>
+              <th>{$t('orders.labels.subtotal')}</th>
+              <th>{$t('orders.labels.notes')}</th>
             </tr>
           </thead>
           <tbody>
@@ -402,7 +416,7 @@
           <!-- Totale -->
           <tfoot>
             <tr class="bg-neutral-50 dark:bg-gray-700 font-medium">
-              <td colspan="4" class="text-right">TOTALE:</td>
+              <td colspan="4" class="text-right">{$t('orders.labels.total')}:</td>
               <td class="text-right font-mono">€ {(data.ordine.totale_valore || 0).toFixed(2)}</td>
               <td></td>
             </tr>
@@ -417,10 +431,10 @@
   <div class="card mt-6">
     <div class="card-header border-b border-gray-200 dark:border-gray-700">
       <div class="flex justify-between items-center">
-        <h2 class="text-lg font-semibold">Movimenti di Magazzino</h2>
+        <h2 class="text-lg font-semibold">{$t('orders.labels.warehouseMovements')}</h2>
         <div class="flex gap-4 text-sm text-neutral-600 dark:text-gray-400">
-          <span>Totale: <strong>{movimenti_stats.totale_movimenti}</strong></span>
-          <span>Collegati: <strong>{movimenti_stats.movimenti_collegati}</strong></span>
+          <span>{$t('orders.labels.total')}: <strong>{movimenti_stats.totale_movimenti}</strong></span>
+          <span>{$t('orders.labels.linked')}: <strong>{movimenti_stats.movimenti_collegati}</strong></span>
         </div>
       </div>
     </div>
@@ -430,19 +444,19 @@
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="stat-card text-center bg-green-50">
           <div class="text-xl font-bold text-green-600">{movimenti_stats.carichi}</div>
-          <div class="text-xs text-green-700">Carichi</div>
+          <div class="text-xs text-green-700">{$t('orders.labels.loads')}</div>
         </div>
         <div class="stat-card text-center bg-yellow-50">
           <div class="text-xl font-bold text-yellow-600">{movimenti_stats.scarichi}</div>
-          <div class="text-xs text-yellow-700">Scarichi</div>
+          <div class="text-xs text-yellow-700">{$t('orders.labels.unloads')}</div>
         </div>
         <div class="stat-card text-center bg-blue-50">
           <div class="text-xl font-bold text-blue-600">{movimenti_stats.rettifiche}</div>
-          <div class="text-xs text-blue-700">Rettifiche</div>
+          <div class="text-xs text-blue-700">{$t('orders.labels.adjustments')}</div>
         </div>
         <div class="stat-card text-center bg-purple-50">
           <div class="text-xl font-bold text-purple-600">{movimenti_stats.movimenti_collegati}</div>
-          <div class="text-xs text-purple-700">Collegati Ordine</div>
+          <div class="text-xs text-purple-700">{$t('orders.labels.orderLinked')}</div>
         </div>
       </div>
 
@@ -452,15 +466,15 @@
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th>Data/Ora</th>
-                <th>Tipo</th>
-                <th>Prodotto</th>
-                <th>Quantità</th>
-                <th>Prezzo</th>
-                <th>Documento</th>
-                <th>Operatore</th>
-                <th>Collegamento</th>
-                <th>Note</th>
+                <th>{$t('orders.labels.dateTime')}</th>
+                <th>{$t('orders.labels.type')}</th>
+                <th>{$t('orders.labels.product')}</th>
+                <th>{$t('orders.labels.quantity')}</th>
+                <th>{$t('orders.labels.price')}</th>
+                <th>{$t('orders.labels.document')}</th>
+                <th>{$t('orders.labels.operator')}</th>
+                <th>{$t('orders.labels.link')}</th>
+                <th>{$t('orders.labels.notes')}</th>
               </tr>
             </thead>
             <tbody>
@@ -470,7 +484,7 @@
                   <td>
                     <div class="text-sm font-medium">{formatDateTime(movimento.data_movimento)}</div>
                     {#if movimento.data_documento && movimento.data_documento !== movimento.data_movimento}
-                      <div class="text-xs text-neutral-500">Doc: {formatDate(movimento.data_documento)}</div>
+                      <div class="text-xs text-neutral-500">{$t('orders.labels.doc')}: {formatDate(movimento.data_documento)}</div>
                     {/if}
                   </td>
                   
@@ -530,10 +544,10 @@
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                           <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                         </svg>
-                        <span class="text-xs">Collegato</span>
+                        <span class="text-xs">{$t('orders.labels.linked')}</span>
                       </div>
                     {:else}
-                      <span class="text-xs text-neutral-400">Correlato</span>
+                      <span class="text-xs text-neutral-400">{$t('orders.labels.related')}</span>
                     {/if}
                   </td>
                   
@@ -553,8 +567,8 @@
           <svg class="w-12 h-12 mx-auto mb-4 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
           </svg>
-          <p class="font-medium">Nessun movimento di magazzino trovato</p>
-          <p class="text-sm">I movimenti dei prodotti di questo ordine appariranno qui</p>
+          <p class="font-medium">{$t('orders.labels.noMovementsFound')}</p>
+          <p class="text-sm">{$t('orders.labels.movementsWillAppearHere')}</p>
         </div>
       {/if}
 
@@ -565,7 +579,7 @@
   {#if data.tracking.length > 0}
     <div class="card mt-6">
       <div class="card-header border-b border-gray-200 dark:border-gray-700">
-        <h2 class="text-lg font-semibold">Storico Cambi Stato</h2>
+        <h2 class="text-lg font-semibold">{$t('orders.labels.statusHistory')}</h2>
       </div>
       <div class="card-body">
         
@@ -576,12 +590,12 @@
               <div class="flex-grow">
                 <div class="flex items-center gap-2">
                   {#if track.stato_precedente}
-                    <span class="badge badge-secondary">{track.stato_precedente}</span>
+                    <span class="badge badge-secondary">{formatStatoOrdine(track.stato_precedente)}</span>
                     <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                   {/if}
-                  <span class="badge {getBadgeClass(track.stato_nuovo)}">{track.stato_nuovo}</span>
+                  <span class="badge {getBadgeClass(track.stato_nuovo)}">{formatStatoOrdine(track.stato_nuovo)}</span>
                 </div>
                 <div class="text-sm text-neutral-600 mt-1">
                   {track.note}

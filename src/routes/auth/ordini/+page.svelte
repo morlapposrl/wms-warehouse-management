@@ -257,7 +257,7 @@
           <th>{$t('common.quantity')}</th>
           <th>{$t('orders.total')}</th>
           <th>{$t('suppliers.contact')}</th>
-          <th>Tracking</th>
+          <th>{$t('orders.labels.tracking')}</th>
         </tr>
       </thead>
       <tbody>
