@@ -1159,237 +1159,182 @@
 {/if}
 </div>
 
-<!-- Content Modal Moderna -->
+<!-- Content Modal - Stile Compatto New Product -->
 {#if showContentModal}
-  <div class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50" on:click={closeModals}>
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-6xl mx-4 max-h-[90vh] overflow-hidden" on:click|stopPropagation>
+  <div class="modal-backdrop" on:click={closeModals}>
+    <div class="modal-content max-w-4xl" on:click|stopPropagation>
       
-      <!-- Header con Gradiente -->
-      <div class="bg-gradient-to-r from-emerald-500 to-teal-600 p-6 rounded-t-xl">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-              <span class="text-2xl">📦</span>
-            </div>
-            <div>
-              <h3 class="text-xl font-bold text-white">
-                {$t('warehouse.locations.content.title', { code: selectedUbicazione?.codice_ubicazione })}
-              </h3>
-              <p class="text-emerald-100 text-sm">
-                {$t('warehouse.locations.content.empty.subtitle')}
-              </p>
-            </div>
-          </div>
-          <button on:click={closeModals} class="text-white/80 hover:text-white text-2xl transition-colors p-2 hover:bg-white/10 rounded-lg">
-            ✕
-          </button>
+      <!-- Header Semplice -->
+      <div class="modal-header bg-white dark:bg-gray-800">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">📦</span>
+          <h2 class="text-xl font-semibold text-neutral-900 dark:text-gray-100">
+            {$t('warehouse.locations.content.title', { code: selectedUbicazione?.codice_ubicazione })}
+          </h2>
         </div>
+        <button on:click={closeModals} class="text-neutral-400 hover:text-neutral-600 dark:text-gray-400 dark:hover:text-gray-200">
+          ✖️
+        </button>
       </div>
       
-      <!-- Body Content -->
-      <div class="p-6 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-blue-900 overflow-y-auto max-h-[75vh]">
+      <!-- Body Content - Stile Form Compatto -->
+      <div class="p-6 bg-white dark:bg-gray-800 overflow-y-auto max-h-[75vh] space-y-4">
         
         {#if ubicazioneContent.length > 0}
-          <!-- Statistiche Moderne con Gradienti -->
-          <div class="grid grid-cols-3 gap-4 mb-6">
-            <div class="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-700 border border-blue-300 rounded-xl p-4 text-center shadow-sm">
-              <div class="text-2xl font-bold text-blue-700 dark:text-blue-100">{ubicazioneContent.length}</div>
-              <div class="text-sm text-blue-600 dark:text-blue-200 font-medium">{$t('warehouse.locations.content.stats.differentSku')}</div>
-              <div class="mt-1">
-                <span class="text-xs px-2 py-1 bg-blue-200 dark:bg-blue-600 text-blue-800 dark:text-blue-100 rounded-full">
-                  📦 SKU
-                </span>
-              </div>
+          <!-- Statistiche Compatte -->
+          <div class="grid grid-cols-3 gap-3 mb-4">
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3 text-center">
+              <div class="text-lg font-bold text-blue-700 dark:text-blue-300">{ubicazioneContent.length}</div>
+              <div class="text-xs text-blue-600 dark:text-blue-400">{$t('warehouse.locations.content.stats.differentSku')}</div>
             </div>
-            <div class="bg-gradient-to-br from-green-100 to-green-200 dark:from-green-800 dark:to-green-700 border border-green-300 rounded-xl p-4 text-center shadow-sm">
-              <div class="text-2xl font-bold text-green-700 dark:text-green-100">{ubicazioneContent.reduce((sum, sku) => sum + sku.quantita_fisica_totale, 0)}</div>
-              <div class="text-sm text-green-600 dark:text-green-200 font-medium">{$t('warehouse.locations.content.stats.totalPieces')}</div>
-              <div class="mt-1">
-                <span class="text-xs px-2 py-1 bg-green-200 dark:bg-green-600 text-green-800 dark:text-green-100 rounded-full">
-                  📊 Pezzi
-                </span>
-              </div>
+            <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3 text-center">
+              <div class="text-lg font-bold text-green-700 dark:text-green-300">{ubicazioneContent.reduce((sum, sku) => sum + sku.quantita_fisica_totale, 0)}</div>
+              <div class="text-xs text-green-600 dark:text-green-400">{$t('warehouse.locations.content.stats.totalPieces')}</div>
             </div>
-            <div class="bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-800 dark:to-orange-700 border border-orange-300 rounded-xl p-4 text-center shadow-sm">
-              <div class="text-2xl font-bold text-orange-700 dark:text-orange-100">{new Set(ubicazioneContent.flatMap(sku => sku.proprietari.map(p => p.committente_id))).size}</div>
-              <div class="text-sm text-orange-600 dark:text-orange-200 font-medium">{$t('warehouse.locations.content.stats.clients')}</div>
-              <div class="mt-1">
-                <span class="text-xs px-2 py-1 bg-orange-200 dark:bg-orange-600 text-orange-800 dark:text-orange-100 rounded-full">
-                  🏢 Clienti
-                </span>
-              </div>
+            <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg p-3 text-center">
+              <div class="text-lg font-bold text-orange-700 dark:text-orange-300">{new Set(ubicazioneContent.flatMap(sku => sku.proprietari.map(p => p.committente_id))).size}</div>
+              <div class="text-xs text-orange-600 dark:text-orange-400">{$t('warehouse.locations.content.stats.clients')}</div>
             </div>
           </div>
           
-          <!-- Contenuto SKU Moderno con Gradienti -->
-          <div class="space-y-6">
+          <!-- Contenuto SKU Compatto -->
+          <div class="space-y-3">
             {#each ubicazioneContent as sku}
-              <div class="bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-blue-900 rounded-xl shadow-lg border border-blue-200 dark:border-blue-700 overflow-hidden">
-                <!-- Header SKU con Gradiente -->
-                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-4">
-                  <div class="flex justify-between items-start">
-                    <div class="flex-1">
-                      <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                          <span class="text-sm font-bold text-white">📦</span>
-                        </div>
-                        <div>
-                          <div class="font-bold text-xl text-white">{sku.sku_code}</div>
-                          <div class="text-indigo-100 text-sm">{sku.prodotto_nome || $t('warehouse.locations.content.sku.noDescription')}</div>
-                        </div>
+              <div class="bg-neutral-50 dark:bg-gray-700 rounded-lg border border-neutral-200 dark:border-gray-600 overflow-hidden">
+                <!-- Header SKU Semplice -->
+                <div class="bg-neutral-100 dark:bg-gray-600 p-3 border-b border-neutral-200 dark:border-gray-500">
+                  <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                      <span class="text-lg">📦</span>
+                      <div>
+                        <div class="font-semibold text-neutral-900 dark:text-gray-100">{sku.sku_code}</div>
+                        <div class="text-sm text-neutral-600 dark:text-gray-400">{sku.prodotto_nome || $t('warehouse.locations.content.sku.noDescription')}</div>
                       </div>
                     </div>
                     <div class="text-right">
-                      <div class="text-2xl font-bold text-white">{sku.quantita_fisica_totale} <span class="text-lg">pz</span></div>
-                      <div class="text-indigo-200 text-sm">{(sku.volume_occupato_cm3 / 1000).toFixed(1)} L</div>
+                      <div class="font-bold text-neutral-900 dark:text-gray-100">{sku.quantita_fisica_totale} pz</div>
+                      <div class="text-xs text-neutral-500 dark:text-gray-400">{(sku.volume_occupato_cm3 / 1000).toFixed(1)} L</div>
                     </div>
                   </div>
                 </div>
                 
-                <!-- Proprietari con Gradienti Colorati per Stato -->
-                <div class="p-6">
+                <!-- Proprietari Compatti -->
+                <div class="p-4">
                   {#if sku.proprietari && sku.proprietari.length > 0}
-                    <div class="space-y-4">
+                    <div class="space-y-3">
                       {#each sku.proprietari as proprietario}
-                        <!-- Gradiente dinamico basato sullo stato -->
-                        <div class="rounded-xl p-4 shadow-sm border-l-4 {proprietario.stato === 'DISPONIBILE' ? 'bg-gradient-to-r from-green-50 to-emerald-100 dark:from-green-900/30 dark:to-emerald-800/30 border-l-green-500' : proprietario.stato === 'RISERVATO' ? 'bg-gradient-to-r from-yellow-50 to-amber-100 dark:from-yellow-900/30 dark:to-amber-800/30 border-l-yellow-500' : 'bg-gradient-to-r from-red-50 to-rose-100 dark:from-red-900/30 dark:to-rose-800/30 border-l-red-500'}">
-                          <!-- Header Proprietario Moderno -->
-                          <div class="flex justify-between items-start mb-4">
-                            <div class="flex-1">
-                              <div class="flex items-center gap-3 flex-wrap">
-                                <div class="flex items-center gap-2">
-                                  <div class="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                                    <span class="text-xs text-white font-bold">🏢</span>
-                                  </div>
-                                  <span class="font-bold text-gray-900 dark:text-gray-100">
-                                    {proprietario.committente_nome}
-                                  </span>
-                                </div>
-                                <span class="px-3 py-1 rounded-full bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 text-slate-700 dark:text-slate-300 text-sm font-medium">
-                                  {proprietario.committente_codice}
-                                </span>
-                                <span class="px-3 py-1 rounded-full font-semibold text-sm {proprietario.stato === 'DISPONIBILE' ? 'bg-gradient-to-r from-green-200 to-emerald-300 dark:from-green-700 dark:to-emerald-600 text-green-800 dark:text-green-200' : proprietario.stato === 'RISERVATO' ? 'bg-gradient-to-r from-yellow-200 to-amber-300 dark:from-yellow-700 dark:to-amber-600 text-yellow-800 dark:text-yellow-200' : 'bg-gradient-to-r from-red-200 to-rose-300 dark:from-red-700 dark:to-rose-600 text-red-800 dark:text-red-200'}">
-                                  {proprietario.stato === 'DISPONIBILE' ? '✅ ' + $t('warehouse.locations.content.owner.state.DISPONIBILE') : proprietario.stato === 'RISERVATO' ? '🔒 ' + $t('warehouse.locations.content.owner.state.RISERVATO') : '⚠️ ' + $t('warehouse.locations.content.owner.state.DANNEGGIATO')}
-                                </span>
-                              </div>
+                        <!-- Card Proprietario Compatta -->
+                        <div class="border-l-4 p-3 rounded-lg {proprietario.stato === 'DISPONIBILE' ? 'bg-green-50 dark:bg-green-900/20 border-l-green-500' : proprietario.stato === 'RISERVATO' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-l-yellow-500' : 'bg-red-50 dark:bg-red-900/20 border-l-red-500'}">
+                          <!-- Header Proprietario -->
+                          <div class="flex justify-between items-start mb-3">
+                            <div class="flex items-center gap-2 flex-wrap">
+                              <span class="text-sm">🏢</span>
+                              <span class="font-semibold text-gray-900 dark:text-gray-100">
+                                {proprietario.committente_nome}
+                              </span>
+                              <span class="px-2 py-1 bg-neutral-200 dark:bg-neutral-600 text-neutral-700 dark:text-neutral-300 text-xs rounded">
+                                {proprietario.committente_codice}
+                              </span>
+                              <span class="px-2 py-1 text-xs rounded font-medium {proprietario.stato === 'DISPONIBILE' ? 'bg-green-200 dark:bg-green-700 text-green-800 dark:text-green-200' : proprietario.stato === 'RISERVATO' ? 'bg-yellow-200 dark:bg-yellow-700 text-yellow-800 dark:text-yellow-200' : 'bg-red-200 dark:bg-red-700 text-red-800 dark:text-red-200'}">
+                                {proprietario.stato === 'DISPONIBILE' ? '✅ ' + $t('warehouse.locations.content.owner.state.DISPONIBILE') : proprietario.stato === 'RISERVATO' ? '🔒 ' + $t('warehouse.locations.content.owner.state.RISERVATO') : '⚠️ ' + $t('warehouse.locations.content.owner.state.DANNEGGIATO')}
+                              </span>
                             </div>
                             <div class="text-right">
-                              <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{proprietario.quantita} <span class="text-lg">pz</span></div>
-                              <div class="text-sm text-gray-600 dark:text-gray-400">{proprietario.percentuale}% del totale</div>
+                              <div class="font-bold text-gray-900 dark:text-gray-100">{proprietario.quantita} pz</div>
+                              <div class="text-xs text-gray-600 dark:text-gray-400">{proprietario.percentuale}%</div>
                             </div>
                           </div>
                           
-                          <!-- Dettagli Moderni con Mini-Cards -->
-                          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                            <!-- Lotto Card -->
-                            <div class="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-800/50 dark:to-purple-700/50 p-3 rounded-lg border border-purple-200 dark:border-purple-600">
-                              <div class="flex items-center gap-2 mb-2">
-                                <span class="text-sm">🏷️</span>
-                                <div class="text-xs font-medium text-purple-700 dark:text-purple-300">{$t("warehouse.locations.content.fields.lot")}</div>
+                          <!-- Dettagli Compatti in Riga -->
+                          <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <!-- Lotto -->
+                            <div class="text-xs">
+                              <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400 mb-1">
+                                <span>🏷️</span>
+                                <span>{$t("warehouse.locations.content.fields.lot")}</span>
                               </div>
-                              <div class="font-bold text-purple-900 dark:text-purple-100">{proprietario.lotto || '—'}</div>
+                              <div class="font-medium text-gray-900 dark:text-gray-100">{proprietario.lotto || '—'}</div>
                             </div>
                             
-                            <!-- Data Carico Card -->
-                            <div class="bg-gradient-to-br from-cyan-100 to-cyan-200 dark:from-cyan-800/50 dark:to-cyan-700/50 p-3 rounded-lg border border-cyan-200 dark:border-cyan-600">
-                              <div class="flex items-center gap-2 mb-2">
-                                <span class="text-sm">📅</span>
-                                <div class="text-xs font-medium text-cyan-700 dark:text-cyan-300">{$t("warehouse.locations.content.fields.loaded")}</div>
+                            <!-- Data Carico -->
+                            <div class="text-xs">
+                              <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400 mb-1">
+                                <span>📅</span>
+                                <span>{$t("warehouse.locations.content.fields.loaded")}</span>
                               </div>
-                              <div class="font-bold text-cyan-900 dark:text-cyan-100 text-sm">
+                              <div class="font-medium text-gray-900 dark:text-gray-100">
                                 {proprietario.data_posizionamento ? 
                                   new Date(proprietario.data_posizionamento).toLocaleDateString('it-IT') : '—'}
                               </div>
-                              {#if proprietario.giorni_stoccaggio}
-                                <div class="text-xs text-cyan-600 dark:text-cyan-400 mt-1">{$t('warehouse.locations.content.fields.daysAgo', { days: proprietario.giorni_stoccaggio })}</div>
-                              {/if}
                             </div>
                             
-                            <!-- Scadenza Card -->
-                            <div class="bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-800/50 dark:to-orange-700/50 p-3 rounded-lg border border-orange-200 dark:border-orange-600">
-                              <div class="flex items-center gap-2 mb-2">
-                                <span class="text-sm">⏰</span>
-                                <div class="text-xs font-medium text-orange-700 dark:text-orange-300">{$t("warehouse.locations.content.fields.expiry")}</div>
+                            <!-- Scadenza -->
+                            <div class="text-xs">
+                              <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400 mb-1">
+                                <span>⏰</span>
+                                <span>{$t("warehouse.locations.content.fields.expiry")}</span>
                               </div>
-                              <div class="font-bold text-sm {proprietario.giorni_a_scadenza !== null && proprietario.giorni_a_scadenza < 30 ? 'text-red-600 dark:text-red-400' : proprietario.giorni_a_scadenza !== null && proprietario.giorni_a_scadenza < 90 ? 'text-yellow-600 dark:text-yellow-400' : 'text-orange-900 dark:text-orange-100'}">
+                              <div class="font-medium {proprietario.giorni_a_scadenza !== null && proprietario.giorni_a_scadenza < 30 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100'}">
                                 {proprietario.data_scadenza ? 
                                   new Date(proprietario.data_scadenza).toLocaleDateString('it-IT') : '—'}
                               </div>
-                              {#if proprietario.giorni_a_scadenza !== null}
-                                <div class="text-xs mt-1 {proprietario.giorni_a_scadenza < 30 ? 'text-red-500' : proprietario.giorni_a_scadenza < 90 ? 'text-yellow-500' : 'text-orange-600 dark:text-orange-400'}">
-                                  {proprietario.giorni_a_scadenza > 0 ? 
-                                    $t('warehouse.locations.content.fields.daysLeft', { days: proprietario.giorni_a_scadenza }) : 
-                                    $t('warehouse.locations.content.fields.expired')}
-                                </div>
-                              {/if}
                             </div>
                             
-                            <!-- Valore Card -->
-                            <div class="bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-800/50 dark:to-emerald-700/50 p-3 rounded-lg border border-emerald-200 dark:border-emerald-600">
-                              <div class="flex items-center gap-2 mb-2">
-                                <span class="text-sm">💰</span>
-                                <div class="text-xs font-medium text-emerald-700 dark:text-emerald-300">{$t("warehouse.locations.content.fields.value")}</div>
+                            <!-- Valore -->
+                            <div class="text-xs">
+                              <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400 mb-1">
+                                <span>💰</span>
+                                <span>{$t("warehouse.locations.content.fields.value")}</span>
                               </div>
-                              <div class="font-bold text-emerald-900 dark:text-emerald-100">
+                              <div class="font-medium text-gray-900 dark:text-gray-100">
                                 {proprietario.costo_acquisto ? 
                                   `€${(proprietario.costo_acquisto * proprietario.quantita).toFixed(2)}` : '—'}
                               </div>
-                              {#if proprietario.costo_acquisto}
-                                <div class="text-xs text-emerald-600 dark:text-emerald-400 mt-1">€{proprietario.costo_acquisto}/pz</div>
-                              {/if}
                             </div>
                           </div>
                           
-                          <!-- Note se presenti - Con gradiente -->
+                          <!-- Note se presenti -->
                           {#if proprietario.note}
-                            <div class="mt-3 p-3 bg-gradient-to-r from-slate-100 to-gray-200 dark:from-slate-800/50 dark:to-gray-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
-                              <div class="flex items-center gap-2 mb-1">
-                                <span class="text-sm">📝</span>
-                                <div class="text-xs font-medium text-slate-700 dark:text-slate-300">{$t("warehouse.locations.content.fields.notes")}</div>
+                            <div class="mt-2 p-2 bg-neutral-100 dark:bg-neutral-600 rounded text-xs">
+                              <div class="flex items-center gap-1 mb-1">
+                                <span>📝</span>
+                                <span class="font-medium">{$t("warehouse.locations.content.fields.notes")}</span>
                               </div>
-                              <div class="text-sm text-slate-900 dark:text-slate-100">{proprietario.note}</div>
+                              <div class="text-neutral-700 dark:text-neutral-300">{proprietario.note}</div>
                             </div>
                           {/if}
                           
-                          <!-- Dettagli UDC con Gradiente Moderno -->
+                          <!-- Dettagli UDC Compatti -->
                           {#if proprietario.udc_details && proprietario.udc_details.length > 0}
-                            <div class="mt-3 p-4 bg-gradient-to-br from-indigo-50 to-blue-100 dark:from-indigo-900/30 dark:to-blue-800/30 rounded-lg border border-indigo-200 dark:border-indigo-600">
-                              <div class="flex items-center gap-2 mb-3">
-                                <div class="w-6 h-6 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-lg flex items-center justify-center">
-                                  <span class="text-xs text-white">🏗️</span>
-                                </div>
-                                <div class="text-sm font-bold text-indigo-800 dark:text-indigo-200">
+                            <div class="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                              <div class="flex items-center gap-1 mb-2 text-xs">
+                                <span>🏗️</span>
+                                <span class="font-medium text-blue-800 dark:text-blue-200">
                                   {$t("warehouse.locations.content.fields.udcDetails", { count: proprietario.udc_count })}
-                                </div>
+                                </span>
                               </div>
-                              <div class="space-y-2">
+                              <div class="space-y-1">
                                 {#each proprietario.udc_details as udc}
-                                  <div class="bg-gradient-to-r from-white to-indigo-50 dark:from-gray-800/80 dark:to-indigo-900/40 border border-indigo-200 dark:border-indigo-600 rounded-lg p-3 shadow-sm">
-                                    <div class="flex justify-between items-start">
+                                  <div class="bg-white dark:bg-gray-700 border border-blue-200 dark:border-blue-600 rounded p-2">
+                                    <div class="flex justify-between items-start text-xs">
                                       <div class="flex-1">
-                                        <div class="flex items-center gap-2 mb-1">
-                                          <span class="text-xs">📦</span>
-                                          <div class="font-bold text-indigo-700 dark:text-indigo-300 text-sm">{udc.udc_barcode}</div>
+                                        <div class="flex items-center gap-1 mb-1">
+                                          <span>📦</span>
+                                          <span class="font-semibold text-blue-700 dark:text-blue-300">{udc.udc_barcode}</span>
                                         </div>
-                                        <div class="flex items-center gap-3 text-xs">
-                                          <span class="px-2 py-1 bg-gradient-to-r from-blue-100 to-indigo-200 dark:from-blue-700 dark:to-indigo-600 text-blue-800 dark:text-blue-200 rounded-full font-medium">
-                                            {$t("warehouse.locations.content.fields.type")}: {udc.tipo_udc || 'Standard'}
+                                        <div class="flex gap-2 text-xs">
+                                          <span class="px-1 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded text-xs">
+                                            {udc.tipo_udc ? $t(`udc.types.${udc.tipo_udc}`) || udc.tipo_udc : 'Standard'}
                                           </span>
-                                          <span class="px-2 py-1 bg-gradient-to-r from-green-100 to-emerald-200 dark:from-green-700 dark:to-emerald-600 text-green-800 dark:text-green-200 rounded-full font-medium">
-                                            {$t("warehouse.locations.content.fields.state")}: {udc.udc_stato}
+                                          <span class="px-1 py-0.5 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200 rounded text-xs">
+                                            {udc.udc_stato}
                                           </span>
                                         </div>
-                                        {#if udc.posizione}
-                                          <div class="mt-1 flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-400">
-                                            <span>📍</span>
-                                            <span class="font-medium">{$t("warehouse.locations.content.fields.position")}: {udc.posizione}</span>
-                                          </div>
-                                        {/if}
                                       </div>
                                       <div class="text-right">
-                                        <div class="text-lg font-bold text-indigo-800 dark:text-indigo-200">{udc.quantita} <span class="text-sm">pz</span></div>
+                                        <div class="font-semibold text-blue-800 dark:text-blue-200">{udc.quantita} pz</div>
                                         {#if udc.lotto}
-                                          <div class="text-xs text-indigo-600 dark:text-indigo-400 font-medium">{$t("warehouse.locations.content.fields.lot")}: {udc.lotto}</div>
+                                          <div class="text-xs text-gray-600 dark:text-gray-400">{udc.lotto}</div>
                                         {/if}
                                       </div>
                                     </div>
@@ -1402,10 +1347,8 @@
                       {/each}
                     </div>
                   {:else}
-                    <div class="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-900/30 dark:to-orange-800/30 rounded-lg p-6 text-center border border-amber-200 dark:border-amber-600">
-                      <div class="w-12 h-12 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <span class="text-2xl text-white">⚠️</span>
-                      </div>
+                    <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3 text-center border border-amber-200 dark:border-amber-600">
+                      <div class="text-2xl mb-2">⚠️</div>
                       <div class="text-sm font-medium text-amber-800 dark:text-amber-200">{$t("warehouse.locations.content.sku.noOwner")}</div>
                     </div>
                   {/if}
@@ -1414,15 +1357,13 @@
             {/each}
           </div>
         {:else}
-          <!-- Stato Vuoto Moderno -->
-          <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-xl p-8 text-center border border-gray-300 dark:border-gray-600">
-            <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span class="text-3xl">📭</span>
-            </div>
-            <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          <!-- Stato Vuoto -->
+          <div class="text-center py-8">
+            <div class="text-4xl mb-4">📭</div>
+            <h4 class="text-lg font-semibold text-neutral-700 dark:text-gray-300 mb-2">
               {$t("warehouse.locations.content.empty.title")}
             </h4>
-            <p class="text-gray-600 dark:text-gray-400">
+            <p class="text-neutral-600 dark:text-gray-400">
               {$t("warehouse.locations.content.empty.subtitle")}
             </p>
           </div>

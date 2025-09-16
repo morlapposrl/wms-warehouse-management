@@ -375,7 +375,8 @@
     "remember": "Se souvenir de moi 30 jours",
     "forgotPassword": "Mot de passe oublié ?",
     "error": "Erreur",
-    "attention": "Attention"
+    "attention": "Attention",
+    "back": "Retour"
   },
   "transfer": {
     "title": "Transfert de Marchandises",
@@ -859,6 +860,34 @@
       "IN_MOVIMENTO": "En Mouvement",
       "BLOCCATO": "Bloqué",
       "DANNEGGIATO": "Endommagé"
+    },
+    "types": {
+      "PALLET_EPAL": "Palette EPAL",
+      "PALLET_EUR": "Palette EUR",
+      "PALLET_USA": "Palette USA",
+      "PALLET_ISO": "Palette ISO",
+      "PALLET_MEZZO": "Demi-Palette",
+      "CONTAINER_20": "Conteneur 20'",
+      "CONTAINER_40": "Conteneur 40'",
+      "CONTAINER_40_HC": "Conteneur 40' HC",
+      "ROLL_CONTAINER": "Conteneur à Roulettes",
+      "ROLL_STANDARD": "Conteneur à Roulettes Standard",
+      "ROLL_GRANDE": "Grand Conteneur à Roulettes",
+      "ROLL_FRIGO": "Conteneur à Roulettes Réfrigéré",
+      "BOX_STANDARD": "Boîte Standard",
+      "BOX_GRANDE": "Grande Boîte",
+      "BOX_ALIMENTARE": "Boîte Alimentaire",
+      "BOX_ISOTERMICO": "Boîte Isotherme",
+      "CASSA_PLASTICA": "Caisse en Plastique",
+      "CASSA_LEGNO": "Caisse en Bois",
+      "CASSA_CARTONE": "Boîte en Carton Ondulé",
+      "SCAFFALE_MOBILE": "Étagère Mobile",
+      "GABBIA_SICUREZZA": "Cage de Sécurité",
+      "CUSTOM_SMALL": "Personnalisé Petit",
+      "CUSTOM_MEDIUM": "Personnalisé Moyen",
+      "CUSTOM_LARGE": "Personnalisé Grand",
+      "SCATOLA_CARTONE_ONDULATO": "Boîte en Carton Ondulé",
+      "Scatola Cartone Ondulato": "Boîte en Carton Ondulé"
     },
     "detail": {
       "title": "Détail UDC",

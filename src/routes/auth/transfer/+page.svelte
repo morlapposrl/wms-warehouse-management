@@ -61,13 +61,81 @@
   }
   
   async function submitTransfer() {
-    // TODO: Implementare invio trasferimento
-    console.log('Transfer data:', {
-      type: transferType,
-      udcId,
-      udcBarcode,
-      formData
-    });
+    if (loading) return;
+    
+    loading = true;
+    try {
+      // Validazione dati base
+      if (!formData.destinationLocation || !formData.cause) {
+        alert('Ubicazione destinazione e causale sono obbligatori');
+        return;
+      }
+
+      // Prepara payload per API
+      const payload = {
+        committente_id: 1, // TODO: Prendere da contesto utente
+        causale_id: parseInt(formData.cause),
+        ubicazione_destinazione: parseInt(formData.destinationLocation),
+        note: formData.notes || null
+      };
+
+      if (transferType === 'byQuantity') {
+        // Trasferimento per quantità - serve prodotto_id e quantità
+        if (!formData.quantityToTransfer) {
+          alert('Quantità da trasferire obbligatoria');
+          return;
+        }
+        payload.tipo_trasferimento = 'QUANTITA';
+        payload.quantita = parseInt(formData.quantityToTransfer);
+        // TODO: Aggiungere selezione prodotto nell'UI
+        payload.prodotto_id = 1; // Temporaneo
+      } else if (transferType === 'byUdc') {
+        // Trasferimento UDC completo
+        if (!udcId) {
+          alert('UDC di origine non valido');
+          return;
+        }
+        payload.tipo_trasferimento = 'UDC';
+        payload.udc_origine_id = parseInt(udcId);
+      }
+
+      console.log('Invio trasferimento:', payload);
+
+      // Chiamata API
+      const response = await fetch('/api/trasferimenti', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert(`✅ ${result.message}`);
+        
+        // Reset form
+        formData.quantityToTransfer = '';
+        formData.destinationLocation = '';
+        formData.cause = '';
+        formData.notes = '';
+        
+        // Opzionalmente torna indietro
+        setTimeout(() => {
+          window.history.back();
+        }, 1500);
+        
+      } else {
+        alert(`❌ Errore: ${result.error}`);
+      }
+
+    } catch (error) {
+      console.error('Errore trasferimento:', error);
+      alert(`💥 Errore di sistema: ${error.message}`);
+    } finally {
+      loading = false;
+    }
   }
 </script>
 

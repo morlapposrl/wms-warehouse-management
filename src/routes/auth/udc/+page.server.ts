@@ -45,7 +45,7 @@ export const load: PageServerLoad = async ({ url }) => {
       return {
         ...udc,
         // Mapping dei nomi dei campi dal repository
-        tipo_udc: udc.tipo_nome,
+        tipo_udc: udc.tipo_codice,
         peso_max_kg: udc.tipo_peso_max_kg,
         lunghezza_cm: udc.tipo_lunghezza_cm,
         larghezza_cm: udc.tipo_larghezza_cm,

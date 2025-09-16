@@ -574,7 +574,7 @@
                         🏗️ {dettaglio.udc_barcode}
                       </div>
                       <div class="text-xs text-gray-500">
-                        {dettaglio.tipo_udc} • {$t('inventory.details.status')}: {dettaglio.stato} • {$t('inventory.details.position')}: {dettaglio.posizione}
+                        {dettaglio.tipo_udc ? $t(`udc.types.${dettaglio.tipo_udc}`) || dettaglio.tipo_udc : 'Standard'} • {$t('inventory.details.status')}: {dettaglio.stato} • {$t('inventory.details.position')}: {dettaglio.posizione}
                       </div>
                     </div>
                   </div>

@@ -350,7 +350,8 @@
     "remember": "30 Tage merken",
     "forgotPassword": "Passwort vergessen?",
     "error": "Fehler",
-    "attention": "Achtung"
+    "attention": "Achtung",
+    "back": "Zurück"
   },
   "transfer": {
     "title": "Warentransfer",
@@ -862,6 +863,34 @@
       "IN_MOVIMENTO": "In Bewegung",
       "BLOCCATO": "Blockiert",
       "DANNEGGIATO": "Beschädigt"
+    },
+    "types": {
+      "PALLET_EPAL": "EPAL Palette",
+      "PALLET_EUR": "EUR Palette",
+      "PALLET_USA": "USA Palette",
+      "PALLET_ISO": "ISO Palette",
+      "PALLET_MEZZO": "Halbe Palette",
+      "CONTAINER_20": "20' Container",
+      "CONTAINER_40": "40' Container",
+      "CONTAINER_40_HC": "40' HC Container",
+      "ROLL_CONTAINER": "Rollcontainer",
+      "ROLL_STANDARD": "Standard Rollcontainer",
+      "ROLL_GRANDE": "Großer Rollcontainer",
+      "ROLL_FRIGO": "Kühl-Rollcontainer",
+      "BOX_STANDARD": "Standard Box",
+      "BOX_GRANDE": "Große Box",
+      "BOX_ALIMENTARE": "Lebensmittel Box",
+      "BOX_ISOTERMICO": "Isolierte Box",
+      "CASSA_PLASTICA": "Kunststoffbox",
+      "CASSA_LEGNO": "Holzkiste",
+      "CASSA_CARTONE": "Wellpappschachtel",
+      "SCAFFALE_MOBILE": "Mobiles Regal",
+      "GABBIA_SICUREZZA": "Sicherheitskäfig",
+      "CUSTOM_SMALL": "Benutzerdefiniert Klein",
+      "CUSTOM_MEDIUM": "Benutzerdefiniert Mittel",
+      "CUSTOM_LARGE": "Benutzerdefiniert Groß",
+      "SCATOLA_CARTONE_ONDULATO": "Wellpappschachtel",
+      "Scatola Cartone Ondulato": "Wellpappschachtel"
     },
     "detail": {
       "title": "LHM-Detail",

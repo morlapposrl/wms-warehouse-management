@@ -327,7 +327,8 @@
     "filters": "Filtri",
     "resetFilters": "Reset filtri",
     "success": "Successo",
-    "attention": "Attenzione"
+    "attention": "Attenzione",
+    "back": "Indietro"
   },
   "transfer": {
     "title": "Trasferimento Merce",
@@ -1103,11 +1104,30 @@
     "types": {
       "PALLET_EPAL": "Pallet EPAL",
       "PALLET_EUR": "Pallet EUR",
-      "ROLL_CONTAINER": "Roll Container",
-      "BOX_STANDARD": "Box Standard",
+      "PALLET_USA": "Pallet USA",
+      "PALLET_ISO": "Pallet ISO",
+      "PALLET_MEZZO": "Mezzo Pallet",
       "CONTAINER_20": "Container 20'",
       "CONTAINER_40": "Container 40'",
-      "CASSA_PLASTICA": "Cassa Plastica"
+      "CONTAINER_40_HC": "Container 40' HC",
+      "ROLL_CONTAINER": "Roll Container",
+      "ROLL_STANDARD": "Roll Container Standard",
+      "ROLL_GRANDE": "Roll Container Grande", 
+      "ROLL_FRIGO": "Roll Container Frigo",
+      "BOX_STANDARD": "Box Standard",
+      "BOX_GRANDE": "Box Grande",
+      "BOX_ALIMENTARE": "Box Alimentare",
+      "BOX_ISOTERMICO": "Box Isotermico",
+      "CASSA_PLASTICA": "Cassa Plastica",
+      "CASSA_LEGNO": "Cassa Legno",
+      "CASSA_CARTONE": "Scatola Cartone Ondulato",
+      "SCAFFALE_MOBILE": "Scaffale Mobile",
+      "GABBIA_SICUREZZA": "Gabbia Sicurezza",
+      "CUSTOM_SMALL": "Custom Piccolo",
+      "CUSTOM_MEDIUM": "Custom Medio",
+      "CUSTOM_LARGE": "Custom Grande",
+      "SCATOLA_CARTONE_ONDULATO": "Scatola Cartone Ondulato",
+      "Scatola Cartone Ondulato": "Scatola Cartone Ondulato"
     },
     "list": {
       "title": "Lista UDC",

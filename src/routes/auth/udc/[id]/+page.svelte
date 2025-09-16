@@ -84,7 +84,7 @@
         
         <div>
           <label class="text-sm font-medium text-neutral-600 dark:text-gray-400">{$t('udc.detail.typeLabel')}</label>
-          <p class="font-semibold">{udc.tipo_udc}</p>
+          <p class="font-semibold">{udc.tipo_udc ? $t(`udc.types.${udc.tipo_udc}`) || udc.tipo_udc : $t('udc.list.details.unknownType')}</p>
         </div>
         
         <div>

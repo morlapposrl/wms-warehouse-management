@@ -217,7 +217,7 @@ export const wavePlanningRepository = {
         u.zona as ubicazione_zona,
         o.numero_ordine,
         udc.barcode as udc_barcode,
-        tu.nome as tipo_udc,
+        tu.codice as tipo_udc,
         udc.stato as udc_stato
       FROM wave_pick_tasks wpt
       JOIN prodotti p ON wpt.prodotto_id = p.id

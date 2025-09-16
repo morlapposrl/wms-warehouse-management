@@ -350,7 +350,8 @@
     "remember": "Recordar por 30 días",
     "forgotPassword": "¿Contraseña olvidada?",
     "error": "Error",
-    "attention": "Atención"
+    "attention": "Atención",
+    "back": "Volver"
   },
   "transfer": {
     "title": "Transferencia de Mercancía",
@@ -862,6 +863,34 @@
       "IN_MOVIMENTO": "En Movimiento",
       "BLOCCATO": "Bloqueado",
       "DANNEGGIATO": "Dañado"
+    },
+    "types": {
+      "PALLET_EPAL": "Palé EPAL",
+      "PALLET_EUR": "Palé EUR",
+      "PALLET_USA": "Palé USA",
+      "PALLET_ISO": "Palé ISO",
+      "PALLET_MEZZO": "Medio Palé",
+      "CONTAINER_20": "Contenedor 20'",
+      "CONTAINER_40": "Contenedor 40'",
+      "CONTAINER_40_HC": "Contenedor 40' HC",
+      "ROLL_CONTAINER": "Contenedor Rodante",
+      "ROLL_STANDARD": "Contenedor Rodante Estándar",
+      "ROLL_GRANDE": "Gran Contenedor Rodante",
+      "ROLL_FRIGO": "Contenedor Rodante Refrigerado",
+      "BOX_STANDARD": "Caja Estándar",
+      "BOX_GRANDE": "Caja Grande",
+      "BOX_ALIMENTARE": "Caja Alimentaria",
+      "BOX_ISOTERMICO": "Caja Isotérmica",
+      "CASSA_PLASTICA": "Caja de Plástico",
+      "CASSA_LEGNO": "Caja de Madera",
+      "CASSA_CARTONE": "Caja de Cartón Corrugado",
+      "SCAFFALE_MOBILE": "Estantería Móvil",
+      "GABBIA_SICUREZZA": "Jaula de Seguridad",
+      "CUSTOM_SMALL": "Personalizado Pequeño",
+      "CUSTOM_MEDIUM": "Personalizado Mediano",
+      "CUSTOM_LARGE": "Personalizado Grande",
+      "SCATOLA_CARTONE_ONDULATO": "Caja de Cartón Corrugado",
+      "Scatola Cartone Ondulato": "Caja de Cartón Corrugado"
     },
     "detail": {
       "title": "Detalle UDC",

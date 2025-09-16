@@ -1251,7 +1251,7 @@
               >
                 <option value="">{$t('movements.load.createNewUdc')}</option>
                 {#each udcDisponibili as udc}
-                  <option value={udc.id}>{udc.barcode} - {udc.tipo_udc}</option>
+                  <option value={udc.id}>{udc.barcode} - {udc.tipo_udc ? $t(`udc.types.${udc.tipo_udc}`) || udc.tipo_udc : 'Standard'}</option>
                 {/each}
               </select>
             </div>

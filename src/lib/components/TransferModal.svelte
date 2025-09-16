@@ -453,7 +453,7 @@
               <select bind:value={transferForm.udc_origine} class="form-input {errors.udc_origine ? 'border-red-500 dark:border-red-400' : ''}">
                 <option value="">{$t('transfer.selectUdcOrigin')}</option>
                 {#each udcs as udc_item}
-                  <option value={udc_item.id}>{udc_item.barcode} - {udc_item.tipo_udc}</option>
+                  <option value={udc_item.id}>{udc_item.barcode} - {udc_item.tipo_udc ? $t(`udc.types.${udc_item.tipo_udc}`) || udc_item.tipo_udc : 'Standard'}</option>
                 {/each}
               </select>
               {#if errors.udc_origine}

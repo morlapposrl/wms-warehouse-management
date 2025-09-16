@@ -418,7 +418,8 @@
     "forgotPassword": "Forgot password?",
     "filters": "Filters",
     "resetFilters": "Reset filters",
-    "success": "Success"
+    "success": "Success",
+    "back": "Back"
   },
   "transfer": {
     "title": "Goods Transfer",
@@ -1068,11 +1069,30 @@
     "types": {
       "PALLET_EPAL": "EPAL Pallet",
       "PALLET_EUR": "EUR Pallet",
-      "ROLL_CONTAINER": "Roll Container",
-      "BOX_STANDARD": "Standard Box",
+      "PALLET_USA": "USA Pallet",
+      "PALLET_ISO": "ISO Pallet",
+      "PALLET_MEZZO": "Half Pallet",
       "CONTAINER_20": "20' Container",
       "CONTAINER_40": "40' Container",
-      "CASSA_PLASTICA": "Plastic Box"
+      "CONTAINER_40_HC": "40' HC Container",
+      "ROLL_CONTAINER": "Roll Container",
+      "ROLL_STANDARD": "Standard Roll Container",
+      "ROLL_GRANDE": "Large Roll Container",
+      "ROLL_FRIGO": "Refrigerated Roll Container",
+      "BOX_STANDARD": "Standard Box",
+      "BOX_GRANDE": "Large Box",
+      "BOX_ALIMENTARE": "Food Grade Box",
+      "BOX_ISOTERMICO": "Insulated Box",
+      "CASSA_PLASTICA": "Plastic Box",
+      "CASSA_LEGNO": "Wooden Box",
+      "CASSA_CARTONE": "Corrugated Cardboard Box",
+      "SCAFFALE_MOBILE": "Mobile Shelf",
+      "GABBIA_SICUREZZA": "Security Cage",
+      "CUSTOM_SMALL": "Custom Small",
+      "CUSTOM_MEDIUM": "Custom Medium",
+      "CUSTOM_LARGE": "Custom Large",
+      "SCATOLA_CARTONE_ONDULATO": "Corrugated Cardboard Box",
+      "Scatola Cartone Ondulato": "Corrugated Cardboard Box"
     },
     "list": {
       "title": "UDC List",

@@ -350,7 +350,8 @@
     "remember": "记住30天",
     "forgotPassword": "忘记密码？",
     "error": "错误",
-    "attention": "注意"
+    "attention": "注意",
+    "back": "返回"
   },
   "transfer": {
     "title": "货物转移",
@@ -862,6 +863,34 @@
       "IN_MOVIMENTO": "移动中",
       "BLOCCATO": "锁定",
       "DANNEGGIATO": "损坏"
+    },
+    "types": {
+      "PALLET_EPAL": "EPAL托盘",
+      "PALLET_EUR": "EUR托盘",
+      "PALLET_USA": "美式托盘",
+      "PALLET_ISO": "ISO托盘",
+      "PALLET_MEZZO": "半托盘",
+      "CONTAINER_20": "20英尺集装箱",
+      "CONTAINER_40": "40英尺集装箱",
+      "CONTAINER_40_HC": "40英尺高箱",
+      "ROLL_CONTAINER": "滚装集装箱",
+      "ROLL_STANDARD": "标准滚装箱",
+      "ROLL_GRANDE": "大型滚装箱",
+      "ROLL_FRIGO": "冷藏滚装箱",
+      "BOX_STANDARD": "标准箱",
+      "BOX_GRANDE": "大型箱",
+      "BOX_ALIMENTARE": "食品级箱",
+      "BOX_ISOTERMICO": "保温箱",
+      "CASSA_PLASTICA": "塑料箱",
+      "CASSA_LEGNO": "木箱",
+      "CASSA_CARTONE": "瓦楞纸箱",
+      "SCAFFALE_MOBILE": "移动货架",
+      "GABBIA_SICUREZZA": "安全笼",
+      "CUSTOM_SMALL": "定制小型",
+      "CUSTOM_MEDIUM": "定制中型",
+      "CUSTOM_LARGE": "定制大型",
+      "SCATOLA_CARTONE_ONDULATO": "瓦楞纸箱",
+      "Scatola Cartone Ondulato": "瓦楞纸箱"
     },
     "detail": {
       "title": "载具详情",

@@ -1,0 +1,103 @@
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#1a1a1a"/>
+  
+  <!-- Header -->
+  <rect x="20" y="20" width="760" height="60" fill="#2a2a2a" rx="8"/>
+  <text x="40" y="60" fill="#ffffff" font-family="Arial, sans-serif" font-size="24" font-weight="bold">📋 Movimenti Magazzino</text>
+  
+  <!-- Filter bar -->
+  <rect x="20" y="100" width="200" height="40" fill="#2a2a2a" rx="8"/>
+  <text x="35" y="125" fill="#888888" font-family="Arial, sans-serif" font-size="14">Tipo Movimento</text>
+  
+  <rect x="240" y="100" width="200" height="40" fill="#2a2a2a" rx="8"/>
+  <text x="255" y="125" fill="#888888" font-family="Arial, sans-serif" font-size="14">Data da/a</text>
+  
+  <rect x="460" y="100" width="180" height="40" fill="#2a2a2a" rx="8"/>
+  <text x="475" y="125" fill="#888888" font-family="Arial, sans-serif" font-size="14">🔍 Cerca...</text>
+  
+  <rect x="660" y="100" width="120" height="40" fill="#4c1d95" rx="8"/>
+  <text x="690" y="125" fill="#ffffff" font-family="Arial, sans-serif" font-size="14">+ Movimento</text>
+  
+  <!-- Movement list -->
+  <rect x="20" y="160" width="760" height="400" fill="#2a2a2a" rx="8"/>
+  
+  <!-- Movement item 1 -->
+  <rect x="40" y="180" width="720" height="60" fill="#1f1f1f" rx="8"/>
+  <circle cx="70" cy="210" r="12" fill="#059669"/>
+  <text x="60" y="218" fill="#ffffff" font-family="Arial, sans-serif" font-size="16" font-weight="bold">↗</text>
+  
+  <text x="100" y="200" fill="#ffffff" font-family="Arial, sans-serif" font-size="16" font-weight="bold">CARICO</text>
+  <text x="100" y="220" fill="#888888" font-family="Arial, sans-serif" font-size="13">Carico merce da fornitore</text>
+  
+  <text x="350" y="200" fill="#ffffff" font-family="Arial, sans-serif" font-size="14">Laptop Dell Latitude</text>
+  <text x="350" y="220" fill="#888888" font-family="Arial, sans-serif" font-size="12">PRD001 • Zona A-12</text>
+  
+  <text x="550" y="200" fill="#059669" font-family="Arial, sans-serif" font-size="16" font-weight="bold">+25 pz</text>
+  <text x="550" y="220" fill="#888888" font-family="Arial, sans-serif" font-size="12">10:30 • Op. Marco</text>
+  
+  <text x="680" y="210" fill="#888888" font-family="Arial, sans-serif" font-size="12">Oggi</text>
+  
+  <!-- Movement item 2 -->
+  <rect x="40" y="250" width="720" height="60" fill="#2a2a2a" rx="8"/>
+  <circle cx="70" cy="280" r="12" fill="#dc2626"/>
+  <text x="60" y="288" fill="#ffffff" font-family="Arial, sans-serif" font-size="16" font-weight="bold">↙</text>
+  
+  <text x="100" y="270" fill="#ffffff" font-family="Arial, sans-serif" font-size="16" font-weight="bold">SCARICO</text>
+  <text x="100" y="290" fill="#888888" font-family="Arial, sans-serif" font-size="13">Prelievo per ordine</text>
+  
+  <text x="350" y="270" fill="#ffffff" font-family="Arial, sans-serif" font-size="14">Mouse Wireless</text>
+  <text x="350" y="290" fill="#888888" font-family="Arial, sans-serif" font-size="12">PRD002 • Zona B-05</text>
+  
+  <text x="550" y="270" fill="#dc2626" font-family="Arial, sans-serif" font-size="16" font-weight="bold">-3 pz</text>
+  <text x="550" y="290" fill="#888888" font-family="Arial, sans-serif" font-size="12">09:45 • Op. Sara</text>
+  
+  <text x="680" y="280" fill="#888888" font-family="Arial, sans-serif" font-size="12">Oggi</text>
+  
+  <!-- Movement item 3 -->
+  <rect x="40" y="320" width="720" height="60" fill="#1f1f1f" rx="8"/>
+  <circle cx="70" cy="350" r="12" fill="#7c3aed"/>
+  <text x="60" y="358" fill="#ffffff" font-family="Arial, sans-serif" font-size="16" font-weight="bold">🔄</text>
+  
+  <text x="100" y="340" fill="#ffffff" font-family="Arial, sans-serif" font-size="16" font-weight="bold">TRASFERIMENTO</text>
+  <text x="100" y="360" fill="#888888" font-family="Arial, sans-serif" font-size="13">Trasferimento interno</text>
+  
+  <text x="350" y="340" fill="#ffffff" font-family="Arial, sans-serif" font-size="14">Monitor Samsung 24"</text>
+  <text x="350" y="360" fill="#888888" font-family="Arial, sans-serif" font-size="12">PRD003 • A-12 → C-08</text>
+  
+  <text x="550" y="340" fill="#7c3aed" font-family="Arial, sans-serif" font-size="16" font-weight="bold">12 pz</text>
+  <text x="550" y="360" fill="#888888" font-family="Arial, sans-serif" font-size="12">08:15 • Op. Luigi</text>
+  
+  <text x="680" y="350" fill="#888888" font-family="Arial, sans-serif" font-size="12">Ieri</text>
+  
+  <!-- Movement item 4 -->
+  <rect x="40" y="390" width="720" height="60" fill="#2a2a2a" rx="8"/>
+  <circle cx="70" cy="420" r="12" fill="#f59e0b"/>
+  <text x="60" y="428" fill="#ffffff" font-family="Arial, sans-serif" font-size="16" font-weight="bold">⚠</text>
+  
+  <text x="100" y="410" fill="#ffffff" font-family="Arial, sans-serif" font-size="16" font-weight="bold">RETTIFICA</text>
+  <text x="100" y="430" fill="#888888" font-family="Arial, sans-serif" font-size="13">Correzione inventario</text>
+  
+  <text x="350" y="410" fill="#ffffff" font-family="Arial, sans-serif" font-size="14">Tastiera RGB</text>
+  <text x="350" y="430" fill="#888888" font-family="Arial, sans-serif" font-size="12">PRD004 • Zona D-15</text>
+  
+  <text x="550" y="410" fill="#f59e0b" font-family="Arial, sans-serif" font-size="16" font-weight="bold">+2 pz</text>
+  <text x="550" y="430" fill="#888888" font-family="Arial, sans-serif" font-size="12">15:20 • Op. Anna</text>
+  
+  <text x="680" y="420" fill="#888888" font-family="Arial, sans-serif" font-size="12">Ieri</text>
+  
+  <!-- Movement item 5 -->
+  <rect x="40" y="460" width="720" height="60" fill="#1f1f1f" rx="8"/>
+  <circle cx="70" cy="490" r="12" fill="#06b6d4"/>
+  <text x="60" y="498" fill="#ffffff" font-family="Arial, sans-serif" font-size="16" font-weight="bold">🏗</text>
+  
+  <text x="100" y="480" fill="#ffffff" font-family="Arial, sans-serif" font-size="16" font-weight="bold">UDC TRANSFER</text>
+  <text x="100" y="500" fill="#888888" font-family="Arial, sans-serif" font-size="13">Trasferimento UDC completo</text>
+  
+  <text x="350" y="480" fill="#ffffff" font-family="Arial, sans-serif" font-size="14">UDC-001247</text>
+  <text x="350" y="500" fill="#888888" font-family="Arial, sans-serif" font-size="12">Pallet • E-01 → F-12</text>
+  
+  <text x="550" y="480" fill="#06b6d4" font-family="Arial, sans-serif" font-size="16" font-weight="bold">1 UDC</text>
+  <text x="550" y="500" fill="#888888" font-family="Arial, sans-serif" font-size="12">14:30 • Op. Marco</text>
+  
+  <text x="680" y="490" fill="#888888" font-family="Arial, sans-serif" font-size="12">Ieri</text>
+</svg>
