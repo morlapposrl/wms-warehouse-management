@@ -11,6 +11,32 @@
     "company": "MicroConnect Solutions",
     "copyright": "© 2025 MicroConnect Solutions. Alle Rechte vorbehalten."
   },
+  "resetPassword": {
+    "title": "Passwort Zurücksetzen",
+    "subtitle": "Geben Sie Ihr neues Passwort ein",
+    "newPassword": "Neues Passwort",
+    "confirmPassword": "Passwort Bestätigen",
+    "passwordMinLength": "Mindestens 8 Zeichen",
+    "newPasswordPlaceholder": "Geben Sie Ihr neues Passwort ein",
+    "confirmPasswordPlaceholder": "Bestätigen Sie Ihr neues Passwort",
+    "updateButton": "Passwort Aktualisieren",
+    "updating": "Aktualisierung...",
+    "backToLogin": "← Zurück zur Anmeldung",
+    "tokenInvalid": "Token ungültig",
+    "tokenInvalidMessage": "Der Passwort-Reset-Link ist ungültig oder abgelaufen.",
+    "successTitle": "Passwort aktualisiert!",
+    "successMessage": "Ihr Passwort wurde erfolgreich aktualisiert. Sie können sich jetzt anmelden."
+  },
+  "forgotPassword": {
+    "title": "Passwort Zurücksetzen",
+    "message": "Geben Sie Ihre E-Mail ein, um den Passwort-Reset-Link zu erhalten.",
+    "emailLabel": "E-Mail",
+    "emailPlaceholder": "Ihre E-Mail",
+    "sendButton": "Reset Senden",
+    "sending": "Senden...",
+    "cancel": "Abbrechen",
+    "successMessage": "Reset-E-Mail gesendet! Überprüfen Sie Ihr Postfach."
+  },
   "navigation": {
     "dashboard": "Dashboard",
     "products": "Produkte",
@@ -427,6 +453,8 @@
     "warehouseLayoutDesc": "Visualisierung der Lagerplätze",
     "orderManagement": "Auftragsverwaltung",
     "orderManagementDesc": "Auftragsbearbeitung",
+    "bottleList": "Flaschenliste",
+    "bottleListDesc": "Flaschenpreise für Diskothek verwalten",
     "wavePlanning": "Wellenplanung",
     "wavePlanningDesc": "Kommissionierung optimieren",
     "reportsAnalytics": "Berichte und Analysen",
@@ -463,6 +491,124 @@
     "contact": "Kontakt",
     "email": "E-Mail",
     "phone": "Telefon"
+  },
+  "globalProducts": {
+    "title": "Globale Produkte - Multi-Mandant-Ansicht",
+    "subtitle": "Aggregierte Produktverwaltung aller Mandanten",
+    "refresh": "Produkte neu laden",
+    "loading": "Lade Produkte...",
+    "filters": "Filter",
+    "search": "Produkt suchen...",
+    "allClients": "Alle Mandanten",
+    "allCategories": "Alle Kategorien",
+    "allStates": "Alle Status",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "resetFilters": "Filter zurücksetzen",
+    "productsCount": "Produkte",
+    "statistics": {
+      "totalProducts": "Produkte Gesamt",
+      "active": "Aktiv",
+      "clients": "Mandanten",
+      "lowStock": "Niedrige Bestände"
+    },
+    "table": {
+      "title": "Produktliste",
+      "titleWithClient": "Produktliste -",
+      "titleAll": "(Alle)",
+      "headers": {
+        "client": "Mandant",
+        "code": "Code",
+        "description": "Beschreibung",
+        "category": "Kategorie",
+        "unitOfMeasure": "M.E.",
+        "currentStock": "Bestand",
+        "minStock": "Min",
+        "maxStock": "Max",
+        "value": "Wert €",
+        "status": "Status",
+        "actions": "Aktionen"
+      },
+      "filters": {
+        "filterClient": "Mandant filtern",
+        "filterCode": "Code filtern",
+        "filterDescription": "Beschreibung filtern",
+        "filterCategory": "Kategorie filtern",
+        "filterStatus": "Status filtern",
+        "clearFilter": "Filter löschen"
+      },
+      "actions": {
+        "viewStock": "Bestände anzeigen",
+        "manageInContext": "Im Mandantenkontext verwalten"
+      }
+    },
+    "emptyState": {
+      "title": "Keine Produkte gefunden",
+      "description": "Es gibt keine Produkte, die den ausgewählten Filtern entsprechen"
+    },
+    "form": {
+      "add": "Neues Produkt",
+      "edit": "Produkt bearbeiten",
+      "code": "Produktcode",
+      "codePlaceholder": "z.B.: PROD001",
+      "description": "Beschreibung",
+      "descriptionPlaceholder": "Produktbeschreibung eingeben...",
+      "category": "Kategorie",
+      "selectCategory": "Kategorie wählen...",
+      "unitOfMeasure": "Maßeinheit",
+      "selectUnit": "Einheit wählen...",
+      "salePrice": "Verkaufspreis (€)",
+      "salePricePlaceholder": "0.00",
+      "minStock": "Mindestbestand",
+      "minStockPlaceholder": "0",
+      "maxStock": "Maximalbestand",
+      "maxStockPlaceholder": "0",
+      "client": "Mandant",
+      "selectClient": "Mandant wählen...",
+      "clientReadOnly": "Der Mandant kann nach der Erstellung nicht mehr geändert werden",
+      "codeReadOnly": "Der Produktcode kann nicht geändert werden",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "deleteConfirm": "Sind Sie sicher, dass Sie das Produkt \"{descrizione}\" löschen möchten?",
+      "compatibility": {
+        "title": "Kompatibilitätskontrollen",
+        "securityCategory": "Sicherheitskategorie",
+        "standard": "Standard",
+        "chemical": "Chemisch",
+        "food": "Lebensmittel",
+        "pharmaceutical": "Pharmazeutisch",
+        "flammable": "Brennbar",
+        "temperatureControl": "Temperaturkontrolliert",
+        "minTemp": "Min (°C)",
+        "maxTemp": "Max (°C)",
+        "accessControls": "Zugriffskontrollen",
+        "controlledAccess": "Kontrollierter Zugriff",
+        "incompatibleFood": "Unverträglich mit Lebensmitteln",
+        "batchTracking": "Chargen-Tracking erforderlich",
+        "physicalDimensions": "Physische Abmessungen",
+        "unitWeight": "Einheitsgewicht (kg)",
+        "unitVolume": "Volumen (cm³)",
+        "height": "Höhe (cm)",
+        "shelfLife": "Haltbarkeit (Tage)",
+        "shelfLifePlaceholder": "365 (optional)",
+        "adrCode": "ADR-Code",
+        "adrCodePlaceholder": "UN1203, UN1805",
+        "adrCodeDesc": "Transportcode für Gefahrstoffe",
+        "dangerClass": "Gefahrenklasse",
+        "selectDangerClass": "Klasse wählen",
+        "class1": "Klasse 1 - Explosivstoffe",
+        "class2": "Klasse 2 - Gase",
+        "class3": "Klasse 3 - Brennbare Flüssigkeiten",
+        "class4": "Klasse 4 - Brennbare Feststoffe",
+        "class5": "Klasse 5 - Oxidierende Stoffe",
+        "class6": "Klasse 6 - Giftige Stoffe",
+        "class8": "Klasse 8 - Ätzende Stoffe",
+        "class9": "Klasse 9 - Verschiedene gefährliche Stoffe"
+      }
+    },
+    "actions": {
+      "addProduct": "Neues Produkt"
+    }
   },
   "orders": {
     "title": "Auftragsverwaltung",
@@ -1138,5 +1284,27 @@
         "MANUTENZIONE": "Wartung"
       }
     }
+  },
+  "emailReset": {
+    "subject": "Passwort zurücksetzen - Morlappo WMS",
+    "title": "Passwort zurücksetzen",
+    "subtitle": "Multi-Client Lagerverwaltung",
+    "greeting": "Hallo {userName},",
+    "message": "Sie haben eine Passwort-Zurücksetzung für Ihr Morlappo WMS-Konto beantragt.",
+    "instruction": "Klicken Sie auf die Schaltfläche unten, um mit der Passwort-Zurücksetzung fortzufahren:",
+    "buttonText": "Passwort zurücksetzen",
+    "linkInstruction": "Wenn die Schaltfläche nicht funktioniert, kopieren Sie diesen Link und fügen Sie ihn in Ihren Browser ein:",
+    "importantTitle": "Wichtig:",
+    "validityText": "Dieser Link ist 1 Stunde gültig",
+    "singleUseText": "Er kann nur einmal verwendet werden",
+    "ignoreText": "Wenn Sie diese Zurücksetzung nicht beantragt haben, ignorieren Sie diese E-Mail",
+    "supportText": "Bei Problemen oder Fragen kontaktieren Sie uns unter info@morlappo.com.",
+    "companyName": "MORLAPPO Srl",
+    "legalAddress": "Rechtsanschrift: L.go Alvaro De Mendoza 4, 64027 Sant'Omero (TE)",
+    "operativeAddress": "Betriebsanschrift: Via Braida 16, 35010 Villa Del Conte (PD)",
+    "vatNumber": "USt-IdNr.: 02174570677",
+    "website": "www.morlappo.com",
+    "copyright": "2025 MORLAPPO Srl - Alle Rechte vorbehalten.",
+    "textMessage": "Passwort zurücksetzen - Morlappo WMS\n\nHallo {userName},\n\nSie haben eine Passwort-Zurücksetzung für Ihr Morlappo WMS-Konto beantragt.\n\nKlicken Sie auf diesen Link, um mit der Zurücksetzung fortzufahren:\n{resetUrl}\n\nWICHTIG:\n- Dieser Link ist 1 Stunde gültig\n- Er kann nur einmal verwendet werden\n- Wenn Sie diese Zurücksetzung nicht beantragt haben, ignorieren Sie diese E-Mail\n\nFür Support: info@morlappo.com\n\nMORLAPPO Srl\nwww.morlappo.com"
   }
 }

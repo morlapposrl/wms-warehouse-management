@@ -317,7 +317,7 @@
               <option value="">Nessun UDC (carico diretto)</option>
               {#each udcDisponibili as udc}
                 <option value={udc.id}>
-                  {udc.barcode} - {udc.tipo_udc ? $t(`udc.types.${udc.tipo_udc}`) || udc.tipo_udc : 'Standard'} 
+                  {udc.barcode} - {udc.tipo_udc || 'Standard'} 
                   ({udc.stato} - {udc.volume_occupato_pct}% pieno)
                 </option>
               {/each}
@@ -330,7 +330,7 @@
                   <div class="text-sm text-green-800">
                     <strong>UDC selezionato:</strong>
                     <div class="mt-1">
-                      <span class="font-mono">{udcInfo.barcode}</span> - {udcInfo.tipo_udc ? $t(`udc.types.${udcInfo.tipo_udc}`) || udcInfo.tipo_udc : 'Standard'}
+                      <span class="font-mono">{udcInfo.barcode}</span> - {udcInfo.tipo_udc || 'Standard'}
                       <br>
                       Stato: <span class="font-semibold">{udcInfo.stato}</span> |
                       Occupazione: <span class="font-bold">{udcInfo.volume_occupato_pct}%</span>

@@ -1,6 +1,7 @@
 import type { PageServerLoad, Actions } from './$types';
 import { userRepository } from '$lib/server/repositories/userRepository';
 import { auditRepository } from '$lib/server/repositories/auditRepository';
+import { emailService } from '$lib/server/services/emailService';
 import { fail, redirect } from '@sveltejs/kit';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -216,6 +217,87 @@ export const actions: Actions = {
       
       console.error('Errore nel logout:', error);
       throw redirect(302, '/login');
+    }
+  },
+
+  resetPassword: async ({ request, getClientAddress }) => {
+    const formData = await request.formData();
+    const email = formData.get('email')?.toString() || '';
+
+    try {
+      // Validazione email
+      if (!email) {
+        return fail(400, {
+          error: 'Email è obbligatoria'
+        });
+      }
+
+      // Verifica se l'utente esiste
+      const user = userRepository.getUserByEmail(email);
+      
+      if (!user) {
+        // Per sicurezza, non rivelare se l'email esiste o meno
+        return { success: true };
+      }
+
+      // Genera token di reset (UUID)
+      const resetToken = uuidv4();
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 1); // Token valido per 1 ora
+
+      // Salva il token nel database (devi implementare questa funzione nel userRepository)
+      userRepository.createPasswordResetToken(user.id!, resetToken, expiresAt.toISOString());
+
+      // Log operazione
+      try {
+        await auditRepository.logOperation({
+          operazione_id: `PWD_RESET_REQUEST_${uuidv4()}`,
+          tabella_principale: 'utenti',
+          tipo_operazione: 'PASSWORD_RESET_REQUEST',
+          descrizione_operazione: `Richiesta reset password per email: ${email}`,
+          utente_id: user.id!,
+          utente_nome: `${user.nome} ${user.cognome}`,
+          utente_email: user.email,
+          committente_id: user.committente_id,
+          indirizzo_ip: getClientAddress(),
+          user_agent: request.headers.get('user-agent') || '',
+          modulo: 'AUTH',
+          funzionalita: 'password_reset_request',
+          importanza: 'MEDIA',
+          esito: 'SUCCESSO'
+        });
+      } catch (auditError) {
+        console.error('Errore nel logging audit:', auditError);
+      }
+
+      // Crea URL di reset con porta corretta
+      const baseUrl = process.env.BASE_URL || 'https://connect.microlops.it:3304';
+      const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
+      
+      // Invia email di reset
+      const emailSent = await emailService.sendPasswordResetEmail({
+        email: user.email,
+        token: resetToken,
+        userName: `${user.nome} ${user.cognome}`,
+        resetUrl: resetUrl
+      });
+
+      if (!emailSent) {
+        // Log fallback per debug - da rimuovere in produzione
+        console.log(`FALLBACK - Reset token per ${email}: ${resetToken}`);
+        console.log(`FALLBACK - Link di reset: ${resetUrl}`);
+        
+        // Non fallire se email non va, per sicurezza
+        return { success: true };
+      }
+
+      return { success: true };
+
+    } catch (error) {
+      console.error('Errore nel reset password:', error);
+      return fail(500, {
+        error: 'Errore interno del server'
+      });
     }
   }
 };

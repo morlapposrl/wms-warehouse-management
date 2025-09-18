@@ -11,6 +11,32 @@
     "company": "微连接解决方案",
     "copyright": "© 2025 微连接解决方案。保留所有权利。"
   },
+  "resetPassword": {
+    "title": "重置密码",
+    "subtitle": "输入您的新密码",
+    "newPassword": "新密码",
+    "confirmPassword": "确认密码",
+    "passwordMinLength": "最少8个字符",
+    "newPasswordPlaceholder": "输入您的新密码",
+    "confirmPasswordPlaceholder": "确认您的新密码",
+    "updateButton": "更新密码",
+    "updating": "更新中...",
+    "backToLogin": "← 返回登录",
+    "tokenInvalid": "令牌无效",
+    "tokenInvalidMessage": "密码重置链接无效或已过期。",
+    "successTitle": "密码已更新！",
+    "successMessage": "您的密码已成功更新。现在您可以登录了。"
+  },
+  "forgotPassword": {
+    "title": "重置密码",
+    "message": "输入您的邮箱以接收密码重置链接。",
+    "emailLabel": "邮箱",
+    "emailPlaceholder": "您的邮箱",
+    "sendButton": "发送重置",
+    "sending": "发送中...",
+    "cancel": "取消",
+    "successMessage": "重置邮件已发送！请检查您的收件箱。"
+  },
   "navigation": {
     "dashboard": "仪表板",
     "products": "产品",
@@ -427,6 +453,8 @@
     "warehouseLayoutDesc": "位置可视化",
     "orderManagement": "订单管理",
     "orderManagementDesc": "订单处理",
+    "bottleList": "酒水价目表",
+    "bottleListDesc": "夜店酒水价格管理",
     "wavePlanning": "波次计划",
     "wavePlanningDesc": "拣选优化",
     "reportsAnalytics": "报表和分析",
@@ -463,6 +491,124 @@
     "contact": "联系人",
     "email": "邮箱",
     "phone": "电话"
+  },
+  "globalProducts": {
+    "title": "全局产品 - 多客户视图",
+    "subtitle": "所有客户产品的汇总管理",
+    "refresh": "刷新产品",
+    "loading": "正在加载产品...",
+    "filters": "筛选器",
+    "search": "搜索产品...",
+    "allClients": "所有客户",
+    "allCategories": "所有类别",
+    "allStates": "所有状态",
+    "active": "活跃",
+    "inactive": "非活跃",
+    "resetFilters": "重置筛选器",
+    "productsCount": "产品",
+    "statistics": {
+      "totalProducts": "产品总数",
+      "active": "活跃",
+      "clients": "客户",
+      "lowStock": "库存不足"
+    },
+    "table": {
+      "title": "产品列表",
+      "titleWithClient": "产品列表 -",
+      "titleAll": "(全部)",
+      "headers": {
+        "client": "客户",
+        "code": "代码",
+        "description": "描述",
+        "category": "类别",
+        "unitOfMeasure": "单位",
+        "currentStock": "库存",
+        "minStock": "最小",
+        "maxStock": "最大",
+        "value": "价值 €",
+        "status": "状态",
+        "actions": "操作"
+      },
+      "filters": {
+        "filterClient": "筛选客户",
+        "filterCode": "筛选代码",
+        "filterDescription": "筛选描述",
+        "filterCategory": "筛选类别",
+        "filterStatus": "筛选状态",
+        "clearFilter": "清除筛选器"
+      },
+      "actions": {
+        "viewStock": "查看库存",
+        "manageInContext": "在客户上下文中管理"
+      }
+    },
+    "emptyState": {
+      "title": "未找到产品",
+      "description": "没有符合所选筛选条件的产品"
+    },
+    "form": {
+      "add": "新产品",
+      "edit": "编辑产品",
+      "code": "产品代码",
+      "codePlaceholder": "例: PROD001",
+      "description": "描述",
+      "descriptionPlaceholder": "输入产品描述...",
+      "category": "类别",
+      "selectCategory": "选择类别...",
+      "unitOfMeasure": "计量单位",
+      "selectUnit": "选择单位...",
+      "salePrice": "销售价格 (€)",
+      "salePricePlaceholder": "0.00",
+      "minStock": "最小库存",
+      "minStockPlaceholder": "0",
+      "maxStock": "最大库存",
+      "maxStockPlaceholder": "0",
+      "client": "客户",
+      "selectClient": "选择客户...",
+      "clientReadOnly": "创建后无法修改客户",
+      "codeReadOnly": "产品代码无法修改",
+      "save": "保存",
+      "cancel": "取消",
+      "deleteConfirm": "确定要删除产品 \"{descrizione}\" 吗？",
+      "compatibility": {
+        "title": "兼容性控制",
+        "securityCategory": "安全类别",
+        "standard": "标准",
+        "chemical": "化学品",
+        "food": "食品",
+        "pharmaceutical": "药品",
+        "flammable": "易燃品",
+        "temperatureControl": "温度控制",
+        "minTemp": "最低 (°C)",
+        "maxTemp": "最高 (°C)",
+        "accessControls": "访问控制",
+        "controlledAccess": "受控访问",
+        "incompatibleFood": "与食品不兼容",
+        "batchTracking": "必须进行批次跟踪",
+        "physicalDimensions": "物理尺寸",
+        "unitWeight": "单位重量 (kg)",
+        "unitVolume": "体积 (cm³)",
+        "height": "高度 (cm)",
+        "shelfLife": "保质期 (天)",
+        "shelfLifePlaceholder": "365 (可选)",
+        "adrCode": "ADR代码",
+        "adrCodePlaceholder": "UN1203, UN1805",
+        "adrCodeDesc": "危险物质运输代码",
+        "dangerClass": "危险等级",
+        "selectDangerClass": "选择等级",
+        "class1": "第1类 - 爆炸品",
+        "class2": "第2类 - 气体",
+        "class3": "第3类 - 易燃液体",
+        "class4": "第4类 - 易燃固体",
+        "class5": "第5类 - 氧化性物质",
+        "class6": "第6类 - 有毒物质",
+        "class8": "第8类 - 腐蚀性物质",
+        "class9": "第9类 - 杂项危险物质"
+      }
+    },
+    "actions": {
+      "addProduct": "新产品"
+    }
   },
   "orders": {
     "title": "订单管理",
@@ -1138,5 +1284,27 @@
         "MANUTENZIONE": "维护"
       }
     }
+  },
+  "emailReset": {
+    "subject": "重置密码 - Morlappo WMS",
+    "title": "重置密码",
+    "subtitle": "多客户仓库管理",
+    "greeting": "您好 {userName}，",
+    "message": "您已请求重置您的 Morlappo WMS 账户密码。",
+    "instruction": "点击下面的按钮进行密码重置：",
+    "buttonText": "重置密码",
+    "linkInstruction": "如果按钮无效，请复制以下链接并粘贴到浏览器中：",
+    "importantTitle": "重要提示：",
+    "validityText": "此链接有效期为1小时",
+    "singleUseText": "只能使用一次",
+    "ignoreText": "如果您没有请求此重置，请忽略此邮件",
+    "supportText": "如有问题或疑问，请联系我们：info@morlappo.com。",
+    "companyName": "MORLAPPO Srl",
+    "legalAddress": "法定地址：L.go Alvaro De Mendoza 4, 64027 Sant'Omero (TE)",
+    "operativeAddress": "运营地址：Via Braida 16, 35010 Villa Del Conte (PD)",
+    "vatNumber": "税号：02174570677",
+    "website": "www.morlappo.com",
+    "copyright": "2025 MORLAPPO Srl - 版权所有。",
+    "textMessage": "重置密码 - Morlappo WMS\n\n您好 {userName}，\n\n您已请求重置您的 Morlappo WMS 账户密码。\n\n点击此链接进行重置：\n{resetUrl}\n\n重要提示：\n- 此链接有效期为1小时\n- 只能使用一次\n- 如果您没有请求此重置，请忽略此邮件\n\n技术支持：info@morlappo.com\n\nMORLAPPO Srl\nwww.morlappo.com"
   }
 }

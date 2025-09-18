@@ -106,6 +106,12 @@
       descriptionKey: 'layout.orderManagementDesc'
     },
     {
+      href: '/auth/listino-bottiglie',
+      labelKey: 'layout.bottleList',
+      icon: 'beaker',
+      descriptionKey: 'layout.bottleListDesc'
+    },
+    {
       href: '/auth/wave-planning',
       labelKey: 'layout.wavePlanning',
       icon: 'adjustments-horizontal',

@@ -7,6 +7,10 @@ export const PUT: RequestHandler = async ({ params, request }) => {
     const { id } = params;
     const data = await request.json();
     
+    console.log('🔧 COMPATIBILITY UPDATE - Categoria sicurezza ricevuta:', data.categoria_sicurezza);
+    console.log('🔧 COMPATIBILITY UPDATE - Richiede temperatura:', data.richiede_temperatura_controllata);
+    console.log('🔧 COMPATIBILITY UPDATE - Peso unitario:', data.peso_unitario_kg);
+    
     // Validazione dati richiesti
     if (!data.codice || !data.descrizione || !data.committente_id || !data.categoria_id || !data.unita_misura_id) {
       return json({ error: 'Codice, descrizione, committente, categoria e unità di misura sono obbligatori' }, { status: 400 });

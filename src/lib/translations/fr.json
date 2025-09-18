@@ -11,6 +11,40 @@
     "company": "MicroConnect Solutions",
     "copyright": "© 2025 MicroConnect Solutions. Tous droits réservés."
   },
+  "resetPassword": {
+    "title": "Réinitialiser le Mot de Passe",
+    "subtitle": "Entrez votre nouveau mot de passe",
+    "newPassword": "Nouveau Mot de Passe",
+    "confirmPassword": "Confirmer le Mot de Passe",
+    "passwordMinLength": "Minimum 8 caractères",
+    "newPasswordPlaceholder": "Entrez votre nouveau mot de passe",
+    "confirmPasswordPlaceholder": "Confirmez votre nouveau mot de passe",
+    "updateButton": "Mettre à Jour le Mot de Passe",
+    "updating": "Mise à jour...",
+    "backToLogin": "← Retour à la connexion",
+    "tokenInvalid": "Token invalide",
+    "tokenInvalidMessage": "Le lien de réinitialisation du mot de passe n'est pas valide ou a expiré.",
+    "successTitle": "Mot de passe mis à jour !",
+    "successMessage": "Votre mot de passe a été mis à jour avec succès. Vous pouvez maintenant vous connecter."
+  },
+  "forgotPassword": {
+    "title": "Réinitialiser le Mot de Passe",
+    "message": "Entrez votre email pour recevoir le lien de réinitialisation du mot de passe.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Votre email",
+    "sendButton": "Envoyer la Réinitialisation",
+    "sending": "Envoi...",
+    "cancel": "Annuler",
+    "successMessage": "Email de réinitialisation envoyé ! Vérifiez votre boîte de réception.",
+    "emailSent": "Email envoyé ! Vérifiez votre boîte de réception.",
+    "error": "Erreur lors de l'envoi de l'email"
+  },
+  "common": {
+    "error": "Erreur",
+    "connectionError": "Erreur de connexion",
+    "remember": "Se souvenir de moi",
+    "forgotPassword": "Mot de passe oublié ?"
+  },
   "navigation": {
     "dashboard": "Tableau de Bord",
     "products": "Produits",
@@ -457,6 +491,8 @@
     "warehouseLayoutDesc": "Visualisation emplacements",
     "orderManagement": "Gestion Commandes",
     "orderManagementDesc": "Traitement des commandes",
+    "bottleList": "Liste des Bouteilles",
+    "bottleListDesc": "Gestion des prix des bouteilles pour discothèque",
     "wavePlanning": "Planification Vagues",
     "wavePlanningDesc": "Optimisation picking",
     "reportsAnalytics": "Rapports et Analyses",
@@ -493,6 +529,124 @@
     "contact": "Contact",
     "email": "Email",
     "phone": "Téléphone"
+  },
+  "globalProducts": {
+    "title": "Produits Globaux - Vue Multi-Client",
+    "subtitle": "Gestion produits agrégée de tous les clients",
+    "refresh": "Recharger produits",
+    "loading": "Chargement produits...",
+    "filters": "Filtres",
+    "search": "Rechercher produit...",
+    "allClients": "Tous clients",
+    "allCategories": "Toutes catégories",
+    "allStates": "Tous états",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "resetFilters": "Reset filtres",
+    "productsCount": "produits",
+    "statistics": {
+      "totalProducts": "Produits Totaux",
+      "active": "Actifs",
+      "clients": "Clients",
+      "lowStock": "Stock Bas"
+    },
+    "table": {
+      "title": "Liste Produits",
+      "titleWithClient": "Liste Produits -",
+      "titleAll": "(Tous)",
+      "headers": {
+        "client": "Client",
+        "code": "Code",
+        "description": "Description",
+        "category": "Catégorie",
+        "unitOfMeasure": "U.M.",
+        "currentStock": "Stock",
+        "minStock": "Min",
+        "maxStock": "Max",
+        "value": "Valeur €",
+        "status": "État",
+        "actions": "Actions"
+      },
+      "filters": {
+        "filterClient": "Filtrer client",
+        "filterCode": "Filtrer code",
+        "filterDescription": "Filtrer description",
+        "filterCategory": "Filtrer catégorie",
+        "filterStatus": "Filtrer état",
+        "clearFilter": "Effacer filtre"
+      },
+      "actions": {
+        "viewStock": "Voir Stocks",
+        "manageInContext": "Gérer dans contexte client"
+      }
+    },
+    "emptyState": {
+      "title": "Aucun produit trouvé",
+      "description": "Il n'y a pas de produits correspondant aux filtres sélectionnés"
+    },
+    "form": {
+      "add": "Nouveau Produit",
+      "edit": "Modifier Produit",
+      "code": "Code Produit",
+      "codePlaceholder": "Ex: PROD001",
+      "description": "Description",
+      "descriptionPlaceholder": "Saisir description produit...",
+      "category": "Catégorie",
+      "selectCategory": "Sélectionner catégorie...",
+      "unitOfMeasure": "Unité de Mesure",
+      "selectUnit": "Sélectionner unité...",
+      "salePrice": "Prix Vente (€)",
+      "salePricePlaceholder": "0.00",
+      "minStock": "Stock Minimum",
+      "minStockPlaceholder": "0",
+      "maxStock": "Stock Maximum",
+      "maxStockPlaceholder": "0",
+      "client": "Client",
+      "selectClient": "Sélectionner client...",
+      "clientReadOnly": "Le client ne peut pas être modifié après création",
+      "codeReadOnly": "Le code produit ne peut pas être modifié",
+      "save": "Sauvegarder",
+      "cancel": "Annuler",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer le produit \"{descrizione}\"?",
+      "compatibility": {
+        "title": "Contrôles de Compatibilité",
+        "securityCategory": "Catégorie Sécurité",
+        "standard": "Standard",
+        "chemical": "Chimique",
+        "food": "Alimentaire",
+        "pharmaceutical": "Pharmaceutique",
+        "flammable": "Inflammable",
+        "temperatureControl": "Température Contrôlée",
+        "minTemp": "Min (°C)",
+        "maxTemp": "Max (°C)",
+        "accessControls": "Contrôles Accès",
+        "controlledAccess": "Accès Contrôlé",
+        "incompatibleFood": "Incompatible avec Alimentaires",
+        "batchTracking": "Traçabilité Lot Obligatoire",
+        "physicalDimensions": "Dimensions Physiques",
+        "unitWeight": "Poids Unitaire (kg)",
+        "unitVolume": "Volume (cm³)",
+        "height": "Hauteur (cm)",
+        "shelfLife": "Durée de Vie (jours)",
+        "shelfLifePlaceholder": "365 (optionnel)",
+        "adrCode": "Code ADR",
+        "adrCodePlaceholder": "UN1203, UN1805",
+        "adrCodeDesc": "Code transport substances dangereuses",
+        "dangerClass": "Classe de Danger",
+        "selectDangerClass": "Sélectionner classe",
+        "class1": "Classe 1 - Explosifs",
+        "class2": "Classe 2 - Gaz",
+        "class3": "Classe 3 - Liquides inflammables",
+        "class4": "Classe 4 - Solides inflammables",
+        "class5": "Classe 5 - Substances comburantes",
+        "class6": "Classe 6 - Substances toxiques",
+        "class8": "Classe 8 - Substances corrosives",
+        "class9": "Classe 9 - Substances diverses"
+      }
+    },
+    "actions": {
+      "addProduct": "Nouveau Produit"
+    }
   },
   "orders": {
     "title": "Gestion Commandes",
@@ -1171,5 +1325,27 @@
         "MANUTENZIONE": "Maintenance"
       }
     }
+  },
+  "emailReset": {
+    "subject": "Réinitialisation du mot de passe - Morlappo WMS",
+    "title": "Réinitialisation du mot de passe",
+    "subtitle": "Gestion d'entrepôt multi-clients",
+    "greeting": "Bonjour {userName},",
+    "message": "Vous avez demandé une réinitialisation du mot de passe pour votre compte Morlappo WMS.",
+    "instruction": "Cliquez sur le bouton ci-dessous pour procéder à la réinitialisation du mot de passe :",
+    "buttonText": "Réinitialiser le mot de passe",
+    "linkInstruction": "Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :",
+    "importantTitle": "Important :",
+    "validityText": "Ce lien est valide pendant 1 heure",
+    "singleUseText": "Il ne peut être utilisé qu'une seule fois",
+    "ignoreText": "Si vous n'avez pas demandé cette réinitialisation, ignorez cet email",
+    "supportText": "Si vous avez des problèmes ou des questions, contactez-nous à info@morlappo.com.",
+    "companyName": "MORLAPPO Srl",
+    "legalAddress": "Adresse légale : L.go Alvaro De Mendoza 4, 64027 Sant'Omero (TE)",
+    "operativeAddress": "Adresse opérationnelle : Via Braida 16, 35010 Villa Del Conte (PD)",
+    "vatNumber": "TVA : 02174570677",
+    "website": "www.morlappo.com",
+    "copyright": "2025 MORLAPPO Srl - Tous droits réservés.",
+    "textMessage": "Réinitialisation du mot de passe - Morlappo WMS\n\nBonjour {userName},\n\nVous avez demandé une réinitialisation du mot de passe pour votre compte Morlappo WMS.\n\nCliquez sur ce lien pour procéder à la réinitialisation :\n{resetUrl}\n\nIMPORTANT :\n- Ce lien est valide pendant 1 heure\n- Il ne peut être utilisé qu'une seule fois\n- Si vous n'avez pas demandé cette réinitialisation, ignorez cet email\n\nPour le support : info@morlappo.com\n\nMORLAPPO Srl\nwww.morlappo.com"
   }
 }

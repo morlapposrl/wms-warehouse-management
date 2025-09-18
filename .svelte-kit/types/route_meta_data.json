@@ -81,6 +81,9 @@
 	"/api/dashboard/operatori-live": [
 		"src/routes/api/dashboard/operatori-live/+server.ts"
 	],
+	"/api/forgot-password": [
+		"src/routes/api/forgot-password/+server.ts"
+	],
 	"/api/fornitori": [
 		"src/routes/api/fornitori/+server.js"
 	],
@@ -98,6 +101,9 @@
 	],
 	"/api/giacenze/realtime": [
 		"src/routes/api/giacenze/realtime/+server.ts"
+	],
+	"/api/listino-bottiglie": [
+		"src/routes/api/listino-bottiglie/+server.js"
 	],
 	"/api/logs": [
 		"src/routes/api/logs/+server.ts"
@@ -214,6 +220,9 @@
 		"src/routes/auth/giacenze/+page.server.ts",
 		"src/routes/+layout.server.ts"
 	],
+	"/auth/listino-bottiglie": [
+		"src/routes/+layout.server.ts"
+	],
 	"/auth/magazzini": [
 		"src/routes/+layout.server.ts"
 	],
@@ -286,6 +295,10 @@
 		"src/routes/+layout.server.ts"
 	],
 	"/logs": [
+		"src/routes/+layout.server.ts"
+	],
+	"/reset-password": [
+		"src/routes/reset-password/+page.server.ts",
 		"src/routes/+layout.server.ts"
 	],
 	"/test-css": [

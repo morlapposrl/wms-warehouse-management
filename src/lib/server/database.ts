@@ -760,6 +760,20 @@ export function initializeDatabase() {
     )
   `);
 
+  // Tabella PASSWORD_RESET_TOKENS (token per reset password)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      utente_id INTEGER NOT NULL,
+      token TEXT UNIQUE NOT NULL,
+      expires_at DATETIME NOT NULL,
+      used BOOLEAN DEFAULT 0,
+      used_at DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (utente_id) REFERENCES utenti(id)
+    )
+  `);
+
   // Tabella NOTIFICHE_SISTEMA (alert e comunicazioni)
   db.exec(`
     CREATE TABLE IF NOT EXISTS notifiche_sistema (
@@ -812,6 +826,8 @@ export function initializeDatabase() {
     CREATE INDEX IF NOT EXISTS idx_sessioni_sessione_id ON sessioni_utenti(sessione_id);
     CREATE INDEX IF NOT EXISTS idx_notifiche_destinatario ON notifiche_sistema(utente_destinatario_id, letta);
     CREATE INDEX IF NOT EXISTS idx_notifiche_committente ON notifiche_sistema(committente_destinatario_id, letta);
+    CREATE INDEX IF NOT EXISTS idx_password_reset_tokens ON password_reset_tokens(token, expires_at);
+    CREATE INDEX IF NOT EXISTS idx_password_reset_utente ON password_reset_tokens(utente_id, used);
   `);
 
   // Trigger per audit trail automatico su tabelle critiche

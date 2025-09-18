@@ -51,7 +51,21 @@
     prezzo_vendita: '',
     scorta_minima: '',
     scorta_massima: '',
-    committente_id: ''
+    committente_id: '',
+    // Campi compatibilità
+    richiede_temperatura_controllata: false,
+    temperatura_min: null,
+    temperatura_max: null,
+    categoria_sicurezza: 'STANDARD',
+    classe_pericolo: '',
+    codice_adr: '',
+    peso_unitario_kg: 0,
+    volume_unitario_cm3: 0,
+    altezza_cm: 0,
+    richiede_accesso_controllato: false,
+    incompatibile_con_alimentari: false,
+    shelf_life_giorni: null,
+    tracking_lotto_obbligatorio: false
   };
   let formErrors = {};
   let formLoading = false;
@@ -98,7 +112,7 @@
           console.error('Errore formato risposta unità misura:', umData);
         }
       } else {
-        console.error('Errore fetch categorie:', catResponse.status);
+        console.error('Errore fetch unità misura:', umResponse.status);
       }
       
       // Carica prodotti globali
@@ -373,6 +387,10 @@
   function openForm(prodotto = null) {
     editingId = prodotto ? prodotto.id : null;
     if (prodotto) {
+      console.log('🔧 DEBUG COMPATIBILITY - Prodotto completo:', prodotto);
+      console.log('🔧 CATEGORIA_SICUREZZA:', prodotto.categoria_sicurezza);
+      console.log('🔧 RICHIEDE_TEMPERATURA:', prodotto.richiede_temperatura_controllata);
+      console.log('🔧 PESO_UNITARIO_KG:', prodotto.peso_unitario_kg);
       formData = {
         codice: prodotto.codice || '',
         descrizione: prodotto.descrizione || '',
@@ -381,7 +399,21 @@
         prezzo_vendita: prodotto.prezzo_vendita || '',
         scorta_minima: prodotto.scorta_minima || '',
         scorta_massima: prodotto.scorta_massima || '',
-        committente_id: prodotto.committente_id || ''
+        committente_id: prodotto.committente_id || '',
+        // Campi compatibilità
+        richiede_temperatura_controllata: prodotto.richiede_temperatura_controllata || false,
+        temperatura_min: prodotto.temperatura_min || null,
+        temperatura_max: prodotto.temperatura_max || null,
+        categoria_sicurezza: prodotto.categoria_sicurezza || 'STANDARD',
+        classe_pericolo: prodotto.classe_pericolo || '',
+        codice_adr: prodotto.codice_adr || '',
+        peso_unitario_kg: prodotto.peso_unitario_kg || 0,
+        volume_unitario_cm3: prodotto.volume_unitario_cm3 || 0,
+        altezza_cm: prodotto.altezza_cm || 0,
+        richiede_accesso_controllato: prodotto.richiede_accesso_controllato || false,
+        incompatibile_con_alimentari: prodotto.incompatibile_con_alimentari || false,
+        shelf_life_giorni: prodotto.shelf_life_giorni || null,
+        tracking_lotto_obbligatorio: prodotto.tracking_lotto_obbligatorio || false
       };
     } else {
       formData = {
@@ -392,7 +424,21 @@
         prezzo_vendita: '',
         scorta_minima: '',
         scorta_massima: '',
-        committente_id: ''
+        committente_id: '',
+        // Campi compatibilità
+        richiede_temperatura_controllata: false,
+        temperatura_min: null,
+        temperatura_max: null,
+        categoria_sicurezza: 'STANDARD',
+        classe_pericolo: '',
+        codice_adr: '',
+        peso_unitario_kg: 0,
+        volume_unitario_cm3: 0,
+        altezza_cm: 0,
+        richiede_accesso_controllato: false,
+        incompatibile_con_alimentari: false,
+        shelf_life_giorni: null,
+        tracking_lotto_obbligatorio: false
       };
     }
     formErrors = {};
@@ -410,7 +456,21 @@
       prezzo_vendita: '',
       scorta_minima: '',
       scorta_massima: '',
-      committente_id: ''
+      committente_id: '',
+      // Campi compatibilità
+      richiede_temperatura_controllata: false,
+      temperatura_min: null,
+      temperatura_max: null,
+      categoria_sicurezza: 'STANDARD',
+      classe_pericolo: '',
+      codice_adr: '',
+      peso_unitario_kg: 0,
+      volume_unitario_cm3: 0,
+      altezza_cm: 0,
+      richiede_accesso_controllato: false,
+      incompatibile_con_alimentari: false,
+      shelf_life_giorni: null,
+      tracking_lotto_obbligatorio: false
     };
     formErrors = {};
     formLoading = false;
@@ -445,6 +505,11 @@
     try {
       const url = editingId ? `/api/prodotti/${editingId}` : '/api/prodotti';
       const method = editingId ? 'PUT' : 'POST';
+      
+      console.log('🔧 DEBUG COMPATIBILITY SUBMIT - FormData:', formData);
+      console.log('🔧 CATEGORIA_SICUREZZA submit:', formData.categoria_sicurezza);
+      console.log('🔧 RICHIEDE_TEMPERATURA submit:', formData.richiede_temperatura_controllata);
+      console.log('🔧 PESO_UNITARIO_KG submit:', formData.peso_unitario_kg);
       
       const response = await fetch(url, {
         method,
@@ -521,7 +586,7 @@
   }
   
   .modal-content {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 max-h-screen overflow-y-auto;
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-screen overflow-y-auto;
   }
   
   .modal-header {
@@ -1084,181 +1149,300 @@
         </button>
       </div>
       
-      <form on:submit|preventDefault={handleSubmit} class="p-6 space-y-4 bg-white dark:bg-gray-800">
-        
-        <!-- Committente -->
-        <div>
-          <label class="form-label">{$t('globalProducts.form.client')} *</label>
-          <select
-            bind:value={formData.committente_id}
-            class="form-input"
-            class:border-red-500={formErrors.committente_id}
-            class:bg-gray-100={editingId}
-            class:dark:bg-gray-600={editingId}
-            disabled={editingId}
-            required
-          >
-            <option value="">{$t('globalProducts.form.selectClient')}</option>
-            {#each committenti as committente}
-              <option value={committente.id}>{committente.ragione_sociale}</option>
-            {/each}
-          </select>
-          {#if editingId}
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              {$t('globalProducts.form.clientReadOnly')}
-            </p>
-          {/if}
-          {#if formErrors.committente_id}
-            <p class="form-error">{formErrors.committente_id.join(', ')}</p>
-          {/if}
-        </div>
+      <div class="flex bg-white dark:bg-gray-800">
+        <!-- Colonna sinistra - Form principale -->
+        <div class="flex-1 p-6">
+          <form on:submit|preventDefault={handleSubmit} class="space-y-4">
+            
+            <!-- Committente -->
+            <div>
+              <label class="form-label">{$t('globalProducts.form.client')} *</label>
+              <select
+                bind:value={formData.committente_id}
+                class="form-input"
+                class:border-red-500={formErrors.committente_id}
+                class:bg-gray-100={editingId}
+                class:dark:bg-gray-600={editingId}
+                disabled={editingId}
+                required
+              >
+                <option value="">{$t('globalProducts.form.selectClient')}</option>
+                {#each committenti as committente}
+                  <option value={committente.id}>{committente.ragione_sociale}</option>
+                {/each}
+              </select>
+              {#if editingId}
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {$t('globalProducts.form.clientReadOnly')}
+                </p>
+              {/if}
+              {#if formErrors.committente_id}
+                <p class="form-error">{formErrors.committente_id.join(', ')}</p>
+              {/if}
+            </div>
 
-        <!-- Codice -->
-        <div>
-          <label class="form-label">{$t('globalProducts.form.code')} *</label>
-          <input
-            type="text"
-            bind:value={formData.codice}
-            class="form-input"
-            class:border-red-500={formErrors.codice}
-            class:bg-gray-100={editingId}
-            class:dark:bg-gray-600={editingId}
-            placeholder="{$t('globalProducts.form.codePlaceholder')}"
-            readonly={editingId}
-            required
-          />
-          {#if editingId}
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              {$t('globalProducts.form.codeReadOnly')}
-            </p>
-          {/if}
-          {#if formErrors.codice}
-            <p class="form-error">{formErrors.codice.join(', ')}</p>
-          {/if}
-        </div>
+            <!-- Codice -->
+            <div>
+              <label class="form-label">{$t('globalProducts.form.code')} *</label>
+              <input
+                type="text"
+                bind:value={formData.codice}
+                class="form-input"
+                class:border-red-500={formErrors.codice}
+                class:bg-gray-100={editingId}
+                class:dark:bg-gray-600={editingId}
+                placeholder="{$t('globalProducts.form.codePlaceholder')}"
+                readonly={editingId}
+                required
+              />
+              {#if editingId}
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {$t('globalProducts.form.codeReadOnly')}
+                </p>
+              {/if}
+              {#if formErrors.codice}
+                <p class="form-error">{formErrors.codice.join(', ')}</p>
+              {/if}
+            </div>
 
-        <!-- Descrizione -->
-        <div>
-          <label class="form-label">{$t('globalProducts.form.description')} *</label>
-          <input
-            type="text"
-            bind:value={formData.descrizione}
-            class="form-input"
-            class:border-red-500={formErrors.descrizione}
-            placeholder="{$t('globalProducts.form.descriptionPlaceholder')}"
-            required
-          />
-          {#if formErrors.descrizione}
-            <p class="form-error">{formErrors.descrizione.join(', ')}</p>
-          {/if}
-        </div>
+            <!-- Descrizione -->
+            <div>
+              <label class="form-label">{$t('globalProducts.form.description')} *</label>
+              <input
+                type="text"
+                bind:value={formData.descrizione}
+                class="form-input"
+                class:border-red-500={formErrors.descrizione}
+                placeholder="{$t('globalProducts.form.descriptionPlaceholder')}"
+                required
+              />
+              {#if formErrors.descrizione}
+                <p class="form-error">{formErrors.descrizione.join(', ')}</p>
+              {/if}
+            </div>
 
-        <!-- Categoria -->
-        <div>
-          <label class="form-label">{$t('globalProducts.form.category')} *</label>
-          <select
-            bind:value={formData.categoria_id}
-            class="form-input"
-            class:border-red-500={formErrors.categoria_id}
-            required
-          >
-            <option value="">{$t('globalProducts.form.selectCategory')}</option>
-            {#each categorieComplete.filter(c => !formData.committente_id || c.committente_id == formData.committente_id) as categoria}
-              <option value={categoria.id}>{categoria.descrizione}</option>
-            {/each}
-          </select>
-          {#if formErrors.categoria_id}
-            <p class="form-error">{formErrors.categoria_id.join(', ')}</p>
-          {/if}
-        </div>
+            <!-- Categoria -->
+            <div>
+              <label class="form-label">{$t('globalProducts.form.category')} *</label>
+              <select
+                bind:value={formData.categoria_id}
+                class="form-input"
+                class:border-red-500={formErrors.categoria_id}
+                required
+              >
+                <option value="">{$t('globalProducts.form.selectCategory')}</option>
+                {#each categorieComplete.filter(c => !formData.committente_id || c.committente_id == formData.committente_id) as categoria}
+                  <option value={categoria.id}>{categoria.descrizione}</option>
+                {/each}
+              </select>
+              {#if formErrors.categoria_id}
+                <p class="form-error">{formErrors.categoria_id.join(', ')}</p>
+              {/if}
+            </div>
 
-        <!-- Unità di Misura -->
-        <div>
-          <label class="form-label">{$t('globalProducts.form.unitOfMeasure')} *</label>
-          <select
-            bind:value={formData.unita_misura_id}
-            class="form-input"
-            class:border-red-500={formErrors.unita_misura_id}
-            required
-          >
-            <option value="">{$t('globalProducts.form.selectUnit')}</option>
-            {#each unitaMisura as um}
-              <option value={um.id}>{um.codice} - {um.descrizione}</option>
-            {/each}
-          </select>
-          {#if formErrors.unita_misura_id}
-            <p class="form-error">{formErrors.unita_misura_id.join(', ')}</p>
-          {/if}
-        </div>
+            <!-- Unità di Misura -->
+            <div>
+              <label class="form-label">{$t('globalProducts.form.unitOfMeasure')} *</label>
+              <select
+                bind:value={formData.unita_misura_id}
+                class="form-input"
+                class:border-red-500={formErrors.unita_misura_id}
+                required
+              >
+                <option value="">{$t('globalProducts.form.selectUnit')}</option>
+                {#each unitaMisura as um}
+                  <option value={um.id}>{um.codice} - {um.descrizione}</option>
+                {/each}
+              </select>
+              {#if formErrors.unita_misura_id}
+                <p class="form-error">{formErrors.unita_misura_id.join(', ')}</p>
+              {/if}
+            </div>
 
-        <!-- Prezzo Vendita -->
-        <div>
-          <label class="form-label">{$t('globalProducts.form.salePrice')}</label>
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            bind:value={formData.prezzo_vendita}
-            class="form-input"
-            class:border-red-500={formErrors.prezzo_vendita}
-            placeholder="{$t('globalProducts.form.salePricePlaceholder')}"
-          />
-          {#if formErrors.prezzo_vendita}
-            <p class="form-error">{formErrors.prezzo_vendita.join(', ')}</p>
-          {/if}
-        </div>
+            <!-- Prezzo Vendita -->
+            <div>
+              <label class="form-label">{$t('globalProducts.form.salePrice')}</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                bind:value={formData.prezzo_vendita}
+                class="form-input"
+                class:border-red-500={formErrors.prezzo_vendita}
+                placeholder="{$t('globalProducts.form.salePricePlaceholder')}"
+              />
+              {#if formErrors.prezzo_vendita}
+                <p class="form-error">{formErrors.prezzo_vendita.join(', ')}</p>
+              {/if}
+            </div>
 
-        <!-- Scorte -->
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="form-label">{$t('globalProducts.form.minStock')}</label>
-            <input
-              type="number"
-              min="0"
-              bind:value={formData.scorta_minima}
-              class="form-input"
-              class:border-red-500={formErrors.scorta_minima}
-              placeholder="{$t('globalProducts.form.minStockPlaceholder')}"
-            />
-            {#if formErrors.scorta_minima}
-              <p class="form-error">{formErrors.scorta_minima.join(', ')}</p>
+            <!-- Scorte -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="form-label">{$t('globalProducts.form.minStock')}</label>
+                <input
+                  type="number"
+                  min="0"
+                  bind:value={formData.scorta_minima}
+                  class="form-input"
+                  class:border-red-500={formErrors.scorta_minima}
+                  placeholder="{$t('globalProducts.form.minStockPlaceholder')}"
+                />
+                {#if formErrors.scorta_minima}
+                  <p class="form-error">{formErrors.scorta_minima.join(', ')}</p>
+                {/if}
+              </div>
+              
+              <div>
+                <label class="form-label">{$t('globalProducts.form.maxStock')}</label>
+                <input
+                  type="number"
+                  min="0"
+                  bind:value={formData.scorta_massima}
+                  class="form-input"
+                  class:border-red-500={formErrors.scorta_massima}
+                  placeholder="{$t('globalProducts.form.maxStockPlaceholder')}"
+                />
+                {#if formErrors.scorta_massima}
+                  <p class="form-error">{formErrors.scorta_massima.join(', ')}</p>
+                {/if}
+              </div>
+            </div>
+
+            <!-- Errori generali -->
+            {#if formErrors.general}
+              <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p class="text-red-600 text-sm">{formErrors.general.join(', ')}</p>
+              </div>
             {/if}
-          </div>
-          
-          <div>
-            <label class="form-label">{$t('globalProducts.form.maxStock')}</label>
-            <input
-              type="number"
-              min="0"
-              bind:value={formData.scorta_massima}
-              class="form-input"
-              class:border-red-500={formErrors.scorta_massima}
-              placeholder="{$t('globalProducts.form.maxStockPlaceholder')}"
-            />
-            {#if formErrors.scorta_massima}
-              <p class="form-error">{formErrors.scorta_massima.join(', ')}</p>
+
+            <!-- Bottoni -->
+            <div class="flex justify-end space-x-3 pt-4">
+              <button type="button" on:click={resetForm} class="btn btn-secondary">
+                {$t('common.cancel')}
+              </button>
+              <button type="submit" disabled={formLoading} class="btn btn-primary">
+                {#if formLoading}<div class="spinner w-4 h-4 mr-2"></div>{/if}
+                {editingId ? $t('common.save') : $t('common.add')}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Colonna destra - Controlli di Compatibilità -->
+        <div class="w-80 bg-gray-50 dark:bg-gray-700 p-4 border-l">
+          <h3 class="text-sm font-semibold text-neutral-900 dark:text-gray-100 mb-4 border-b pb-2">
+            🔒 {$t('globalProducts.form.compatibility.title')}
+          </h3>
+
+          <div class="space-y-4">
+            
+            <!-- Categoria Sicurezza -->
+            <div>
+              <label class="form-label text-xs">🚨 {$t('globalProducts.form.compatibility.securityCategory')}</label>
+              <select bind:value={formData.categoria_sicurezza} class="form-input text-xs">
+                <option value="STANDARD">🟢 {$t('globalProducts.form.compatibility.standard')}</option>
+                <option value="CHIMICO">🔴 {$t('globalProducts.form.compatibility.chemical')}</option>
+                <option value="ALIMENTARE">🟡 {$t('globalProducts.form.compatibility.food')}</option>
+                <option value="FARMACEUTICO">💊 {$t('globalProducts.form.compatibility.pharmaceutical')}</option>
+                <option value="INFIAMMABILE">🔥 {$t('globalProducts.form.compatibility.flammable')}</option>
+              </select>
+            </div>
+
+            <!-- Controlli Temperatura -->
+            <div>
+              <div class="flex items-center space-x-2 mb-2">
+                <input type="checkbox" id="temp_ctrl" bind:checked={formData.richiede_temperatura_controllata} class="rounded text-blue-600" />
+                <label for="temp_ctrl" class="text-xs font-medium">🌡️ {$t('globalProducts.form.compatibility.temperatureControl')}</label>
+              </div>
+              
+              {#if formData.richiede_temperatura_controllata}
+                <div class="grid grid-cols-2 gap-2 ml-4 p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                  <div>
+                    <label class="form-label text-xs">{$t('globalProducts.form.compatibility.minTemp')}</label>
+                    <input type="number" step="0.1" bind:value={formData.temperatura_min} class="form-input text-xs" placeholder="2" />
+                  </div>
+                  <div>
+                    <label class="form-label text-xs">{$t('globalProducts.form.compatibility.maxTemp')}</label>
+                    <input type="number" step="0.1" bind:value={formData.temperatura_max} class="form-input text-xs" placeholder="8" />
+                  </div>
+                </div>
+              {/if}
+            </div>
+
+            <!-- Controlli Accesso -->
+            <div>
+              <label class="form-label text-xs mb-2 block">🔐 {$t('globalProducts.form.compatibility.accessControls')}</label>
+              <div class="space-y-2">
+                <div class="flex items-center space-x-2">
+                  <input type="checkbox" id="acc_ctrl" bind:checked={formData.richiede_accesso_controllato} class="rounded text-red-600" />
+                  <label for="acc_ctrl" class="text-xs">🔐 {$t('globalProducts.form.compatibility.controlledAccess')}</label>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <input type="checkbox" id="incomp_alim" bind:checked={formData.incompatibile_con_alimentari} class="rounded text-orange-600" />
+                  <label for="incomp_alim" class="text-xs">🚫 {$t('globalProducts.form.compatibility.incompatibleFood')}</label>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <input type="checkbox" id="track_lotto" bind:checked={formData.tracking_lotto_obbligatorio} class="rounded text-purple-600" />
+                  <label for="track_lotto" class="text-xs">📋 {$t('globalProducts.form.compatibility.batchTracking')}</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dimensioni Fisiche -->
+            <div>
+              <label class="form-label text-xs mb-2 block">📦 {$t('globalProducts.form.compatibility.physicalDimensions')}</label>
+              <div class="space-y-2">
+                <div>
+                  <label class="form-label text-xs">⚖️ {$t('globalProducts.form.compatibility.unitWeight')}</label>
+                  <input type="number" step="0.001" bind:value={formData.peso_unitario_kg} class="form-input text-xs" placeholder="0.000" />
+                </div>
+                <div>
+                  <label class="form-label text-xs">📦 {$t('globalProducts.form.compatibility.unitVolume')}</label>
+                  <input type="number" bind:value={formData.volume_unitario_cm3} class="form-input text-xs" placeholder="0" />
+                </div>
+                <div>
+                  <label class="form-label text-xs">📏 {$t('globalProducts.form.compatibility.height')}</label>
+                  <input type="number" step="0.1" bind:value={formData.altezza_cm} class="form-input text-xs" placeholder="0.0" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Shelf Life -->
+            <div>
+              <label class="form-label text-xs">📅 {$t('globalProducts.form.compatibility.shelfLife')}</label>
+              <input type="number" bind:value={formData.shelf_life_giorni} class="form-input text-xs" placeholder="365 (opzionale)" />
+            </div>
+
+            <!-- Codici per sostanze pericolose -->
+            {#if formData.categoria_sicurezza === 'CHIMICO' || formData.categoria_sicurezza === 'INFIAMMABILE'}
+              <div class="p-3 bg-red-50 dark:bg-red-900/20 rounded border">
+                <label class="form-label text-xs">⚠️ {$t('globalProducts.form.compatibility.adrCode')}</label>
+                <input type="text" bind:value={formData.codice_adr} class="form-input text-xs mt-1" placeholder="UN1203, UN1805" />
+                <p class="text-xs text-red-600 mt-1">{$t('globalProducts.form.compatibility.adrCodeDesc')}</p>
+              </div>
             {/if}
+
+            {#if formData.categoria_sicurezza === 'CHIMICO'}
+              <div>
+                <label class="form-label text-xs">⚠️ {$t('globalProducts.form.compatibility.dangerClass')}</label>
+                <select bind:value={formData.classe_pericolo} class="form-input text-xs">
+                  <option value="">{$t('globalProducts.form.compatibility.selectDangerClass')}</option>
+                  <option value="CLASSE_1">{$t('globalProducts.form.compatibility.class1')}</option>
+                  <option value="CLASSE_2">{$t('globalProducts.form.compatibility.class2')}</option>
+                  <option value="CLASSE_3">{$t('globalProducts.form.compatibility.class3')}</option>
+                  <option value="CLASSE_4">{$t('globalProducts.form.compatibility.class4')}</option>
+                  <option value="CLASSE_5">{$t('globalProducts.form.compatibility.class5')}</option>
+                  <option value="CLASSE_6">{$t('globalProducts.form.compatibility.class6')}</option>
+                  <option value="CLASSE_8">{$t('globalProducts.form.compatibility.class8')}</option>
+                  <option value="CLASSE_9">{$t('globalProducts.form.compatibility.class9')}</option>
+                </select>
+              </div>
+            {/if}
+
           </div>
         </div>
-
-        <!-- Errori generali -->
-        {#if formErrors.general}
-          <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p class="text-red-600 text-sm">{formErrors.general.join(', ')}</p>
-          </div>
-        {/if}
-
-        <!-- Bottoni -->
-        <div class="flex justify-end space-x-3 pt-4">
-          <button type="button" on:click={resetForm} class="btn btn-secondary">
-            {$t('common.cancel')}
-          </button>
-          <button type="submit" disabled={formLoading} class="btn btn-primary">
-            {#if formLoading}<div class="spinner w-4 h-4 mr-2"></div>{/if}
-            {editingId ? $t('common.save') : $t('common.add')}
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   </div>
 {/if}

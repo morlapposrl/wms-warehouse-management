@@ -423,5 +423,82 @@ export const userRepository = {
     `);
     
     return stmt.get();
+  },
+
+  // === GESTIONE RESET PASSWORD ===
+
+  /**
+   * Crea token di reset password
+   */
+  createPasswordResetToken(utente_id: number, token: string, expires_at: string): boolean {
+    // Prima elimina eventuali token esistenti per questo utente
+    const deleteStmt = db.prepare(`
+      DELETE FROM password_reset_tokens 
+      WHERE utente_id = ? OR expires_at < datetime('now')
+    `);
+    deleteStmt.run(utente_id);
+
+    // Crea nuovo token
+    const insertStmt = db.prepare(`
+      INSERT INTO password_reset_tokens (utente_id, token, expires_at)
+      VALUES (?, ?, ?)
+    `);
+    
+    const result = insertStmt.run(utente_id, token, expires_at);
+    return result.changes > 0;
+  },
+
+  /**
+   * Verifica token di reset password
+   */
+  verifyResetToken(token: string): { utente_id: number; email: string } | null {
+    const stmt = db.prepare(`
+      SELECT 
+        prt.utente_id,
+        u.email
+      FROM password_reset_tokens prt
+      JOIN utenti u ON prt.utente_id = u.id
+      WHERE prt.token = ? 
+        AND prt.expires_at > datetime('now')
+        AND prt.used = 0
+        AND u.attivo = 1
+    `);
+    
+    return stmt.get(token) as { utente_id: number; email: string } | null;
+  },
+
+  /**
+   * Marca token come utilizzato
+   */
+  markTokenAsUsed(token: string): boolean {
+    const stmt = db.prepare(`
+      UPDATE password_reset_tokens 
+      SET used = 1, used_at = datetime('now')
+      WHERE token = ?
+    `);
+    
+    const result = stmt.run(token);
+    return result.changes > 0;
+  },
+
+  /**
+   * Reset password con token
+   */
+  async resetPasswordWithToken(token: string, newPassword: string): Promise<boolean> {
+    // Verifica token
+    const tokenData = this.verifyResetToken(token);
+    if (!tokenData) {
+      return false;
+    }
+
+    // Cambia password
+    const success = await this.changePassword(tokenData.utente_id, newPassword);
+    
+    if (success) {
+      // Marca token come utilizzato
+      this.markTokenAsUsed(token);
+    }
+    
+    return success;
   }
 };

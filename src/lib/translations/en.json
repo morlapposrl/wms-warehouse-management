@@ -11,6 +11,34 @@
     "company": "MicroConnect Solutions",
     "copyright": "© 2025 MicroConnect Solutions. All rights reserved."
   },
+  "resetPassword": {
+    "title": "Reset Password",
+    "subtitle": "Enter your new password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "passwordMinLength": "Minimum 8 characters",
+    "newPasswordPlaceholder": "Enter your new password",
+    "confirmPasswordPlaceholder": "Confirm your new password",
+    "updateButton": "Update Password",
+    "updating": "Updating...",
+    "backToLogin": "← Back to login",
+    "tokenInvalid": "Invalid Token",
+    "tokenInvalidMessage": "The password reset link is invalid or has expired.",
+    "successTitle": "Password updated!",
+    "successMessage": "Your password has been updated successfully. You can now log in."
+  },
+  "forgotPassword": {
+    "title": "Reset Password",
+    "message": "Enter your email to receive the password reset link.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Your email",
+    "sendButton": "Send Reset",
+    "sending": "Sending...",
+    "cancel": "Cancel",
+    "successMessage": "Reset email sent! Check your inbox.",
+    "emailSent": "Email sent! Check your inbox.",
+    "error": "Error sending email"
+  },
   "navigation": {
     "dashboard": "Dashboard",
     "products": "Products",
@@ -501,6 +529,8 @@
     "warehouseLayoutDesc": "Interactive map of locations and zones",
     "orderManagement": "Order Management",
     "orderManagementDesc": "B2B orders for clients",
+    "bottleList": "Bottle Price List",
+    "bottleListDesc": "Bottle pricing management for nightclub",
     "wavePlanning": "Wave Planning",
     "wavePlanningDesc": "Multi-client picking optimization",
     "reportsAnalytics": "Reports & Analytics",
@@ -1509,5 +1539,27 @@
         "MANUTENZIONE": "Maintenance"
       }
     }
+  },
+  "emailReset": {
+    "subject": "Reset Password - Morlappo WMS",
+    "title": "Reset Password",
+    "subtitle": "Multi-Client Warehouse Management",
+    "greeting": "Hello {userName},",
+    "message": "You have requested a password reset for your Morlappo WMS account.",
+    "instruction": "Click the button below to proceed with the password reset:",
+    "buttonText": "Reset Password",
+    "linkInstruction": "If the button doesn't work, copy and paste this link into your browser:",
+    "importantTitle": "Important:",
+    "validityText": "This link is valid for 1 hour",
+    "singleUseText": "It can only be used once",
+    "ignoreText": "If you did not request this reset, please ignore this email",
+    "supportText": "If you have problems or questions, contact us at info@morlappo.com.",
+    "companyName": "MORLAPPO Srl",
+    "legalAddress": "Legal address: L.go Alvaro De Mendoza 4, 64027 Sant'Omero (TE)",
+    "operativeAddress": "Operative address: Via Braida 16, 35010 Villa Del Conte (PD)",
+    "vatNumber": "VAT: 02174570677",
+    "website": "www.morlappo.com",
+    "copyright": "2025 MORLAPPO Srl - All rights reserved.",
+    "textMessage": "Reset Password - Morlappo WMS\n\nHello {userName},\n\nYou have requested a password reset for your Morlappo WMS account.\n\nClick this link to proceed with the reset:\n{resetUrl}\n\nIMPORTANT:\n- This link is valid for 1 hour\n- It can only be used once\n- If you did not request this reset, please ignore this email\n\nFor support: info@morlappo.com\n\nMORLAPPO Srl\nwww.morlappo.com"
   }
 }

@@ -27,6 +27,12 @@
  */
 declare module '$env/static/private' {
 	export const DB_PATH: string;
+	export const BASE_URL: string;
+	export const SMTP_SERVER: string;
+	export const SMTP_PORT: string;
+	export const SMTP_USERNAME: string;
+	export const SMTP_PASSWORD: string;
+	export const FROM_EMAIL: string;
 	export const LESSOPEN: string;
 	export const LANGUAGE: string;
 	export const USER: string;
@@ -117,6 +123,12 @@ declare module '$env/static/public' {
 declare module '$env/dynamic/private' {
 	export const env: {
 		DB_PATH: string;
+		BASE_URL: string;
+		SMTP_SERVER: string;
+		SMTP_PORT: string;
+		SMTP_USERNAME: string;
+		SMTP_PASSWORD: string;
+		FROM_EMAIL: string;
 		LESSOPEN: string;
 		LANGUAGE: string;
 		USER: string;

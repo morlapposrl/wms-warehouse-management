@@ -32,9 +32,9 @@
           title: 'Il futuro della gestione magazzino',
           subtitle: 'Sistema intelligente per magazzini multicommittente',
           description: 'Ottimizza il tuo magazzino con intelligenza artificiale. Gestione completa per 3PL, e-commerce e industria con tracciabilità real-time e analytics avanzati.',
-          cta: 'Inizia Gratis',
+          cta: 'Accedi',
           demo: 'Vedi Demo',
-          clients: 'Scelto da leader del settore'
+          clients: 'Partecipa anche tu a questa avventura!'
         },
         stats: {
           title: 'Numeri che parlano',
@@ -137,7 +137,7 @@
                 'Support email',
                 'App mobile'
               ],
-              cta: 'Inizia gratis',
+              cta: 'Accedi',
               popular: false
             },
             {
@@ -154,7 +154,7 @@
                 'API access',
                 'Integrazioni'
               ],
-              cta: 'Inizia prova',
+              cta: 'Accedi',
               popular: true
             },
             {
@@ -183,7 +183,7 @@
         cta: {
           title: 'Pronto a rivoluzionare il tuo magazzino?',
           description: 'Unisciti a centinaia di aziende che hanno già ottimizzato la loro logistica',
-          button: 'Inizia la Prova Gratuita'
+          button: 'Accedi alla Piattaforma'
         }
       }
     },
@@ -202,9 +202,9 @@
           title: 'The future of warehouse management',
           subtitle: 'Intelligent system for multi-client warehouses',
           description: 'Optimize your warehouse with artificial intelligence. Complete management for 3PL, e-commerce and industry with real-time tracking and advanced analytics.',
-          cta: 'Start Free',
+          cta: 'Login',
           demo: 'Watch Demo',
-          clients: 'Trusted by industry leaders'
+          clients: 'Join this adventure too!'
         },
         stats: {
           title: 'Numbers that speak',
@@ -374,7 +374,7 @@
           description: 'Optimisez votre entrepôt avec l\'intelligence artificielle. Gestion complète pour 3PL, e-commerce et industrie avec traçabilité temps réel et analytics avancés.',
           cta: 'Commencer gratuit',
           demo: 'Voir démo',
-          clients: 'Choisi par les leaders du secteur'
+          clients: 'Participez aussi à cette aventure!'
         },
         stats: {
           title: 'Des chiffres qui parlent',
@@ -544,7 +544,7 @@
           description: 'Optimieren Sie Ihr Lager mit künstlicher Intelligenz. Komplette Verwaltung für 3PL, E-Commerce und Industrie mit Echtzeit-Tracking und erweiterten Analytics.',
           cta: 'Kostenlos starten',
           demo: 'Demo ansehen',
-          clients: 'Vertraut von Branchenführern'
+          clients: 'Nehmen Sie auch an diesem Abenteuer teil!'
         },
         stats: {
           title: 'Zahlen, die sprechen',
@@ -714,7 +714,7 @@
           description: 'Optimiza tu almacén con inteligencia artificial. Gestión completa para 3PL, e-commerce e industria con seguimiento en tiempo real y analytics avanzados.',
           cta: 'Empezar gratis',
           demo: 'Ver demo',
-          clients: 'Elegido por líderes del sector'
+          clients: '¡Participa tú también en esta aventura!'
         },
         stats: {
           title: 'Números que hablan',
@@ -884,7 +884,7 @@
           description: '用人工智能优化您的仓库。为3PL、电子商务和工业提供完整管理，具有实时跟踪和高级分析功能。',
           cta: '免费开始',
           demo: '观看演示',
-          clients: '行业领导者的选择'
+          clients: '你也来参与这个冒险吧！'
         },
         stats: {
           title: '数据说话',
@@ -1079,22 +1079,22 @@
     {
       title: "Dashboard Principale",
       description: "Monitor in tempo reale delle attività del magazzino con KPI avanzati e analytics intelligenti. Controlla produttività, spazio occupato e performance operative.",
-      image: "/placeholder-dashboard.svg"
+      image: "https://connect.microlops.it:3304/placeholder-dashboard.svg"
     },
     {
       title: "Gestione Prodotti",
       description: "Anagrafica completa dei prodotti con codici barcode, categorie personalizzate e gestione scorte automatica per ogni committente.",
-      image: "/placeholder-products.svg"
+      image: "https://connect.microlops.it:3304/placeholder-products.svg"
     },
     {
       title: "Movimenti Magazzino",
       description: "Tracciabilità completa di carico, scarico e movimenti interni con picking ottimizzato e controllo qualità integrato.",
-      image: "/placeholder-movements.svg"
+      image: "https://connect.microlops.it:3304/placeholder-movements.svg"
     },
     {
       title: "Report e Analytics",
       description: "Reportistica avanzata con grafici interattivi, previsioni AI e export automatizzati per la business intelligence.",
-      image: "/placeholder-analytics.svg"
+      image: "https://connect.microlops.it:3304/placeholder-analytics.svg"
     }
   ];
 
@@ -1102,19 +1102,63 @@
     activeGalleryItem = index;
   }
 
-  // Auto-cycle gallery images every 4 seconds
-  let galleryInterval: NodeJS.Timeout;
+  // Gallery scroll control
+  let gallerySection: HTMLElement;
+  let isGalleryFullyVisible = false;
+  let scrollTimeout: NodeJS.Timeout;
   
-  function startGalleryAutoplay() {
-    galleryInterval = setInterval(() => {
-      activeGalleryItem = (activeGalleryItem + 1) % galleryItems.length;
-    }, 4000);
+  function checkGalleryVisibility() {
+    if (!gallerySection) return;
+    
+    const rect = gallerySection.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    
+    // La sezione è completamente visibile se il top è sopra il viewport e il bottom è sotto
+    isGalleryFullyVisible = rect.top <= viewportHeight * 0.1 && rect.bottom >= viewportHeight * 0.9;
   }
   
-  function stopGalleryAutoplay() {
-    if (galleryInterval) {
-      clearInterval(galleryInterval);
+  function handleWheelScroll(event: WheelEvent) {
+    if (!gallerySection) return;
+    
+    checkGalleryVisibility();
+    
+    // Verifica se lo scroll avviene dentro la sezione gallery E se la sezione è completamente visibile
+    const rect = gallerySection.getBoundingClientRect();
+    const isInGalleryArea = event.clientY >= rect.top && event.clientY <= rect.bottom;
+    
+    // Solo se siamo nell'area della gallery E la sezione è completamente visibile
+    if (!isInGalleryArea || !isGalleryFullyVisible) return;
+    
+    // Controlla se dobbiamo bloccare lo scroll in base alla posizione corrente
+    let shouldPreventScroll = false;
+    
+    if (event.deltaY > 0) {
+      // Scroll verso il basso - blocca solo se NON siamo all'ultima immagine
+      shouldPreventScroll = activeGalleryItem < galleryItems.length - 1;
+    } else {
+      // Scroll verso l'alto - blocca solo se NON siamo alla prima immagine
+      shouldPreventScroll = activeGalleryItem > 0;
     }
+    
+    if (!shouldPreventScroll) return; // Lascia passare lo scroll normale
+    
+    event.preventDefault();
+    
+    // Debounce per evitare scroll troppo veloce
+    if (scrollTimeout) {
+      clearTimeout(scrollTimeout);
+    }
+    
+    scrollTimeout = setTimeout(() => {
+      // Cambia immagine
+      if (event.deltaY > 0) {
+        // Scroll verso il basso - prossima immagine
+        activeGalleryItem = (activeGalleryItem + 1) % galleryItems.length;
+      } else {
+        // Scroll verso l'alto - immagine precedente
+        activeGalleryItem = (activeGalleryItem - 1 + galleryItems.length) % galleryItems.length;
+      }
+    }, 50);
   }
 
   // Intersection Observer per le animazioni
@@ -1124,10 +1168,7 @@
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             sectionsVisible[sectionName] = true;
-            // Start gallery autoplay when gallery section becomes visible
-            if (sectionName === 'gallery') {
-              setTimeout(startGalleryAutoplay, 1000); // Start after initial animations
-            }
+            // Gallery autoplay disabled - now controlled by mouse scroll
           }
         });
       },
@@ -1148,10 +1189,24 @@
     setTimeout(() => {
       sectionsVisible.hero = true;
     }, 200);
+    
+    // Aggiungi event listener per lo scroll del mouse
+    document.addEventListener('wheel', handleWheelScroll, { passive: false });
+    
+    // Aggiungi listener per controllare la visibilità durante lo scroll
+    document.addEventListener('scroll', checkGalleryVisibility);
+    window.addEventListener('resize', checkGalleryVisibility);
   });
 
   onDestroy(() => {
-    stopGalleryAutoplay();
+    // Rimuovi event listener
+    document.removeEventListener('wheel', handleWheelScroll);
+    document.removeEventListener('scroll', checkGalleryVisibility);
+    window.removeEventListener('resize', checkGalleryVisibility);
+    
+    if (scrollTimeout) {
+      clearTimeout(scrollTimeout);
+    }
   });
 </script>
 
@@ -1212,6 +1267,11 @@
           <span class="text-purple-300 text-sm font-medium">{content.hero.badge}</span>
         </div>
 
+        <!-- Logo -->
+        <div class="mb-8 opacity-0 {sectionsVisible.hero ? 'animate-fade-in-up animation-delay-100' : ''}">
+          <img src="https://connect.microlops.it:3304/morlappo-logo-white.png" alt="Morlappo Logo" class="w-24 h-24 md:w-32 md:h-32 mx-auto object-contain">
+        </div>
+
         <!-- Main Title -->
         <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight opacity-0 {sectionsVisible.hero ? 'animate-fade-in-up animation-delay-200' : ''}">
           <span class="bg-gradient-to-r from-white via-purple-100 to-purple-300 bg-clip-text text-transparent">
@@ -1229,23 +1289,11 @@
           {content.hero.description}
         </p>
 
-        <!-- Single CTA Button -->
-        <div class="flex justify-center mb-16 opacity-0 {sectionsVisible.hero ? 'animate-fade-in-up animation-delay-800' : ''}">
-          <button 
-            on:click={() => window.location.href = '/login'}
-            class="px-8 py-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 font-semibold text-lg shadow-xl hover:shadow-purple-500/25 hover:scale-105"
-          >
-            Accedi alla Piattaforma
-          </button>
-        </div>
 
-        <!-- Trust Indicators -->
-        <p class="text-sm text-gray-500 mb-8 opacity-0 {sectionsVisible.hero ? 'animate-fade-in-up animation-delay-1000' : ''}">{content.hero.clients}</p>
-        <div class="flex justify-center items-center space-x-8 opacity-40 {sectionsVisible.hero ? 'animate-fade-in-up animation-delay-1200' : ''}">
-          <div class="text-2xl font-bold">SAP</div>
-          <div class="text-2xl font-bold">Oracle</div>
-          <div class="text-2xl font-bold">Microsoft</div>
-          <div class="text-2xl font-bold">Amazon</div>
+        <!-- Join Adventure -->
+        <div class="text-center opacity-0 {sectionsVisible.hero ? 'animate-fade-in-up animation-delay-1000' : ''}">
+          <p class="text-lg text-purple-300 font-semibold mb-4">Partecipa anche tu a questa avventura!</p>
+          <p class="text-sm text-gray-400 max-w-2xl mx-auto">Unisciti alla community di innovatori che stanno costruendo il futuro della logistica digitale</p>
         </div>
       </div>
     </div>
@@ -1259,7 +1307,7 @@
   <section class="py-20 border-t border-gray-800" use:observeSection={'stats'}>
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
       <div class="text-center mb-16">
-        <h2 class="text-3xl font-bold mb-4 opacity-0 {sectionsVisible.stats ? 'animate-fade-in-up' : ''}">{content.stats.title}</h2>
+        <h2 class="text-4xl font-bold text-white mb-6 opacity-0 {sectionsVisible.stats ? 'animate-fade-in-up' : ''}">{content.stats.title}</h2>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
         {#each content.stats.items as stat, index}
@@ -1273,18 +1321,15 @@
   </section>
 
   <!-- Screenshot Gallery Section -->
-  <section class="py-20 border-t border-gray-800" use:observeSection={'gallery'}>
+  <section class="py-20 border-t border-gray-800" use:observeSection={'gallery'} bind:this={gallerySection}>
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
       <div class="text-center mb-16">
-        <h2 class="text-4xl font-bold mb-6 opacity-0 {sectionsVisible.gallery ? 'animate-fade-in-up' : ''}">Esplora la Piattaforma</h2>
+        <h2 class="text-4xl font-bold text-white mb-6 opacity-0 {sectionsVisible.gallery ? 'animate-fade-in-up' : ''}">Esplora la Piattaforma</h2>
         <p class="text-xl text-gray-400 max-w-3xl mx-auto opacity-0 {sectionsVisible.gallery ? 'animate-fade-in-up animation-delay-200' : ''}">Scopri le funzionalità principali del nostro sistema di gestione magazzino</p>
+        <p class="text-sm text-purple-400 mt-4 opacity-0 {sectionsVisible.gallery ? 'animate-fade-in-up animation-delay-400' : ''}">💡 Quando questa sezione è completamente visibile, usa lo scroll del mouse per navigare tra le immagini</p>
       </div>
       
-      <div 
-        class="grid lg:grid-cols-2 gap-12 items-center"
-        on:mouseenter={stopGalleryAutoplay}
-        on:mouseleave={startGalleryAutoplay}
-      >
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
         <!-- Descriptions (Left Side) -->
         <div class="space-y-8 opacity-0 {sectionsVisible.gallery ? 'animate-fade-in-up animation-delay-400' : ''}">
           {#each galleryItems as item, index}
@@ -1303,7 +1348,7 @@
         
         <!-- Screenshot Display (Right Side) -->
         <div class="relative opacity-0 {sectionsVisible.gallery ? 'animate-fade-in-up animation-delay-600' : ''}">
-          <div class="relative rounded-xl overflow-hidden shadow-2xl border border-gray-700">
+          <div class="relative rounded-xl overflow-hidden shadow-2xl border border-gray-700 bg-gray-900 min-h-[400px]">
             {#each galleryItems as item, index}
               <div 
                 class="absolute inset-0 transition-opacity duration-500 {activeGalleryItem === index ? 'opacity-100' : 'opacity-0'}"
@@ -1311,8 +1356,13 @@
                 <img 
                   src={item.image} 
                   alt={item.title}
-                  class="w-full h-auto object-cover"
+                  class="w-full h-[400px] object-contain bg-gray-900"
                   loading="lazy"
+                  on:error={(e) => {
+                    console.log('Image load error:', e.target.src);
+                    e.target.style.display = 'none';
+                  }}
+                  on:load={() => console.log('Image loaded:', item.image)}
                 />
                 <!-- Overlay gradient for better text readability -->
                 <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
@@ -1340,7 +1390,7 @@
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
       <div class="text-center mb-16">
         <p class="text-purple-400 text-sm font-medium uppercase tracking-wider mb-4 opacity-0 {sectionsVisible.features ? 'animate-fade-in-up' : ''}">{content.features.subtitle}</p>
-        <h2 class="text-4xl md:text-5xl font-bold mb-6 opacity-0 {sectionsVisible.features ? 'animate-fade-in-up animation-delay-200' : ''}">{content.features.title}</h2>
+        <h2 class="text-4xl md:text-5xl font-bold text-white mb-6 opacity-0 {sectionsVisible.features ? 'animate-fade-in-up animation-delay-200' : ''}">{content.features.title}</h2>
         <p class="text-xl text-gray-400 max-w-3xl mx-auto opacity-0 {sectionsVisible.features ? 'animate-fade-in-up animation-delay-400' : ''}">{content.features.description}</p>
       </div>
 
@@ -1362,7 +1412,7 @@
   <section class="py-20 border-t border-gray-800" use:observeSection={'technologies'}>
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
       <div class="text-center mb-16">
-        <h2 class="text-4xl font-bold mb-6 opacity-0 {sectionsVisible.technologies ? 'animate-fade-in-up' : ''}">{content.technologies.title}</h2>
+        <h2 class="text-4xl font-bold text-white mb-6 opacity-0 {sectionsVisible.technologies ? 'animate-fade-in-up' : ''}">{content.technologies.title}</h2>
         <p class="text-xl text-gray-400 max-w-3xl mx-auto opacity-0 {sectionsVisible.technologies ? 'animate-fade-in-up animation-delay-200' : ''}">{content.technologies.description}</p>
       </div>
       
@@ -1381,7 +1431,7 @@
   <section class="py-20 border-t border-gray-800" use:observeSection={'testimonials'}>
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
       <div class="text-center mb-16">
-        <h2 class="text-4xl font-bold mb-6 opacity-0 {sectionsVisible.testimonials ? 'animate-fade-in-up' : ''}">{content.testimonials.title}</h2>
+        <h2 class="text-4xl font-bold text-white mb-6 opacity-0 {sectionsVisible.testimonials ? 'animate-fade-in-up' : ''}">{content.testimonials.title}</h2>
       </div>
       
       <div class="grid md:grid-cols-3 gap-8">
@@ -1407,7 +1457,7 @@
   <section id="pricing" class="py-20 border-t border-gray-800" use:observeSection={'pricing'}>
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
       <div class="text-center mb-16">
-        <h2 class="text-4xl font-bold mb-6 opacity-0 {sectionsVisible.pricing ? 'animate-fade-in-up' : ''}">{content.pricing.title}</h2>
+        <h2 class="text-4xl font-bold text-white mb-6 opacity-0 {sectionsVisible.pricing ? 'animate-fade-in-up' : ''}">{content.pricing.title}</h2>
         <p class="text-xl text-gray-400 mb-8 opacity-0 {sectionsVisible.pricing ? 'animate-fade-in-up animation-delay-200' : ''}">{content.pricing.subtitle}</p>
         
         <!-- Pricing Toggle -->
@@ -1431,7 +1481,7 @@
           <div class="bg-gray-900/50 border rounded-xl p-8 relative {plan.popular ? 'border-purple-500' : 'border-gray-800'} opacity-0 {sectionsVisible.pricing ? 'animate-fade-in-up' : ''}" style="animation-delay: {600 + index * 200}ms">
             {#if plan.popular}
               <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span class="bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">Popolare</span>
+                <span class="bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">{currentLang === 'it' ? 'Popolare' : currentLang === 'en' ? 'Popular' : currentLang === 'fr' ? 'Populaire' : currentLang === 'de' ? 'Beliebt' : currentLang === 'es' ? 'Popular' : currentLang === 'zh' ? '热门' : 'Popolare'}</span>
               </div>
             {/if}
             
@@ -1461,12 +1511,6 @@
               {/each}
             </ul>
 
-            <button 
-              on:click={() => plan.cta.includes('Contatt') || plan.cta.includes('Contact') || plan.cta.includes('Nous contacter') || plan.cta.includes('Kontakt') || plan.cta.includes('联系我们') ? window.open('https://canary.discord.com/channels/1417092442569572364/1417092781398032446', '_blank') : goto('/login')}
-              class="w-full py-3 rounded-lg font-semibold transition-all duration-200 {plan.popular ? 'bg-purple-600 text-white hover:bg-purple-700' : 'border border-gray-600 text-gray-300 hover:border-gray-400 hover:text-white'}"
-            >
-              {plan.cta}
-            </button>
           </div>
         {/each}
       </div>
@@ -1485,7 +1529,7 @@
             </svg>
             <span class="text-green-300 text-sm font-medium">Open Source</span>
           </div>
-          <h2 class="text-4xl font-bold mb-6 opacity-0 {sectionsVisible.integration ? 'animate-fade-in-up animation-delay-200' : ''}">Partendo dall'Open Source per creare un progetto globale</h2>
+          <h2 class="text-4xl font-bold text-white mb-6 opacity-0 {sectionsVisible.integration ? 'animate-fade-in-up animation-delay-200' : ''}">Partendo dall'Open Source per creare un progetto globale</h2>
           <p class="text-xl text-gray-400 mb-8 opacity-0 {sectionsVisible.integration ? 'animate-fade-in-up animation-delay-400' : ''}">
             Crediamo nella forza della collaborazione globale. Il nostro WMS parte da un progetto open source per costruire insieme il futuro della logistica mondiale.
           </p>
@@ -1575,60 +1619,70 @@
   <!-- CTA Section -->
   <section class="py-20 border-t border-gray-800" use:observeSection={'cta'}>
     <div class="max-w-4xl mx-auto px-6 lg:px-8 text-center">
-      <h2 class="text-4xl md:text-5xl font-bold mb-6 opacity-0 {sectionsVisible.cta ? 'animate-fade-in-up' : ''}">{content.cta.title}</h2>
+      <h2 class="text-4xl md:text-5xl font-bold text-white mb-6 opacity-0 {sectionsVisible.cta ? 'animate-fade-in-up' : ''}">{content.cta.title}</h2>
       <p class="text-xl text-gray-400 mb-12 opacity-0 {sectionsVisible.cta ? 'animate-fade-in-up animation-delay-200' : ''}">{content.cta.description}</p>
-      <button 
-        on:click={() => window.location.href = '/login'}
-        class="px-8 py-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 font-semibold text-lg shadow-xl hover:shadow-purple-500/25 hover:scale-105 opacity-0 {sectionsVisible.cta ? 'animate-fade-in-up animation-delay-400' : ''}"
-      >
-        {content.cta.button}
-      </button>
     </div>
   </section>
 
   <!-- Footer -->
   <footer class="border-t border-gray-800 py-12">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
-      <div class="grid md:grid-cols-4 gap-8">
+      <div class="grid md:grid-cols-2 gap-12">
+        <!-- Colonna Sinistra: Logo e Descrizione -->
         <div>
-          <div class="flex items-center space-x-3 mb-4">
-            <img src="https://connect.microlops.it:3304/morlappo-logo-white.png" alt="Morlappo Logo" class="w-8 h-8 object-contain">
-            <span class="text-xl font-bold">Morlappo WMS</span>
+          <div class="flex items-center space-x-3 mb-6">
+            <img src="https://connect.microlops.it:3304/morlappo-logo-white.png" alt="Morlappo Logo" class="w-10 h-10 object-contain">
+            <span class="text-2xl font-bold">Morlappo WMS</span>
           </div>
-          <p class="text-gray-400">Soluzioni integrate per la logistica e gestione magazzino con tecnologie avanzate per ottimizzare i processi della supply chain.</p>
+          <p class="text-gray-400 text-lg leading-relaxed mb-8">Soluzioni integrate per la logistica e gestione magazzino con tecnologie avanzate per ottimizzare i processi della supply chain.</p>
+          
+          <div class="space-y-3">
+            <h4 class="font-semibold text-white text-lg mb-4">Collegamenti</h4>
+            <div class="flex flex-wrap gap-6">
+              <a href="#features" class="text-gray-400 hover:text-white transition-colors">Funzionalità</a>
+              <a href="#pricing" class="text-gray-400 hover:text-white transition-colors">Prezzi</a>
+              <a href="https://github.com/morlapposrl/wms-warehouse-management" target="_blank" class="text-gray-400 hover:text-white transition-colors">GitHub</a>
+              <a href="https://canary.discord.com/channels/1417092442569572364/1417092781398032446" target="_blank" class="text-gray-400 hover:text-white transition-colors">Discord Community</a>
+              <a href="https://morlappo.com" target="_blank" class="text-gray-400 hover:text-white transition-colors">Sito Aziendale</a>
+            </div>
+          </div>
         </div>
         
+        <!-- Colonna Destra: Contatti -->
         <div>
-          <h4 class="font-semibold mb-4">Prodotto</h4>
-          <ul class="space-y-2 text-gray-400">
-            <li><a href="#features" class="hover:text-white transition-colors">Funzionalità</a></li>
-            <li><a href="#pricing" class="hover:text-white transition-colors">Prezzi</a></li>
-            <li><a href="https://github.com/morlapposrl/wms-warehouse-management" target="_blank" class="hover:text-white transition-colors">GitHub</a></li>
-          </ul>
-        </div>
-        
-        <div>
-          <h4 class="font-semibold mb-4">Contatti</h4>
-          <ul class="space-y-2 text-gray-400">
-            <li><span class="text-gray-300">WhatsApp:</span> +39 353 481 4795</li>
-            <li><span class="text-gray-300">Sede Legale:</span><br>L.go Alvaro De Mendoza 4<br>64027 Sant'Omero (TE)</li>
-            <li><span class="text-gray-300">Sede Operativa:</span><br>Via Braida 16<br>35010 Villa Del Conte (PD)</li>
-            <li><span class="text-gray-300">P.IVA:</span> 02174570677</li>
-          </ul>
-        </div>
-        
-        <div>
-          <h4 class="font-semibold mb-4">Supporto</h4>
-          <ul class="space-y-2 text-gray-400">
-            <li><a href="https://github.com/morlapposrl/wms-warehouse-management" target="_blank" class="hover:text-white transition-colors">Documentazione</a></li>
-            <li><a href="https://canary.discord.com/channels/1417092442569572364/1417092781398032446" target="_blank" class="hover:text-white transition-colors">Discord Community</a></li>
-            <li><a href="https://morlappo.com" target="_blank" class="hover:text-white transition-colors">Sito Aziendale</a></li>
-          </ul>
+          <h4 class="font-semibold text-white text-lg mb-6">Contatti</h4>
+          <div class="space-y-4 text-gray-400">
+            <div>
+              <span class="text-white font-medium">WhatsApp:</span>
+              <p class="text-xl text-purple-400 font-semibold">+39 353 481 4795</p>
+            </div>
+            
+            <div>
+              <span class="text-white font-medium">Sede Legale:</span>
+              <p>L.go Alvaro De Mendoza 4<br>64027 Sant'Omero (TE)</p>
+            </div>
+            
+            <div>
+              <span class="text-white font-medium">Sede Operativa:</span>
+              <p>Via Braida 16<br>35010 Villa Del Conte (PD)</p>
+            </div>
+            
+            <div>
+              <span class="text-white font-medium">P.IVA:</span>
+              <span class="text-purple-400 font-mono">02174570677</span>
+            </div>
+            
+            <div>
+              <span class="text-white font-medium">Email:</span>
+              <a href="mailto:info@morlappo.com" class="text-purple-400 hover:text-purple-300 transition-colors">info@morlappo.com</a>
+            </div>
+          </div>
         </div>
       </div>
       
-      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+      <div class="border-t border-gray-800 mt-12 pt-8 flex justify-between items-center text-gray-400">
         <p>&copy; 2025 MORLAPPO Srl - Tutti i diritti riservati.</p>
+        <a href="https://morlappo.com" target="_blank" class="text-purple-400 hover:text-purple-300 transition-colors">www.morlappo.com</a>
       </div>
     </div>
   </footer>
@@ -1638,6 +1692,7 @@
   :global(html) {
     scroll-behavior: smooth;
   }
+
 
   /* Animazioni fade-in */
   :global(.animate-fade-in-up) {

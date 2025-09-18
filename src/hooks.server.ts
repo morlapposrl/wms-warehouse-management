@@ -11,7 +11,7 @@ export const handle: Handle = async ({ event, resolve }) => {
   const { cookies, url } = event;
   
   // Route che non richiedono autenticazione
-  const publicRoutes = ['/login', '/api/health'];
+  const publicRoutes = ['/login', '/api/health', '/api/forgot-password', '/reset-password'];
   const isPublicRoute = publicRoutes.some(route => url.pathname.startsWith(route));
   
   // Se è una route pubblica, continua senza controlli

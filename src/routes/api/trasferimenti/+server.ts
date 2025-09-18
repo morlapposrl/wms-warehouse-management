@@ -81,9 +81,12 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
       let ubicazioneOrigine = null;
       
       if (data.tipo_trasferimento === 'QUANTITA') {
-        // Verifica prodotto esistente
+        // Verifica prodotto esistente con vincoli di compatibilità
         prodotto = database.prepare(`
-          SELECT id, codice, descrizione, committente_id, categoria_id, attivo
+          SELECT id, codice, descrizione, committente_id, categoria_id, attivo,
+                 richiede_temperatura_controllata, temperatura_min, temperatura_max,
+                 categoria_sicurezza, incompatibile_con_alimentari, 
+                 richiede_accesso_controllato
           FROM prodotti 
           WHERE id = ? AND committente_id = ? AND attivo = 1
         `).get(data.prodotto_id, data.committente_id);
@@ -102,8 +105,51 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
           throw new Error(`Giacenza insufficiente. Disponibile: ${giacenza?.quantita || 0}, Richiesto: ${data.quantita}`);
         }
 
-        // Per ora non implementiamo controlli peso/volume dettagliati 
-        // poiché la tabella prodotti non ha questi campi nella struttura attuale
+        // 6.1. Controlli temperatura prodotto vs ubicazione destinazione
+        if (prodotto.richiede_temperatura_controllata) {
+          if (!ubicazioneDestinazione.temperatura_controllata) {
+            throw new Error(`Prodotto ${prodotto.codice} richiede temperatura controllata ma ubicazione ${ubicazioneDestinazione.codice_ubicazione} non la supporta`);
+          }
+          
+          // Verifica range temperature se specificato
+          if (prodotto.temperatura_min !== null && ubicazioneDestinazione.temperatura_attuale < prodotto.temperatura_min) {
+            throw new Error(`Temperatura ubicazione ${ubicazioneDestinazione.codice_ubicazione} (${ubicazioneDestinazione.temperatura_attuale}°C) sotto il minimo richiesto per prodotto ${prodotto.codice} (${prodotto.temperatura_min}°C)`);
+          }
+          
+          if (prodotto.temperatura_max !== null && ubicazioneDestinazione.temperatura_attuale > prodotto.temperatura_max) {
+            throw new Error(`Temperatura ubicazione ${ubicazioneDestinazione.codice_ubicazione} (${ubicazioneDestinazione.temperatura_attuale}°C) sopra il massimo richiesto per prodotto ${prodotto.codice} (${prodotto.temperatura_max}°C)`);
+          }
+        }
+
+        // 6.2. Controlli accesso limitato prodotto
+        if (prodotto.richiede_accesso_controllato && !ubicazioneDestinazione.accesso_limitato) {
+          throw new Error(`Prodotto ${prodotto.codice} richiede ubicazione ad accesso controllato ma ${ubicazioneDestinazione.codice_ubicazione} non lo è`);
+        }
+
+        // 6.3. Controlli compatibilità alimentari/chimici
+        if (prodotto.incompatibile_con_alimentari) {
+          // Verifica che nell'ubicazione di destinazione non ci siano prodotti alimentari
+          const prodottiAlimentari = database.prepare(`
+            SELECT p.codice, p.descrizione 
+            FROM prodotti p
+            JOIN giacenze g ON p.id = g.prodotto_id
+            JOIN categorie c ON p.categoria_id = c.id
+            WHERE g.ubicazione_id = ? 
+            AND (c.descrizione LIKE '%aliment%' OR c.descrizione LIKE '%food%' OR c.descrizione LIKE '%cibo%')
+            LIMIT 1
+          `).get(data.ubicazione_destinazione);
+          
+          if (prodottiAlimentari) {
+            throw new Error(`Prodotto ${prodotto.codice} (categoria sicurezza: ${prodotto.categoria_sicurezza}) non compatibile con prodotti alimentari presenti in ubicazione ${ubicazioneDestinazione.codice_ubicazione}`);
+          }
+        }
+
+        // 6.4. Controlli base zona-tipo
+        if (ubicazioneDestinazione.tipo === 'FRIGO' || ubicazioneDestinazione.tipo === 'CONGELATORE') {
+          if (!prodotto.richiede_temperatura_controllata) {
+            console.warn(`⚠️ Prodotto ${prodotto.codice} non richiede temperatura controllata ma viene stoccato in zona ${ubicazioneDestinazione.tipo}`);
+          }
+        }
 
         // Verifica ubicazione origine se specificata
         if (data.ubicazione_origine) {
@@ -359,8 +405,18 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         validazioni_eseguite: {
           ubicazione_attiva: ubicazioneDestinazione.attiva === 1,
           capacita_sufficiente: ubicazioneDestinazione.percentuale_occupazione < 95,
-          controlli_temperatura: true, // Non implementati per ora
-          controlli_accesso: !ubicazioneDestinazione.accesso_limitato || !!ubicazioneDestinazione.badge_richiesto
+          controlli_temperatura: data.tipo_trasferimento === 'QUANTITA' ? {
+            prodotto_richiede_temp_controllata: prodotto?.richiede_temperatura_controllata || false,
+            ubicazione_temp_controllata: ubicazioneDestinazione.temperatura_controllata || false,
+            range_temperatura_ok: !prodotto?.richiede_temperatura_controllata || 
+              ((!prodotto.temperatura_min || ubicazioneDestinazione.temperatura_attuale >= prodotto.temperatura_min) &&
+               (!prodotto.temperatura_max || ubicazioneDestinazione.temperatura_attuale <= prodotto.temperatura_max))
+          } : true,
+          controlli_accesso: !ubicazioneDestinazione.accesso_limitato || !!ubicazioneDestinazione.badge_richiesto,
+          controlli_compatibilita: data.tipo_trasferimento === 'QUANTITA' ? {
+            prodotto_accesso_controllato_ok: !prodotto?.richiede_accesso_controllato || ubicazioneDestinazione.accesso_limitato,
+            compatibilita_alimentari_ok: !prodotto?.incompatibile_con_alimentari // Verifica già eseguita sopra se fallisce
+          } : true
         }
       };
     });

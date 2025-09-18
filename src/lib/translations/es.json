@@ -11,6 +11,32 @@
     "company": "MicroConnect Solutions",
     "copyright": "© 2025 MicroConnect Solutions. Todos los derechos reservados."
   },
+  "resetPassword": {
+    "title": "Restablecer Contraseña",
+    "subtitle": "Ingresa tu nueva contraseña",
+    "newPassword": "Nueva Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "passwordMinLength": "Mínimo 8 caracteres",
+    "newPasswordPlaceholder": "Ingresa tu nueva contraseña",
+    "confirmPasswordPlaceholder": "Confirma tu nueva contraseña",
+    "updateButton": "Actualizar Contraseña",
+    "updating": "Actualizando...",
+    "backToLogin": "← Volver al inicio de sesión",
+    "tokenInvalid": "Token inválido",
+    "tokenInvalidMessage": "El enlace de restablecimiento de contraseña no es válido o ha caducado.",
+    "successTitle": "¡Contraseña actualizada!",
+    "successMessage": "Tu contraseña ha sido actualizada exitosamente. Ahora puedes iniciar sesión."
+  },
+  "forgotPassword": {
+    "title": "Restablecer Contraseña",
+    "message": "Ingresa tu email para recibir el enlace de restablecimiento de contraseña.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Tu email",
+    "sendButton": "Enviar Restablecimiento",
+    "sending": "Enviando...",
+    "cancel": "Cancelar",
+    "successMessage": "¡Email de restablecimiento enviado! Revisa tu bandeja de entrada."
+  },
   "navigation": {
     "dashboard": "Panel de Control",
     "products": "Productos",
@@ -427,6 +453,8 @@
     "warehouseLayoutDesc": "Visualización ubicaciones",
     "orderManagement": "Gestión Pedidos",
     "orderManagementDesc": "Procesamiento de pedidos",
+    "bottleList": "Lista de Botellas",
+    "bottleListDesc": "Gestión de precios de botellas para discoteca",
     "wavePlanning": "Planificación Oleadas",
     "wavePlanningDesc": "Optimización picking",
     "reportsAnalytics": "Informes y Análisis",
@@ -463,6 +491,124 @@
     "contact": "Contacto",
     "email": "Email",
     "phone": "Teléfono"
+  },
+  "globalProducts": {
+    "title": "Productos Globales - Vista Multi-cliente",
+    "subtitle": "Gestión agregada de productos de todos los clientes",
+    "refresh": "Recargar productos",
+    "loading": "Cargando productos...",
+    "filters": "Filtros",
+    "search": "Buscar producto...",
+    "allClients": "Todos los clientes",
+    "allCategories": "Todas las categorías",
+    "allStates": "Todos los estados",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "resetFilters": "Restablecer filtros",
+    "productsCount": "productos",
+    "statistics": {
+      "totalProducts": "Productos Totales",
+      "active": "Activos",
+      "clients": "Clientes",
+      "lowStock": "Stock Bajo"
+    },
+    "table": {
+      "title": "Lista de Productos",
+      "titleWithClient": "Lista de Productos -",
+      "titleAll": "(Todos)",
+      "headers": {
+        "client": "Cliente",
+        "code": "Código",
+        "description": "Descripción",
+        "category": "Categoría",
+        "unitOfMeasure": "U.M.",
+        "currentStock": "Stock",
+        "minStock": "Mín",
+        "maxStock": "Máx",
+        "value": "Valor €",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "filters": {
+        "filterClient": "Filtrar cliente",
+        "filterCode": "Filtrar código",
+        "filterDescription": "Filtrar descripción",
+        "filterCategory": "Filtrar categoría",
+        "filterStatus": "Filtrar estado",
+        "clearFilter": "Limpiar filtro"
+      },
+      "actions": {
+        "viewStock": "Ver Inventario",
+        "manageInContext": "Gestionar en contexto del cliente"
+      }
+    },
+    "emptyState": {
+      "title": "No se encontraron productos",
+      "description": "No hay productos que coincidan con los filtros seleccionados"
+    },
+    "form": {
+      "add": "Nuevo Producto",
+      "edit": "Editar Producto",
+      "code": "Código Producto",
+      "codePlaceholder": "Ej: PROD001",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Ingrese descripción del producto...",
+      "category": "Categoría",
+      "selectCategory": "Seleccionar categoría...",
+      "unitOfMeasure": "Unidad de Medida",
+      "selectUnit": "Seleccionar unidad...",
+      "salePrice": "Precio Venta (€)",
+      "salePricePlaceholder": "0.00",
+      "minStock": "Stock Mínimo",
+      "minStockPlaceholder": "0",
+      "maxStock": "Stock Máximo",
+      "maxStockPlaceholder": "0",
+      "client": "Cliente",
+      "selectClient": "Seleccionar cliente...",
+      "clientReadOnly": "El cliente no puede modificarse después de la creación",
+      "codeReadOnly": "El código del producto no puede modificarse",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "deleteConfirm": "¿Está seguro de que desea eliminar el producto \"{descrizione}\"?",
+      "compatibility": {
+        "title": "Controles de Compatibilidad",
+        "securityCategory": "Categoría de Seguridad",
+        "standard": "Estándar",
+        "chemical": "Químico",
+        "food": "Alimentario",
+        "pharmaceutical": "Farmacéutico",
+        "flammable": "Inflamable",
+        "temperatureControl": "Temperatura Controlada",
+        "minTemp": "Mín (°C)",
+        "maxTemp": "Máx (°C)",
+        "accessControls": "Controles de Acceso",
+        "controlledAccess": "Acceso Controlado",
+        "incompatibleFood": "Incompatible con Alimentos",
+        "batchTracking": "Seguimiento de Lote Obligatorio",
+        "physicalDimensions": "Dimensiones Físicas",
+        "unitWeight": "Peso Unitario (kg)",
+        "unitVolume": "Volumen (cm³)",
+        "height": "Altura (cm)",
+        "shelfLife": "Vida Útil (días)",
+        "shelfLifePlaceholder": "365 (opcional)",
+        "adrCode": "Código ADR",
+        "adrCodePlaceholder": "UN1203, UN1805",
+        "adrCodeDesc": "Código de transporte de sustancias peligrosas",
+        "dangerClass": "Clase de Peligro",
+        "selectDangerClass": "Seleccionar clase",
+        "class1": "Clase 1 - Explosivos",
+        "class2": "Clase 2 - Gases",
+        "class3": "Clase 3 - Líquidos inflamables",
+        "class4": "Clase 4 - Sólidos inflamables",
+        "class5": "Clase 5 - Sustancias comburentes",
+        "class6": "Clase 6 - Sustancias tóxicas",
+        "class8": "Clase 8 - Sustancias corrosivas",
+        "class9": "Clase 9 - Sustancias diversas"
+      }
+    },
+    "actions": {
+      "addProduct": "Nuevo Producto"
+    }
   },
   "orders": {
     "title": "Gestión Pedidos",
@@ -1138,5 +1284,27 @@
         "MANUTENZIONE": "Mantenimiento"
       }
     }
+  },
+  "emailReset": {
+    "subject": "Restablecer Contraseña - Morlappo WMS",
+    "title": "Restablecer Contraseña",
+    "subtitle": "Gestión de Almacén Multi-Cliente",
+    "greeting": "Hola {userName},",
+    "message": "Has solicitado el restablecimiento de contraseña para tu cuenta Morlappo WMS.",
+    "instruction": "Haz clic en el botón de abajo para proceder con el restablecimiento de contraseña:",
+    "buttonText": "Restablecer Contraseña",
+    "linkInstruction": "Si el botón no funciona, copia y pega este enlace en tu navegador:",
+    "importantTitle": "Importante:",
+    "validityText": "Este enlace es válido por 1 hora",
+    "singleUseText": "Solo puede usarse una vez",
+    "ignoreText": "Si no solicitaste este restablecimiento, ignora este email",
+    "supportText": "Si tienes problemas o preguntas, contáctanos en info@morlappo.com.",
+    "companyName": "MORLAPPO Srl",
+    "legalAddress": "Dirección legal: L.go Alvaro De Mendoza 4, 64027 Sant'Omero (TE)",
+    "operativeAddress": "Dirección operativa: Via Braida 16, 35010 Villa Del Conte (PD)",
+    "vatNumber": "CIF: 02174570677",
+    "website": "www.morlappo.com",
+    "copyright": "2025 MORLAPPO Srl - Todos los derechos reservados.",
+    "textMessage": "Restablecer Contraseña - Morlappo WMS\n\nHola {userName},\n\nHas solicitado el restablecimiento de contraseña para tu cuenta Morlappo WMS.\n\nHaz clic en este enlace para proceder con el restablecimiento:\n{resetUrl}\n\nIMPORTANTE:\n- Este enlace es válido por 1 hora\n- Solo puede usarse una vez\n- Si no solicitaste este restablecimiento, ignora este email\n\nPara soporte: info@morlappo.com\n\nMORLAPPO Srl\nwww.morlappo.com"
   }
 }

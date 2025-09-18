@@ -11,6 +11,40 @@
     "company": "MicroConnect Solutions",
     "copyright": "© 2025 MicroConnect Solutions. Tutti i diritti riservati."
   },
+  "resetPassword": {
+    "title": "Reset Password",
+    "subtitle": "Inserisci la tua nuova password",
+    "newPassword": "Nuova Password",
+    "confirmPassword": "Conferma Password",
+    "passwordMinLength": "Minimo 8 caratteri",
+    "newPasswordPlaceholder": "Inserisci la tua nuova password",
+    "confirmPasswordPlaceholder": "Conferma la tua nuova password",
+    "updateButton": "Aggiorna Password",
+    "updating": "Aggiornamento...",
+    "backToLogin": "← Torna al login",
+    "tokenInvalid": "Token non valido",
+    "tokenInvalidMessage": "Il link di reset password non è valido o è scaduto.",
+    "successTitle": "Password aggiornata!",
+    "successMessage": "La tua password è stata aggiornata con successo. Ora puoi effettuare il login."
+  },
+  "forgotPassword": {
+    "title": "Reset Password",
+    "message": "Inserisci la tua email per ricevere il link di reset password.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "La tua email",
+    "sendButton": "Invia Reset",
+    "sending": "Invio...",
+    "cancel": "Annulla",
+    "successMessage": "Email di reset inviata! Controlla la tua casella di posta.",
+    "emailSent": "Email inviata! Controlla la tua casella di posta.",
+    "error": "Errore nell'invio dell'email"
+  },
+  "common": {
+    "error": "Errore",
+    "connectionError": "Errore di connessione",
+    "remember": "Ricordami",
+    "forgotPassword": "Password dimenticata?"
+  },
   "navigation": {
     "dashboard": "Dashboard",
     "products": "Prodotti",
@@ -409,6 +443,8 @@
     "warehouseLayoutDesc": "Mappa interattiva ubicazioni e zone",
     "orderManagement": "Gestione Ordini",
     "orderManagementDesc": "Ordini B2B per committenti",
+    "bottleList": "Listino Bottiglie",
+    "bottleListDesc": "Gestione prezzi bottiglie per discoteca",
     "wavePlanning": "Wave Planning",
     "wavePlanningDesc": "Ottimizzazione picking multi-committente",
     "reportsAnalytics": "Report & Analytics",
@@ -781,7 +817,42 @@
       "codeReadOnly": "Il codice prodotto non può essere modificato",
       "save": "Salva",
       "cancel": "Annulla",
-      "deleteConfirm": "Sei sicuro di voler eliminare il prodotto \"{descrizione}\"?"
+      "deleteConfirm": "Sei sicuro di voler eliminare il prodotto \"{descrizione}\"?",
+      "compatibility": {
+        "title": "Controlli di Compatibilità",
+        "securityCategory": "Categoria Sicurezza",
+        "standard": "Standard",
+        "chemical": "Chimico",
+        "food": "Alimentare", 
+        "pharmaceutical": "Farmaceutico",
+        "flammable": "Infiammabile",
+        "temperatureControl": "Temperatura Controllata",
+        "minTemp": "Min (°C)",
+        "maxTemp": "Max (°C)",
+        "accessControls": "Controlli Accesso",
+        "controlledAccess": "Accesso Controllato",
+        "incompatibleFood": "Incompatibile con Alimentari",
+        "batchTracking": "Tracking Lotto Obbligatorio",
+        "physicalDimensions": "Dimensioni Fisiche",
+        "unitWeight": "Peso Unitario (kg)",
+        "unitVolume": "Volume (cm³)",
+        "height": "Altezza (cm)",
+        "shelfLife": "Shelf Life (giorni)",
+        "shelfLifePlaceholder": "365 (opzionale)",
+        "adrCode": "Codice ADR",
+        "adrCodePlaceholder": "UN1203, UN1805",
+        "adrCodeDesc": "Codice trasporto sostanze pericolose",
+        "dangerClass": "Classe di Pericolo",
+        "selectDangerClass": "Seleziona classe",
+        "class1": "Classe 1 - Esplosivi",
+        "class2": "Classe 2 - Gas",
+        "class3": "Classe 3 - Liquidi infiammabili",
+        "class4": "Classe 4 - Solidi infiammabili", 
+        "class5": "Classe 5 - Sostanze comburenti",
+        "class6": "Classe 6 - Sostanze tossiche",
+        "class8": "Classe 8 - Sostanze corrosive",
+        "class9": "Classe 9 - Sostanze varie"
+      }
     },
     "actions": {
       "addProduct": "Nuovo Prodotto"
@@ -1619,5 +1690,27 @@
         "MANUTENZIONE": "Manutenzione"
       }
     }
+  },
+  "emailReset": {
+    "subject": "Reset Password - Morlappo WMS",
+    "title": "Reset Password",
+    "subtitle": "Gestionale Magazzino Multicommittente",
+    "greeting": "Ciao {userName},",
+    "message": "Hai richiesto il reset della password per il tuo account Morlappo WMS.",
+    "instruction": "Clicca sul pulsante qui sotto per procedere con il reset della password:",
+    "buttonText": "Reset Password",
+    "linkInstruction": "Se il pulsante non funziona, copia e incolla questo link nel tuo browser:",
+    "importantTitle": "Importante:",
+    "validityText": "Questo link è valido per 1 ora",
+    "singleUseText": "Può essere utilizzato una sola volta",
+    "ignoreText": "Se non hai richiesto questo reset, ignora questa email",
+    "supportText": "Se hai problemi o domande, contattaci a info@morlappo.com.",
+    "companyName": "MORLAPPO Srl",
+    "legalAddress": "Sede legale: L.go Alvaro De Mendoza 4, 64027 Sant'Omero (TE)",
+    "operativeAddress": "Sede operativa: Via Braida 16, 35010 Villa Del Conte (PD)",
+    "vatNumber": "P.IVA: 02174570677",
+    "website": "www.morlappo.com",
+    "copyright": "2025 MORLAPPO Srl - Tutti i diritti riservati.",
+    "textMessage": "Reset Password - Morlappo WMS\n\nCiao {userName},\n\nHai richiesto il reset della password per il tuo account Morlappo WMS.\n\nClicca su questo link per procedere con il reset:\n{resetUrl}\n\nIMPORTANTE:\n- Questo link è valido per 1 ora\n- Può essere utilizzato una sola volta\n- Se non hai richiesto questo reset, ignora questa email\n\nPer supporto: info@morlappo.com\n\nMORLAPPO Srl\nwww.morlappo.com"
   }
 }
