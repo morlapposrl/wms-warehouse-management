@@ -1,1 +1,1 @@
-export { default as component } from "../../../../src/routes/auth/listino-bottiglie/+page.svelte";
+export { default as component } from "../../../../src/routes/auth/magazzini/+page.svelte";

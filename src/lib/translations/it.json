@@ -443,8 +443,6 @@
     "warehouseLayoutDesc": "Mappa interattiva ubicazioni e zone",
     "orderManagement": "Gestione Ordini",
     "orderManagementDesc": "Ordini B2B per committenti",
-    "bottleList": "Listino Bottiglie",
-    "bottleListDesc": "Gestione prezzi bottiglie per discoteca",
     "wavePlanning": "Wave Planning",
     "wavePlanningDesc": "Ottimizzazione picking multi-committente",
     "reportsAnalytics": "Report & Analytics",

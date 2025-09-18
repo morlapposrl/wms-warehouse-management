@@ -102,9 +102,6 @@
 	"/api/giacenze/realtime": [
 		"src/routes/api/giacenze/realtime/+server.ts"
 	],
-	"/api/listino-bottiglie": [
-		"src/routes/api/listino-bottiglie/+server.js"
-	],
 	"/api/logs": [
 		"src/routes/api/logs/+server.ts"
 	],
@@ -218,9 +215,6 @@
 	],
 	"/auth/giacenze": [
 		"src/routes/auth/giacenze/+page.server.ts",
-		"src/routes/+layout.server.ts"
-	],
-	"/auth/listino-bottiglie": [
 		"src/routes/+layout.server.ts"
 	],
 	"/auth/magazzini": [

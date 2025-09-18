@@ -36,8 +36,7 @@ export const nodes = [
 	() => import('./nodes/32'),
 	() => import('./nodes/33'),
 	() => import('./nodes/34'),
-	() => import('./nodes/35'),
-	() => import('./nodes/36')
+	() => import('./nodes/35')
 ];
 
 export const server_loads = [0];
@@ -54,29 +53,28 @@ export const dictionary = {
 		"/auth/dashboard": [~10,[2]],
 		"/auth/fornitori": [12,[2]],
 		"/auth/giacenze": [~13,[2]],
-		"/auth/listino-bottiglie": [14,[2]],
-		"/auth/magazzini": [15,[2]],
-		"/auth/magazzino": [~16,[2]],
-		"/auth/movimenti": [~17,[2]],
-		"/auth/movimenti/nuovo": [~18,[2]],
-		"/auth/ordini": [~19,[2]],
-		"/auth/ordini/nuovo": [~21,[2]],
-		"/auth/ordini/[id]": [~20,[2]],
-		"/auth/ottimizzazione": [~22,[2]],
-		"/auth/prodotti": [23,[2]],
-		"/auth/sistema": [24,[2]],
-		"/auth/tipi-udc": [~25,[2]],
-		"/auth/transfer": [26,[2]],
-		"/auth/udc": [~27,[2]],
-		"/auth/udc/[id]": [~28,[2]],
-		"/auth/unita-misura": [29,[2]],
-		"/auth/utenti": [~30,[2]],
-		"/auth/wave-planning": [~31,[2]],
-		"/auth/wave-planning/[id]": [~32,[2]],
-		"/login": [~33],
-		"/logs": [34],
-		"/reset-password": [~35],
-		"/test-css": [36]
+		"/auth/magazzini": [14,[2]],
+		"/auth/magazzino": [~15,[2]],
+		"/auth/movimenti": [~16,[2]],
+		"/auth/movimenti/nuovo": [~17,[2]],
+		"/auth/ordini": [~18,[2]],
+		"/auth/ordini/nuovo": [~20,[2]],
+		"/auth/ordini/[id]": [~19,[2]],
+		"/auth/ottimizzazione": [~21,[2]],
+		"/auth/prodotti": [22,[2]],
+		"/auth/sistema": [23,[2]],
+		"/auth/tipi-udc": [~24,[2]],
+		"/auth/transfer": [25,[2]],
+		"/auth/udc": [~26,[2]],
+		"/auth/udc/[id]": [~27,[2]],
+		"/auth/unita-misura": [28,[2]],
+		"/auth/utenti": [~29,[2]],
+		"/auth/wave-planning": [~30,[2]],
+		"/auth/wave-planning/[id]": [~31,[2]],
+		"/login": [~32],
+		"/logs": [33],
+		"/reset-password": [~34],
+		"/test-css": [35]
 	};
 
 export const hooks = {

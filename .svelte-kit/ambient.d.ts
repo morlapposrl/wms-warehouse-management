@@ -26,73 +26,110 @@
  * ```
  */
 declare module '$env/static/private' {
-	export const DB_PATH: string;
-	export const BASE_URL: string;
 	export const SMTP_SERVER: string;
 	export const SMTP_PORT: string;
 	export const SMTP_USERNAME: string;
 	export const SMTP_PASSWORD: string;
 	export const FROM_EMAIL: string;
+	export const NODE_ENV: string;
 	export const LESSOPEN: string;
+	export const pm_out_log_path: string;
 	export const LANGUAGE: string;
 	export const USER: string;
 	export const SSH_CLIENT: string;
-	export const CLAUDE_CODE_ENTRYPOINT: string;
 	export const npm_config_user_agent: string;
-	export const GIT_EDITOR: string;
+	export const restart_time: string;
 	export const XDG_SESSION_TYPE: string;
 	export const BUN_INSTALL: string;
 	export const npm_node_execpath: string;
+	export const PM2_USAGE: string;
 	export const SHLVL: string;
 	export const npm_config_noproxy: string;
 	export const MOTD_SHOWN: string;
 	export const HOME: string;
+	export const username: string;
 	export const OLDPWD: string;
+	export const PM2_HOME: string;
+	export const created_at: string;
 	export const NVM_BIN: string;
 	export const SSH_TTY: string;
 	export const npm_package_json: string;
 	export const NVM_INC: string;
+	export const pm_cwd: string;
+	export const namespace: string;
 	export const npm_config_userconfig: string;
 	export const npm_config_local_prefix: string;
+	export const filter_env: string;
 	export const DBUS_SESSION_BUS_ADDRESS: string;
+	export const pm_exec_path: string;
+	export const unstable_restarts: string;
+	export const pm_id: string;
+	export const kill_retry_time: string;
 	export const COLOR: string;
 	export const NVM_DIR: string;
 	export const LOGNAME: string;
+	export const node_args: string;
+	export const versioning: string;
+	export const autostart: string;
 	export const _: string;
 	export const npm_config_prefix: string;
 	export const npm_config_npm_version: string;
 	export const XDG_SESSION_CLASS: string;
 	export const TERM: string;
 	export const XDG_SESSION_ID: string;
-	export const OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: string;
+	export const exec_mode: string;
 	export const npm_config_cache: string;
+	export const NODE_APP_INSTANCE: string;
+	export const axm_monitor: string;
+	export const windowsHide: string;
+	export const status: string;
 	export const npm_config_node_gyp: string;
 	export const PATH: string;
+	export const exec_interpreter: string;
+	export const watch: string;
 	export const NODE: string;
 	export const npm_package_name: string;
-	export const COREPACK_ENABLE_AUTO_PIN: string;
+	export const prev_restart_delay: string;
 	export const XDG_RUNTIME_DIR: string;
-	export const NoDefaultCurrentDirectoryInExePath: string;
+	export const axm_options: string;
+	export const axm_dynamic: string;
 	export const LANG: string;
 	export const DOTNET_BUNDLE_EXTRACT_BASE_DIR: string;
+	export const vizion: string;
+	export const pm_pid_path: string;
+	export const pm_err_log_path: string;
+	export const treekill: string;
 	export const LS_COLORS: string;
 	export const npm_lifecycle_script: string;
 	export const SHELL: string;
+	export const pmx: string;
+	export const unique_id: string;
 	export const npm_package_version: string;
 	export const npm_lifecycle_event: string;
+	export const automation: string;
+	export const exit_code: string;
 	export const LESSCLOSE: string;
-	export const CLAUDECODE: string;
+	export const vizion_running: string;
+	export const instance_var: string;
+	export const name: string;
 	export const npm_config_globalconfig: string;
 	export const npm_config_init_module: string;
 	export const PWD: string;
 	export const npm_execpath: string;
+	export const env: string;
 	export const SSH_CONNECTION: string;
 	export const NVM_CD_FLAGS: string;
 	export const npm_config_global_prefix: string;
+	export const km_link: string;
+	export const instances: string;
+	export const axm_actions: string;
+	export const merge_logs: string;
 	export const npm_command: string;
+	export const autorestart: string;
+	export const pm_uptime: string;
 	export const INIT_CWD: string;
 	export const EDITOR: string;
-	export const NODE_ENV: string;
+	export const VITE_USER_NODE_ENV: string;
 }
 
 /**
@@ -105,7 +142,7 @@ declare module '$env/static/private' {
  * ```
  */
 declare module '$env/static/public' {
-	
+	export const PUBLIC_URL: string;
 }
 
 /**
@@ -122,73 +159,110 @@ declare module '$env/static/public' {
  */
 declare module '$env/dynamic/private' {
 	export const env: {
-		DB_PATH: string;
-		BASE_URL: string;
 		SMTP_SERVER: string;
 		SMTP_PORT: string;
 		SMTP_USERNAME: string;
 		SMTP_PASSWORD: string;
 		FROM_EMAIL: string;
+		NODE_ENV: string;
 		LESSOPEN: string;
+		pm_out_log_path: string;
 		LANGUAGE: string;
 		USER: string;
 		SSH_CLIENT: string;
-		CLAUDE_CODE_ENTRYPOINT: string;
 		npm_config_user_agent: string;
-		GIT_EDITOR: string;
+		restart_time: string;
 		XDG_SESSION_TYPE: string;
 		BUN_INSTALL: string;
 		npm_node_execpath: string;
+		PM2_USAGE: string;
 		SHLVL: string;
 		npm_config_noproxy: string;
 		MOTD_SHOWN: string;
 		HOME: string;
+		username: string;
 		OLDPWD: string;
+		PM2_HOME: string;
+		created_at: string;
 		NVM_BIN: string;
 		SSH_TTY: string;
 		npm_package_json: string;
 		NVM_INC: string;
+		pm_cwd: string;
+		namespace: string;
 		npm_config_userconfig: string;
 		npm_config_local_prefix: string;
+		filter_env: string;
 		DBUS_SESSION_BUS_ADDRESS: string;
+		pm_exec_path: string;
+		unstable_restarts: string;
+		pm_id: string;
+		kill_retry_time: string;
 		COLOR: string;
 		NVM_DIR: string;
 		LOGNAME: string;
+		node_args: string;
+		versioning: string;
+		autostart: string;
 		_: string;
 		npm_config_prefix: string;
 		npm_config_npm_version: string;
 		XDG_SESSION_CLASS: string;
 		TERM: string;
 		XDG_SESSION_ID: string;
-		OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: string;
+		exec_mode: string;
 		npm_config_cache: string;
+		NODE_APP_INSTANCE: string;
+		axm_monitor: string;
+		windowsHide: string;
+		status: string;
 		npm_config_node_gyp: string;
 		PATH: string;
+		exec_interpreter: string;
+		watch: string;
 		NODE: string;
 		npm_package_name: string;
-		COREPACK_ENABLE_AUTO_PIN: string;
+		prev_restart_delay: string;
 		XDG_RUNTIME_DIR: string;
-		NoDefaultCurrentDirectoryInExePath: string;
+		axm_options: string;
+		axm_dynamic: string;
 		LANG: string;
 		DOTNET_BUNDLE_EXTRACT_BASE_DIR: string;
+		vizion: string;
+		pm_pid_path: string;
+		pm_err_log_path: string;
+		treekill: string;
 		LS_COLORS: string;
 		npm_lifecycle_script: string;
 		SHELL: string;
+		pmx: string;
+		unique_id: string;
 		npm_package_version: string;
 		npm_lifecycle_event: string;
+		automation: string;
+		exit_code: string;
 		LESSCLOSE: string;
-		CLAUDECODE: string;
+		vizion_running: string;
+		instance_var: string;
+		name: string;
 		npm_config_globalconfig: string;
 		npm_config_init_module: string;
 		PWD: string;
 		npm_execpath: string;
+		env: string;
 		SSH_CONNECTION: string;
 		NVM_CD_FLAGS: string;
 		npm_config_global_prefix: string;
+		km_link: string;
+		instances: string;
+		axm_actions: string;
+		merge_logs: string;
 		npm_command: string;
+		autorestart: string;
+		pm_uptime: string;
 		INIT_CWD: string;
 		EDITOR: string;
-		NODE_ENV: string;
+		VITE_USER_NODE_ENV: string;
 		[key: `PUBLIC_${string}`]: undefined;
 		[key: `${string}`]: string | undefined;
 	}
@@ -206,6 +280,7 @@ declare module '$env/dynamic/private' {
  */
 declare module '$env/dynamic/public' {
 	export const env: {
+		PUBLIC_URL: string;
 		[key: `PUBLIC_${string}`]: string | undefined;
 	}
 }

@@ -545,6 +545,19 @@
   .sortable-header .absolute {
     z-index: 1000;
   }
+  
+  /* Modal styles */
+  .modal-backdrop {
+    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+  }
+  
+  .modal-content {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-screen overflow-y-auto;
+  }
+  
+  .modal-header {
+    @apply flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700;
+  }
 </style>
 
 <div class="w-full">
@@ -1132,16 +1145,18 @@
   on:close={handleTransferClose}
 />
 
-<!-- Load Modal SEMPLICE E COMPATTA -->
+<!-- Load Modal -->
 {#if showLoadModal}
-  <div class="fixed inset-0 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70 flex items-center justify-center z-50">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-hidden">
+  <div class="modal-backdrop" on:click={closeLoadModal}>
+    <div class="modal-content" on:click|stopPropagation>
       
-      <!-- Header semplice -->
-      <div class="bg-green-600 px-4 py-3 flex justify-between items-center">
-        <h2 class="text-white font-semibold">📥 {$t('movements.load.title')}</h2>
+      <!-- Header moderno -->
+      <div class="modal-header bg-white dark:bg-gray-800">
+        <h2 class="text-xl font-semibold text-neutral-900 dark:text-gray-100">
+          📥 {$t('movements.load.title')}
+        </h2>
         <button 
-          class="text-white hover:text-gray-200 text-xl"
+          class="text-neutral-400 hover:text-neutral-600 dark:text-gray-400 dark:hover:text-gray-200 text-xl"
           on:click={closeLoadModal}
         >
           ×
@@ -1149,17 +1164,18 @@
       </div>
       
       <!-- Content scrollabile -->
-      <div class="overflow-y-auto max-h-[calc(90vh-120px)]">
-        <form on:submit|preventDefault={submitLoad} class="p-4 space-y-4">
+      <div class="flex bg-white dark:bg-gray-800">
+        <div class="flex-1 p-6">
+          <form on:submit|preventDefault={submitLoad} class="space-y-4">
           
           <!-- Riga 1: Cliente e Ordine -->
           <div class="grid grid-cols-2 gap-4">
             <!-- Cliente -->
             <div>
-              <label class="block text-sm font-medium mb-1">{$t('movements.load.client')} *</label>
+              <label class="form-label">{$t('movements.load.client')} *</label>
               <select 
                 bind:value={loadForm.committente_id}
-                class="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700"
+                class="form-input"
                 required
               >
                 <option value="">{$t('movements.load.selectClient')}</option>
@@ -1171,11 +1187,11 @@
 
             <!-- Ordine -->
             <div>
-              <label class="block text-sm font-medium mb-1">{$t('movements.load.order')} *</label>
+              <label class="form-label">{$t('movements.load.order')} *</label>
               <select 
                 bind:value={loadForm.ordine_id}
                 on:change={onOrdineChange}
-                class="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700"
+                class="form-input"
                 disabled={!loadForm.committente_id}
                 required
               >
@@ -1189,10 +1205,10 @@
           
           <!-- Riga 2: Prodotto -->
           <div>
-            <label class="block text-sm font-medium mb-1">{$t('movements.load.product')} *</label>
+            <label class="form-label">{$t('movements.load.product')} *</label>
             <select 
               bind:value={loadForm.prodotto_id}
-              class="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700"
+              class="form-input"
               required
               disabled={!loadForm.committente_id}
             >
@@ -1206,31 +1222,31 @@
           <!-- Riga 3: Quantità, Prezzo, Ubicazione -->
           <div class="grid grid-cols-3 gap-4">
             <div>
-              <label class="block text-sm font-medium mb-1">{$t('movements.load.quantity')} *</label>
+              <label class="form-label">{$t('movements.load.quantity')} *</label>
               <input 
                 type="number" 
                 bind:value={loadForm.quantita}
-                class="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700"
-                placeholder="Qtà"
+                class="form-input"
+                placeholder="{$t('movements.load.quantityPlaceholder')}"
                 min="1"
                 required
               />
             </div>
             <div>
-              <label class="block text-sm font-medium mb-1">{$t('movements.load.unitPrice')}</label>
+              <label class="form-label">{$t('movements.load.unitPrice')}</label>
               <input 
                 type="number" 
                 step="0.01"
                 bind:value={loadForm.prezzo}
-                class="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700"
-                placeholder="€"
+                class="form-input"
+                placeholder="{$t('movements.load.pricePlaceholder')}"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium mb-1">{$t('movements.load.location')} *</label>
+              <label class="form-label">{$t('movements.load.location')} *</label>
               <select 
                 bind:value={loadForm.ubicazione_id}
-                class="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700"
+                class="form-input"
                 required
               >
                 <option value="">{$t('movements.load.selectLocation')}</option>
@@ -1244,10 +1260,10 @@
           <!-- Riga 4: UDC e Tipo UDC -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium mb-1">{$t('movements.load.udc')}</label>
+              <label class="form-label">{$t('movements.load.udc')}</label>
               <select 
                 bind:value={loadForm.udc_id}
-                class="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700"
+                class="form-input"
               >
                 <option value="">{$t('movements.load.createNewUdc')}</option>
                 {#each udcDisponibili as udc}
@@ -1256,10 +1272,10 @@
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium mb-1">{$t('movements.load.udcType')}</label>
+              <label class="form-label">{$t('movements.load.udcType')}</label>
               <select 
                 bind:value={loadForm.tipo_udc_id}
-                class="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700"
+                class="form-input"
                 required
               >
                 {#each tipiUdcDisponibili as tipo}
@@ -1272,20 +1288,20 @@
           <!-- Riga 5: Campi opzionali -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium mb-1">{$t('movements.load.batch')}</label>
+              <label class="form-label">{$t('movements.load.batch')}</label>
               <input 
                 type="text" 
                 bind:value={loadForm.lotto}
-                class="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700"
-                placeholder="Lotto"
+                class="form-input"
+                placeholder="{$t('movements.load.batchPlaceholder')}"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium mb-1">{$t('movements.load.expiry')}</label>
+              <label class="form-label">{$t('movements.load.expiry')}</label>
               <input 
                 type="date" 
                 bind:value={loadForm.data_scadenza}
-                class="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700"
+                class="form-input"
               />
             </div>
           </div>
@@ -1293,45 +1309,46 @@
           <!-- Riga 6: Pesi -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium mb-1">{$t('movements.load.grossWeight')}</label>
+              <label class="form-label">{$t('movements.load.grossWeight')}</label>
               <input 
                 type="number" 
                 step="0.01"
                 bind:value={loadForm.peso_lordo}
-                class="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700"
-                placeholder="kg"
+                class="form-input"
+                placeholder="{$t('movements.load.weightPlaceholder')}"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium mb-1">{$t('movements.load.netWeight')}</label>
+              <label class="form-label">{$t('movements.load.netWeight')}</label>
               <input 
                 type="number" 
                 step="0.01"
                 bind:value={loadForm.peso_netto}
-                class="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700"
-                placeholder="kg"
+                class="form-input"
+                placeholder="{$t('movements.load.weightPlaceholder')}"
               />
             </div>
           </div>
           
           <!-- Note -->
           <div>
-            <label class="block text-sm font-medium mb-1">{$t('movements.load.notes')}</label>
+            <label class="form-label">{$t('movements.load.notes')}</label>
             <textarea 
               bind:value={loadForm.note}
-              class="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700 resize-none"
+              class="form-input resize-none"
               rows="3"
               placeholder="{$t('movements.load.notesPlaceholder')}"
             ></textarea>
           </div>
-        </form>
+          </form>
+        </div>
       </div>
 
-      <!-- Footer semplice -->
-      <div class="border-t bg-gray-50 dark:bg-gray-800 px-4 py-3 flex justify-end gap-3">
+      <!-- Footer moderno -->
+      <div class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-6 py-4 flex justify-end gap-3">
         <button 
           type="button" 
-          class="px-4 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-100"
+          class="btn btn-secondary"
           on:click={closeLoadModal}
         >
           {$t('common.cancel')}
@@ -1340,7 +1357,7 @@
         <button
           type="button"
           on:click={submitLoad}
-          class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded"
+          class="btn btn-primary"
         >
           {$t('movements.load.save')}
         </button>

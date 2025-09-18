@@ -491,8 +491,6 @@
     "warehouseLayoutDesc": "Visualisation emplacements",
     "orderManagement": "Gestion Commandes",
     "orderManagementDesc": "Traitement des commandes",
-    "bottleList": "Liste des Bouteilles",
-    "bottleListDesc": "Gestion des prix des bouteilles pour discothèque",
     "wavePlanning": "Planification Vagues",
     "wavePlanningDesc": "Optimisation picking",
     "reportsAnalytics": "Rapports et Analyses",

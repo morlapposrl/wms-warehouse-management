@@ -13,11 +13,11 @@ interface EmailConfig {
 
 // Configurazione email da variabili di ambiente
 const emailConfig: EmailConfig = {
-  smtpServer: process.env.SMTP_SERVER || 'pro3.mail.ovh.net',
+  smtpServer: process.env.SMTP_SERVER || '',
   smtpPort: parseInt(process.env.SMTP_PORT || '587'),
-  username: process.env.SMTP_USERNAME || 'info@morlappo.com',
-  password: process.env.SMTP_PASSWORD || '130673Lops!',
-  fromEmail: process.env.FROM_EMAIL || 'info@morlappo.com'
+  username: process.env.SMTP_USERNAME || '',
+  password: process.env.SMTP_PASSWORD || '',
+  fromEmail: process.env.FROM_EMAIL || ''
 };
 
 let transporter: Transporter;

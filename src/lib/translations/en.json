@@ -529,8 +529,6 @@
     "warehouseLayoutDesc": "Interactive map of locations and zones",
     "orderManagement": "Order Management",
     "orderManagementDesc": "B2B orders for clients",
-    "bottleList": "Bottle Price List",
-    "bottleListDesc": "Bottle pricing management for nightclub",
     "wavePlanning": "Wave Planning",
     "wavePlanningDesc": "Multi-client picking optimization",
     "reportsAnalytics": "Reports & Analytics",
