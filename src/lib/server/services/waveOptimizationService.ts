@@ -133,18 +133,59 @@ export class WaveOptimizationService {
       const ordiniIds = ordiniSelezionati.map(o => o.id);
       const tasksCreated = wavePlanningRepository.createPickTasksWithUDC(waveId, ordiniIds);
 
-      // 7. Aggiorna statistiche wave
+      // 7. Aggiorna statistiche wave con calcoli dinamici
       if (tasksCreated > 0) {
         const stats = wavePlanningRepository.getWaveStatistics(waveId);
-        const avgTime = stats.tempo_medio_pick || 60;
-        const totalTime = tasksCreated * avgTime;
-        const estimatedDistance = tasksCreated * 25; // 25m media per pick
+        
+        // Calcola tempo stimato basato su metriche reali
+        const pickTasks = wavePlanningRepository.getPickTasks(waveId);
+        let totalDistance = 0;
+        let totalTime = 0;
+        
+        for (let i = 0; i < pickTasks.length; i++) {
+          const task = pickTasks[i];
+          const prevTask = i > 0 ? pickTasks[i - 1] : null;
+          
+          // Calcola distanza dinamica
+          let distance = 0;
+          if (prevTask && task.ubicazione_zona && prevTask.ubicazione_zona) {
+            // Calcola distanza euclidea tra ubicazioni
+            const dx = (task.coordinata_x || 0) - (prevTask.coordinata_x || 0);
+            const dy = (task.coordinata_y || 0) - (prevTask.coordinata_y || 0);
+            distance = Math.sqrt(dx * dx + dy * dy);
+          } else if (i === 0) {
+            // Distanza dall'entrata (0,0) al primo pick
+            const dx = task.coordinata_x || 0;
+            const dy = task.coordinata_y || 0;
+            distance = Math.sqrt(dx * dx + dy * dy);
+          }
+          
+          totalDistance += distance;
+          
+          // Tempo stimato dinamico basato su:
+          // - 30s base per pick
+          // - 2s per metro di spostamento  
+          // - 15s extra se cambio zona
+          // - 10s extra se controllo barcode UDC
+          let timeForTask = 30; // Tempo base pick
+          timeForTask += distance * 2; // Tempo movimento
+          
+          if (prevTask && task.zona !== prevTask.zona) {
+            timeForTask += 15; // Cambio zona
+          }
+          
+          if (task.udc_barcode) {
+            timeForTask += 10; // Controllo barcode UDC
+          }
+          
+          totalTime += timeForTask;
+        }
 
         db.prepare(`
           UPDATE wave_planning 
           SET totale_picks = ?, tempo_stimato_minuti = ?, distanza_stimata_metri = ?
           WHERE id = ?
-        `).run(tasksCreated, Math.round(totalTime / 60), estimatedDistance, waveId);
+        `).run(tasksCreated, Math.round(totalTime / 60), Math.round(totalDistance), waveId);
       }
 
       return {
@@ -276,16 +317,146 @@ export class WaveOptimizationService {
    * Selezione ordini per affinità di zona
    */
   private static selectByZoneAffinity(ordini: OrderForWave[], maxOrdini: number): OrderForWave[] {
-    // TODO: Implementa logica di clustering per zone
-    return ordini.slice(0, maxOrdini);
+    // Raggruppa ordini per zone dei loro prodotti
+    const ordiniConZone = ordini.map(ordine => {
+      // Query per ottenere le zone più frequenti nei prodotti dell'ordine
+      const zoneStmt = db.prepare(`
+        SELECT u.zona, COUNT(*) as frequenza
+        FROM ordini_dettaglio od
+        JOIN prodotti p ON od.sku_code = p.codice AND od.committente_id = p.committente_id
+        JOIN giacenze g ON p.id = g.prodotto_id
+        JOIN ubicazioni u ON g.ubicazione_id = u.id
+        WHERE od.order_id = ? AND u.attiva = 1
+        GROUP BY u.zona
+        ORDER BY frequenza DESC, u.zona
+        LIMIT 1
+      `);
+      
+      const zonaResult = zoneStmt.get(ordine.id) as { zona: string; frequenza: number } | undefined;
+      
+      return {
+        ...ordine,
+        zona_principale: zonaResult?.zona || 'UNKNOWN',
+        peso_zona: zonaResult?.frequenza || 0
+      };
+    });
+
+    // Raggruppa per zona e seleziona bilanciando
+    const ordiniPerZona = new Map<string, typeof ordiniConZone>();
+    
+    ordiniConZone.forEach(ordine => {
+      const zona = ordine.zona_principale;
+      if (!ordiniPerZona.has(zona)) {
+        ordiniPerZona.set(zona, []);
+      }
+      ordiniPerZone.get(zona)!.push(ordine);
+    });
+
+    // Seleziona bilanciando tra zone (Round Robin)
+    const selezionati: OrderForWave[] = [];
+    const zoneArray = Array.from(ordiniPerZona.entries()).sort((a, b) => b[1].length - a[1].length);
+    
+    let indiceZona = 0;
+    while (selezionati.length < maxOrdini) {
+      let aggiunto = false;
+      
+      for (let i = 0; i < zoneArray.length && selezionati.length < maxOrdini; i++) {
+        const [zona, ordiniZona] = zoneArray[i];
+        if (ordiniZona.length > indiceZona) {
+          selezionati.push(ordiniZona[indiceZona]);
+          aggiunto = true;
+        }
+      }
+      
+      if (!aggiunto) break;
+      indiceZona++;
+    }
+
+    return selezionati;
   }
 
   /**
    * Selezione ordini per affinità di prodotto
    */
   private static selectByProductAffinity(ordini: OrderForWave[], maxOrdini: number): OrderForWave[] {
-    // TODO: Implementa logica di clustering per prodotti
-    return ordini.slice(0, maxOrdini);
+    // Calcola similarità tra ordini basata sui prodotti in comune
+    const ordiniConProdotti = ordini.map(ordine => {
+      // Query per ottenere i prodotti dell'ordine
+      const prodottiStmt = db.prepare(`
+        SELECT od.sku_code, od.quantita, p.descrizione
+        FROM ordini_dettaglio od
+        JOIN prodotti p ON od.sku_code = p.codice AND od.committente_id = p.committente_id
+        WHERE od.order_id = ?
+      `);
+      
+      const prodotti = prodottiStmt.all(ordine.id) as Array<{ sku_code: string; quantita: number; descrizione: string }>;
+      
+      return {
+        ...ordine,
+        prodotti: prodotti,
+        prodotti_set: new Set(prodotti.map(p => p.sku_code)),
+        prodotti_count: prodotti.length
+      };
+    });
+
+    // Calcola matrice di similarità (Jaccard Index)
+    const similarityMatrix = new Map<string, number>();
+    
+    for (let i = 0; i < ordiniConProdotti.length; i++) {
+      for (let j = i + 1; j < ordiniConProdotti.length; j++) {
+        const ordineA = ordiniConProdotti[i];
+        const ordineB = ordiniConProdotti[j];
+        
+        // Intersezione prodotti comuni
+        const intersection = new Set([...ordineA.prodotti_set].filter(x => ordineB.prodotti_set.has(x)));
+        // Unione di tutti i prodotti
+        const union = new Set([...ordineA.prodotti_set, ...ordineB.prodotti_set]);
+        
+        // Jaccard Similarity = |A ∩ B| / |A ∪ B|
+        const similarity = intersection.size / union.size;
+        
+        const key = `${ordineA.id}-${ordineB.id}`;
+        similarityMatrix.set(key, similarity);
+      }
+    }
+
+    // Clustering greedy basato sulla similarità
+    const selezionati: OrderForWave[] = [];
+    const usedOrders = new Set<number>();
+    
+    // Ordina ordini per numero di prodotti (batch picking efficiency)
+    const ordiniOrdinati = ordiniConProdotti.sort((a, b) => b.prodotti_count - a.prodotti_count);
+    
+    for (const ordine of ordiniOrdinati) {
+      if (selezionati.length >= maxOrdini) break;
+      if (usedOrders.has(ordine.id)) continue;
+      
+      // Aggiungi l'ordine corrente
+      selezionati.push(ordine);
+      usedOrders.add(ordine.id);
+      
+      // Trova ordini simili da aggiungere al cluster
+      const ordiniSimilari = ordiniConProdotti
+        .filter(o => !usedOrders.has(o.id))
+        .map(o => ({
+          ordine: o,
+          similarity: similarityMatrix.get(`${Math.min(ordine.id, o.id)}-${Math.max(ordine.id, o.id)}`) || 0
+        }))
+        .filter(item => item.similarity > 0.2) // Soglia similarità minima 20%
+        .sort((a, b) => b.similarity - a.similarity);
+      
+      // Aggiungi fino a 3 ordini simili per cluster (batch picking ottimale)
+      const maxPerCluster = Math.min(3, maxOrdini - selezionati.length);
+      for (let i = 0; i < Math.min(maxPerCluster, ordiniSimilari.length); i++) {
+        const similItem = ordiniSimilari[i];
+        if (!usedOrders.has(similItem.ordine.id)) {
+          selezionati.push(similItem.ordine);
+          usedOrders.add(similItem.ordine.id);
+        }
+      }
+    }
+
+    return selezionati.slice(0, maxOrdini);
   }
 
   /**
@@ -406,7 +577,7 @@ export class WaveOptimizationService {
       ...current,
       sequenza_pick: 1,
       distanza_dal_precedente: Math.sqrt(current.coordinata_x ** 2 + current.coordinata_y ** 2),
-      tempo_stimato_secondi: 60 // Tempo base primo pick
+      tempo_stimato_secondi: 30 + Math.round(Math.sqrt(current.coordinata_x ** 2 + current.coordinata_y ** 2) * 2) // Tempo base + movimento
     });
 
     // Continua con nearest neighbor
@@ -456,28 +627,45 @@ export class WaveOptimizationService {
   private static async getPickTasksForWave(waveId: number): Promise<any[]> {
     const stmt = db.prepare(`
       SELECT 
-        od.ordine_id,
-        od.prodotto_id,
+        wo.ordine_id,
+        od.sku_code,
+        p.id as prodotto_id,
         p.codice as prodotto_codice,
-        od.quantita_ordinata as quantita_richiesta,
-        u.id as ubicazione_id,
+        p.descrizione as prodotto_descrizione,
+        od.quantita as quantita_richiesta,
+        
+        -- Trova la migliore ubicazione per questo prodotto
+        g.ubicazione_id,
         u.codice_ubicazione,
         u.zona,
-        u.coordinata_x,
-        u.coordinata_y,
-        COALESCE(g.quantita, od.quantita_ordinata) as quantita_disponibile
+        COALESCE(u.coordinata_x, 0) as coordinata_x,
+        COALESCE(u.coordinata_y, 0) as coordinata_y,
+        g.quantita as quantita_disponibile,
+        
+        -- Informazioni UDC se disponibili
+        udc.id as udc_id,
+        udc.barcode as udc_barcode,
+        
+        -- Priorità picking (prodotti con più giacenza hanno priorità)
+        ROW_NUMBER() OVER (
+          PARTITION BY wo.ordine_id 
+          ORDER BY g.quantita DESC, u.zona, u.codice_ubicazione
+        ) as priorita_pick
+        
       FROM wave_ordini wo
-      JOIN ordini_dettaglio_new od ON wo.ordine_id = od.ordine_id
-      JOIN prodotti p ON od.prodotto_id = p.id
-      LEFT JOIN giacenze g ON p.id = g.prodotto_id AND p.committente_id = g.committente_id
-      JOIN (
-        SELECT * FROM ubicazioni 
-        WHERE attiva = 1 
-        ORDER BY zona, coordinata_x, coordinata_y 
-        LIMIT 1
-      ) u ON 1=1
+      JOIN ordini_dettaglio od ON wo.ordine_id = od.order_id
+      JOIN prodotti p ON od.sku_code = p.codice AND od.committente_id = p.committente_id
+      
+      -- Join con giacenze per trovare dove è disponibile il prodotto
+      JOIN giacenze g ON p.id = g.prodotto_id AND g.quantita >= od.quantita
+      JOIN ubicazioni u ON g.ubicazione_id = u.id AND u.attiva = 1
+      
+      -- Left join con UDC se disponibili
+      LEFT JOIN udc_contenuto uc ON p.id = uc.prodotto_id AND uc.quantita >= od.quantita
+      LEFT JOIN udc ON uc.udc_id = udc.id AND udc.ubicazione_attuale_id = u.id AND udc.stato IN ('PARZIALE', 'PIENO')
+      
       WHERE wo.wave_id = ?
-      ORDER BY od.ordine_id, od.prodotto_id
+      ORDER BY wo.ordine_id, priorita_pick, u.zona, u.codice_ubicazione
     `);
 
     const result = stmt.all(waveId);

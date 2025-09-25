@@ -76,20 +76,31 @@ export const GET: RequestHandler = async ({ params }) => {
 
     yPosition += 30;
 
-    // Header tabella
-    doc.fontSize(8).font('Helvetica-Bold')
+    // Header tabella (UDC BARCODE espanso)
+    doc.fontSize(7).font('Helvetica-Bold')
        .text('SEQ', 50, yPosition)
        .text('ZONA', 80, yPosition)
-       .text('UBICAZIONE', 110, yPosition)
-       .text('UDC BARCODE', 170, yPosition)
-       .text('PRODOTTO', 230, yPosition)
-       .text('DESCRIZIONE', 290, yPosition)
-       .text('QTÀ', 380, yPosition)
-       .text('ORDINE', 410, yPosition)
-       .text('NOTE', 470, yPosition);
+       .text('UBICAZIONE', 105, yPosition)
+       .text('UDC BARCODE', 150, yPosition)
+       .text('PRODOTTO', 250, yPosition)
+       .text('QTÀ', 290, yPosition)
+       .text('LOTTO', 315, yPosition)
+       .text('SCADENZA', 355, yPosition)
+       .text('PRIORITÀ', 405, yPosition)
+       .text('ORDINE', 450, yPosition)
+       .text('NOTE', 500, yPosition);
 
     yPosition += 15;
+    
+    // Linea orizzontale e separatori verticali per tabella
     doc.moveTo(50, yPosition).lineTo(550, yPosition).stroke();
+    
+    // Linee verticali per separare colonne (aggiornate per UDC espanso)
+    const columnPositions = [78, 103, 148, 248, 288, 313, 353, 403, 448, 498];
+    columnPositions.forEach(x => {
+      doc.moveTo(x, yPosition).lineTo(x, yPosition + 5).stroke();
+    });
+    
     yPosition += 10;
 
     // Raggruppa pick tasks per sequenza
@@ -102,26 +113,58 @@ export const GET: RequestHandler = async ({ params }) => {
         yPosition = 50;
       }
 
-      // Evidenzia UDC barcode in grassetto se presente
-      doc.fontSize(8).font('Helvetica')
+      // Layout ottimizzato con UDC BARCODE completo
+      doc.fontSize(7).font('Helvetica')
          .text(task.sequenza_pick.toString(), 50, yPosition)
          .text(task.ubicazione_zona || task.zona, 80, yPosition)
-         .text(task.codice_ubicazione, 110, yPosition);
+         .text(task.codice_ubicazione, 105, yPosition);
       
-      // UDC Barcode in grassetto
+      // UDC Barcode COMPLETO in grassetto (ora ha più spazio)
       if (task.udc_barcode) {
         doc.font('Helvetica-Bold')
-           .text(task.udc_barcode, 170, yPosition)
+           .text(task.udc_barcode, 150, yPosition)
            .font('Helvetica');
       } else {
-        doc.text('N/A', 170, yPosition);
+        doc.text('N/A', 150, yPosition);
       }
       
-      doc.text(task.prodotto_codice, 230, yPosition)
-         .text(task.prodotto_descrizione ? task.prodotto_descrizione.substring(0, 12) + '...' : '', 290, yPosition)
-         .text(task.quantita_richiesta.toString(), 380, yPosition)
-         .text(task.numero_ordine, 410, yPosition)
-         .text(task.note_operatore || '', 470, yPosition);
+      doc.text(task.prodotto_codice, 250, yPosition)
+         .text(task.quantita_richiesta.toString(), 290, yPosition);
+      
+      // LOTTO (con evidenziazione se obbligatorio)
+      if (task.lotto_partita) {
+        if (task.tracking_lotto_obbligatorio) {
+          doc.font('Helvetica-Bold')
+             .text(task.lotto_partita.substring(0, 8), 315, yPosition)
+             .font('Helvetica');
+        } else {
+          doc.text(task.lotto_partita.substring(0, 8), 315, yPosition);
+        }
+      } else {
+        doc.text('N/A', 315, yPosition);
+      }
+      
+      // SCADENZA (con warning se vicina)
+      if (task.data_scadenza_stimata) {
+        const scadenza = new Date(task.data_scadenza_stimata);
+        const oggi = new Date();
+        const giorni = Math.floor((scadenza.getTime() - oggi.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (giorni <= 7) {
+          doc.font('Helvetica-Bold')
+             .text(scadenza.toLocaleDateString('it-IT'), 355, yPosition)
+             .font('Helvetica');
+        } else {
+          doc.text(scadenza.toLocaleDateString('it-IT'), 355, yPosition);
+        }
+      } else {
+        doc.text('N/A', 355, yPosition);
+      }
+      
+      // PRIORITÀ FIFO/FEFO
+      doc.text(task.tipo_priorita || 'FIFO', 405, yPosition)
+         .text(task.numero_ordine, 450, yPosition)
+         .text(task.note_operatore || '', 500, yPosition);
 
       yPosition += 15;
 

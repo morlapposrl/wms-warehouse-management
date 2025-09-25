@@ -200,7 +200,7 @@
             <h3 class="text-lg font-semibold mb-3">🎯 Selezione Ordini per Wave</h3>
             <div class="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded">
               {#each data.ordiniDisponibili as ordine (ordine.id)}
-                <label class="flex items-center p-3 hover:bg-white dark:bg-gray-800 border-b border-gray-100 cursor-pointer">
+                <label class="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600 cursor-pointer">
                   <input 
                     type="checkbox" 
                     name="selected_orders" 
@@ -211,21 +211,21 @@
                     <div class="flex items-center justify-between">
                       <div>
                         <span class="font-medium text-gray-900 dark:text-gray-100">{ordine.numero_ordine}</span>
-                        <span class="text-sm text-gray-500 ml-2">({ordine.committente_nome})</span>
+                        <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">({ordine.committente_nome})</span>
                       </div>
                       <div class="text-right text-sm">
                         <div class="text-gray-600 dark:text-gray-400">{ordine.righe_totali} righe</div>
                         <div class="text-blue-600 font-medium">{ordine.quantita_totale} pz</div>
                       </div>
                     </div>
-                    <div class="text-xs text-gray-500 mt-1">
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       Cliente: {ordine.cliente_fornitore || 'N/D'} | 
                       Data: {new Date(ordine.data_ordine).toLocaleDateString('it-IT')}
                     </div>
                   </div>
                 </label>
               {:else}
-                <div class="p-4 text-center text-gray-500">
+                <div class="p-4 text-center text-gray-500 dark:text-gray-400">
                   Nessun ordine disponibile per il wave picking
                 </div>
               {/each}
@@ -264,7 +264,7 @@
                   </option>
                 {/each}
               </select>
-              <div class="text-xs text-neutral-500 mt-1">
+              <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Lascia vuoto per wave cross-committente
               </div>
             </div>
@@ -314,7 +314,7 @@
                   </option>
                 {/each}
               </select>
-              <div class="text-xs text-red-600 mt-1">
+              <div class="text-xs text-red-600 dark:text-red-400 mt-1">
                 ⚠️ Operatore obbligatorio per l'assegnazione della wave
               </div>
             </div>
@@ -362,13 +362,13 @@
     <div class="card-body py-4">
       <div class="flex items-center gap-2 mb-3">
         <span class="text-lg">🔍</span>
-        <span class="text-md font-semibold text-neutral-900 dark:text-gray-100">Filtri</span>
+        <span class="text-md font-semibold text-gray-900 dark:text-gray-100">Filtri</span>
       </div>
       <div class="flex items-end gap-2 flex-nowrap">
         
         <!-- Filtro Committente -->
         <div class="w-36">
-          <label class="text-xs text-neutral-600 block">Committente</label>
+          <label class="text-xs text-gray-600 dark:text-gray-400 block">Committente</label>
           <select 
             class="form-input text-sm"
             value={data.filters.committente_filter}
@@ -414,7 +414,7 @@
           </select>
         </div>
 
-        <div class="text-sm text-neutral-600 dark:text-gray-400">
+        <div class="text-sm text-gray-600 dark:text-gray-400">
           {data.waves.length} wave trovate
         </div>
 
@@ -454,13 +454,13 @@
                   <td>
                     <div class="font-mono font-medium text-sm">{wave.wave_number}</div>
                     {#if wave.operatore_nome}
-                      <div class="text-xs text-neutral-500">👤 {wave.operatore_nome}</div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400">👤 {wave.operatore_nome}</div>
                     {/if}
                   </td>
 
                   <!-- Tipo -->
                   <td>
-                    <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                    <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
                       {formatTipoWave(wave.tipo_wave)}
                     </span>
                   </td>
@@ -504,9 +504,9 @@
                   <!-- Efficienza -->
                   <td class="text-center">
                     <div class="font-mono text-sm {
-                      wave.stato === 'COMPLETATA' ? 'text-green-600' : 
-                      wave.stato === 'IN_CORSO' ? 'text-blue-600' : 
-                      'text-neutral-400'
+                      wave.stato === 'COMPLETATA' ? 'text-green-600 dark:text-green-400' : 
+                      wave.stato === 'IN_CORSO' ? 'text-blue-600 dark:text-blue-400' : 
+                      'text-gray-400 dark:text-gray-500'
                     }">
                       {calculateEfficiency(wave)}
                     </div>
@@ -594,18 +594,18 @@
       </div>
     </div>
   {:else}
-    <div class="text-center py-12 text-neutral-500">
-      <svg class="w-16 h-16 mx-auto mb-4 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+      <svg class="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
       </svg>
-      <p class="text-lg font-medium">Nessuna wave trovata</p>
-      <p class="text-sm mt-2">Crea la prima wave per ottimizzare il picking</p>
+      <p class="text-lg font-medium text-gray-900 dark:text-gray-100">Nessuna wave trovata</p>
+      <p class="text-sm mt-2 text-gray-600 dark:text-gray-400">Crea la prima wave per ottimizzare il picking</p>
       {#if data.ordiniDisponibili.length > 0}
         <button class="btn btn-primary mt-4" on:click={toggleCreateForm}>
           Crea Prima Wave
         </button>
       {:else}
-        <p class="text-sm text-red-600 mt-4">⚠️ Non ci sono ordini disponibili per creare wave</p>
+        <p class="text-sm text-red-600 dark:text-red-400 mt-4">⚠️ Non ci sono ordini disponibili per creare wave</p>
       {/if}
     </div>
   {/if}
@@ -615,16 +615,16 @@
     <div class="card mt-8">
       <div class="card-header border-b border-gray-200 dark:border-gray-700">
         <h2 class="text-lg font-semibold">📚 Algoritmi di Ottimizzazione - Documentazione Tecnica</h2>
-        <p class="text-sm text-neutral-600 mt-1">Visibile solo agli amministratori</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Visibile solo agli amministratori</p>
       </div>
       <div class="card-body">
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           <!-- Batch Picking -->
-          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 class="font-semibold text-blue-900 mb-3">🔄 Batch Picking Algorithm</h3>
-            <div class="text-sm text-blue-800 space-y-2">
+          <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <h3 class="font-semibold text-blue-900 dark:text-blue-100 mb-3">🔄 Batch Picking Algorithm</h3>
+            <div class="text-sm text-blue-800 dark:text-blue-200 space-y-2">
               <p><strong>Principio:</strong> Raggruppa ordini che condividono gli stessi prodotti/ubicazioni</p>
               <p><strong>Ottimizzazione:</strong> Riduce i movimenti ripetuti verso la stessa ubicazione</p>
               <p><strong>Ideale per:</strong> Magazzini con alta densità di SKU comuni tra ordini</p>
@@ -639,9 +639,9 @@
           </div>
 
           <!-- Zone Picking -->
-          <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-            <h3 class="font-semibold text-green-900 mb-3">🗺️ Zone Picking Algorithm</h3>
-            <div class="text-sm text-green-800 space-y-2">
+          <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+            <h3 class="font-semibold text-green-900 dark:text-green-100 mb-3">🗺️ Zone Picking Algorithm</h3>
+            <div class="text-sm text-green-800 dark:text-green-200 space-y-2">
               <p><strong>Principio:</strong> Divide il magazzino in zone, ogni operatore gestisce una zona</p>
               <p><strong>Ottimizzazione:</strong> Riduce spostamenti cross-zone, aumenta specializzazione</p>
               <p><strong>Ideale per:</strong> Magazzini grandi con layout definito e team multipli</p>
@@ -656,9 +656,9 @@
           </div>
 
           <!-- Discrete Picking -->
-          <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <h3 class="font-semibold text-yellow-900 mb-3">⚡ Discrete Picking Algorithm</h3>
-            <div class="text-sm text-yellow-800 space-y-2">
+          <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+            <h3 class="font-semibold text-yellow-900 dark:text-yellow-100 mb-3">⚡ Discrete Picking Algorithm</h3>
+            <div class="text-sm text-yellow-800 dark:text-yellow-200 space-y-2">
               <p><strong>Principio:</strong> Un operatore processa un ordine completo alla volta</p>
               <p><strong>Ottimizzazione:</strong> Zero errori di sorting, alta tracciabilità</p>
               <p><strong>Ideale per:</strong> Ordini urgenti, prodotti di alto valore, ordini piccoli</p>
@@ -673,9 +673,9 @@
           </div>
 
           <!-- Wave Picking -->
-          <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-            <h3 class="font-semibold text-purple-900 mb-3">🌊 Wave Picking Algorithm (Standard)</h3>
-            <div class="text-sm text-purple-800 space-y-2">
+          <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+            <h3 class="font-semibold text-purple-900 dark:text-purple-100 mb-3">🌊 Wave Picking Algorithm (Standard)</h3>
+            <div class="text-sm text-purple-800 dark:text-purple-200 space-y-2">
               <p><strong>Principio:</strong> Bilanciamento tra efficienza e flessibilità</p>
               <p><strong>Ottimizzazione:</strong> Combina vantaggi di zone e batch picking</p>
               <p><strong>Ideale per:</strong> Operazioni standard, mix di tipologie ordine</p>
@@ -692,7 +692,7 @@
         </div>
 
         <!-- Algoritmi Supporto -->
-        <div class="bg-gray-50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mt-6">
+        <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mt-6">
           <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">⚙️ Algoritmi di Supporto</h3>
           <div class="text-sm text-gray-700 dark:text-gray-300 space-y-3">
             

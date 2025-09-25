@@ -213,12 +213,30 @@ export const wavePlanningRepository = {
         wpt.*,
         p.codice as prodotto_codice,
         p.descrizione as prodotto_descrizione,
+        p.lotto_partita,
+        p.shelf_life_giorni,
+        p.tracking_lotto_obbligatorio,
         u.codice_ubicazione,
         u.zona as ubicazione_zona,
         o.numero_ordine,
         udc.barcode as udc_barcode,
         tu.codice as tipo_udc,
-        udc.stato as udc_stato
+        udc.stato as udc_stato,
+        
+        -- Calcolo data scadenza stimata  
+        CASE 
+          WHEN p.shelf_life_giorni IS NOT NULL AND p.shelf_life_giorni > 0
+          THEN date('now', '+' || p.shelf_life_giorni || ' days')
+          ELSE NULL
+        END as data_scadenza_stimata,
+        
+        -- Priorità FIFO/FEFO
+        CASE 
+          WHEN p.shelf_life_giorni IS NOT NULL AND p.shelf_life_giorni > 0
+          THEN 'FEFO'  -- First Expired First Out
+          ELSE 'FIFO'  -- First In First Out
+        END as tipo_priorita
+        
       FROM wave_pick_tasks wpt
       JOIN prodotti p ON wpt.prodotto_id = p.id
       JOIN ubicazioni u ON wpt.ubicazione_id = u.id
@@ -266,49 +284,64 @@ export const wavePlanningRepository = {
   }): any[] {
     let query = `
       SELECT 
-        o.*,
-        c.ragione_sociale as committente_nome,
+        om.*,
+        om.customer_name as committente_nome,
         COUNT(od.id) as righe_totali,
-        SUM(od.quantita_ordinata) as quantita_totale
-      FROM ordini o
-      JOIN committenti c ON o.committente_id = c.id
-      LEFT JOIN ordini_dettaglio_new od ON o.id = od.ordine_id
-      WHERE o.tipo_ordine = 'OUTBOUND'
+        SUM(od.quantita) as quantita_totale,
+        CASE om.service_level 
+          WHEN 'PRIME' THEN 9
+          WHEN 'STANDARD' THEN 5  
+          WHEN 'ECONOMY' THEN 3
+          ELSE 5
+        END as priorita
+      FROM ordini_master om
+      LEFT JOIN ordini_dettaglio od ON om.id = od.order_id
+      WHERE om.status IN ('PAYMENT_CONFIRMED', 'PENDING_PICKING')
     `;
     
     const params: any[] = [];
     
-    if (filters.committente_id) {
-      query += ` AND o.committente_id = ?`;
-      params.push(filters.committente_id);
-    }
-    
     if (filters.data_da) {
-      query += ` AND o.data_ordine >= ?`;
+      query += ` AND om.created_at >= ?`;
       params.push(filters.data_da);
     }
     
     if (filters.data_a) {
-      query += ` AND o.data_ordine <= ?`;
+      query += ` AND om.created_at <= ?`;
       params.push(filters.data_a);
+    }
+    
+    if (filters.priorita_minima) {
+      query += ` AND (CASE om.service_level 
+          WHEN 'PRIME' THEN 9
+          WHEN 'STANDARD' THEN 5  
+          WHEN 'ECONOMY' THEN 3
+          ELSE 5
+        END) >= ?`;
+      params.push(filters.priorita_minima);
     }
     
     if (filters.stato && filters.stato.length > 0) {
       const placeholders = filters.stato.map(() => '?').join(',');
-      query += ` AND o.stato IN (${placeholders})`;
+      query += ` AND om.status IN (${placeholders})`;
       params.push(...filters.stato);
     }
     
     query += `
-      GROUP BY o.id, c.ragione_sociale
+      GROUP BY om.id, om.customer_name
       HAVING righe_totali > 0
       ORDER BY 
-        CASE o.stato 
-          WHEN 'NUOVO' THEN 1 
-          WHEN 'CONFERMATO' THEN 2 
-          WHEN 'IN_PREPARAZIONE' THEN 3 
+        CASE om.status 
+          WHEN 'PAYMENT_CONFIRMED' THEN 1 
+          WHEN 'PENDING_PICKING' THEN 2 
         END,
-        o.data_ordine ASC
+        CASE om.service_level 
+          WHEN 'PRIME' THEN 9
+          WHEN 'STANDARD' THEN 5  
+          WHEN 'ECONOMY' THEN 3
+          ELSE 5
+        END DESC,
+        om.created_at ASC
     `;
     
     const stmt = db.prepare(query);
@@ -340,9 +373,9 @@ export const wavePlanningRepository = {
     // Ottieni i dettagli degli ordini con UDC assegnati
     const orderDetailsQuery = `
       SELECT 
-        od.ordine_id,
-        od.prodotto_id,
-        od.quantita_ordinata,
+        od.order_id as ordine_id,
+        p.id as prodotto_id,
+        od.quantita,
         p.codice as prodotto_codice,
         p.descrizione as prodotto_descrizione,
         
@@ -352,6 +385,8 @@ export const wavePlanningRepository = {
         udc.ubicazione_attuale_id,
         ub.codice_ubicazione,
         ub.zona,
+        ub.coordinata_x,
+        ub.coordinata_y,
         
         -- Calcola sequenza ottimale per zona
         ROW_NUMBER() OVER (
@@ -359,17 +394,20 @@ export const wavePlanningRepository = {
           ORDER BY ub.codice_ubicazione, udc.barcode, p.codice
         ) as sequenza_pick
         
-      FROM ordini_dettaglio_new od
-      JOIN prodotti p ON od.prodotto_id = p.id
+      FROM ordini_dettaglio od
+      JOIN prodotti p ON od.sku_code = p.codice AND od.committente_id = p.committente_id
       
       -- Trova UDC contenenti questo prodotto con quantità sufficiente
-      JOIN udc_contenuto uc ON p.id = uc.prodotto_id AND uc.quantita >= od.quantita_ordinata
-      JOIN udc ON uc.udc_id = udc.id AND udc.stato IN ('PARZIALE', 'PIENO')
-      JOIN ubicazioni ub ON udc.ubicazione_attuale_id = ub.id
+      LEFT JOIN udc_contenuto uc ON p.id = uc.prodotto_id AND uc.quantita >= od.quantita
+      LEFT JOIN udc ON uc.udc_id = udc.id AND udc.stato IN ('PARZIALE', 'PIENO')
+      LEFT JOIN ubicazioni ub ON COALESCE(udc.ubicazione_attuale_id, (
+        SELECT g.ubicazione_id FROM giacenze g WHERE g.prodotto_id = p.id AND g.quantita >= od.quantita LIMIT 1
+      )) = ub.id
       
-      WHERE od.ordine_id IN (${selectedOrderIds.map(() => '?').join(',')})
+      WHERE od.order_id IN (${selectedOrderIds.map(() => '?').join(',')})
+        AND ub.attiva = 1
       
-      ORDER BY ub.zona, ub.codice_ubicazione, udc.barcode, p.codice
+      ORDER BY ub.zona, ub.codice_ubicazione, COALESCE(udc.barcode, ''), p.codice
     `;
     
     const stmt = db.prepare(orderDetailsQuery);
@@ -379,20 +417,36 @@ export const wavePlanningRepository = {
     
     // Crea i pick tasks con UDC
     for (const detail of orderDetails) {
+      // Calcola distanza dal task precedente
+      let distanza = 0;
+      if (tasksCreated > 0) {
+        const prevDetail = orderDetails[tasksCreated - 1];
+        if (prevDetail && detail.coordinata_x !== undefined && detail.coordinata_y !== undefined) {
+          const dx = detail.coordinata_x - (prevDetail.coordinata_x || 0);
+          const dy = detail.coordinata_y - (prevDetail.coordinata_y || 0);
+          distanza = Math.sqrt(dx * dx + dy * dy);
+        }
+      }
+      
+      // Calcola tempo stimato dinamico
+      let tempoStimato = 30; // Base time
+      tempoStimato += distanza * 2; // Movement time
+      if (detail.udc_barcode) tempoStimato += 10; // UDC scanning time
+      
       const pickTask = this.createPickTask({
         wave_id: wave_id,
         ordine_id: detail.ordine_id,
         prodotto_id: detail.prodotto_id,
         ubicazione_id: detail.ubicazione_attuale_id,
         udc_id: detail.udc_id,
-        quantita_richiesta: detail.quantita_ordinata,
+        quantita_richiesta: detail.quantita,
         quantita_prelevata: 0,
         sequenza_pick: detail.sequenza_pick,
         zona: detail.zona,
-        distanza_dal_precedente: 0,
-        tempo_stimato_secondi: 60,
+        distanza_dal_precedente: Math.round(distanza),
+        tempo_stimato_secondi: Math.round(tempoStimato),
         stato: 'IN_CODA',
-        controllo_barcode: 1
+        controllo_barcode: detail.udc_barcode ? 1 : 0
       });
       
       if (pickTask) tasksCreated++;
