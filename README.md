@@ -9,7 +9,7 @@
 [🇨🇳 中文](README.zh.md)
 
 ## Sistema WMS (Warehouse Management System) con Intelligenza Artificiale
-
+MIT Licence
 Sistema di gestione magazzino avanzato con supporto multicommittente, UDC (Unità Di Carico) e trasferimenti intelligenti, sviluppato da **Morlappo Srl** - *Innovazione attraverso l'Intelligenza Artificiale*.
 
 ---
