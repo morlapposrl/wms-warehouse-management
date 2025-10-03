@@ -235,9 +235,6 @@ npm run preview
 
 ---
 
-## 📄 Licenza
-
-**Sistema proprietario** - Tutti i diritti riservati  
 © 2025 **Morlappo Srl** - Innovazione attraverso l'Intelligenza Artificiale
 
 ---
